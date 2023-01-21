@@ -102,6 +102,15 @@ vim.api.nvim_create_autocmd('BufWritePost', {
   pattern = vim.fn.expand '$MYVIMRC',
 })
 
+
+-- Autocommand that reloads neovim whenever you save the init.lua file
+vim.cmd([[
+  augroup init_config
+    autocmd!
+    autocmd BufWritePost init.lua source <afile> | PackerSync
+  augroup end
+]])
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
