@@ -13,6 +13,7 @@ require('packer').startup(function(use)
 
   use { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
+    commit = "0eecf453d33248e9d571ad26559f35175c37502d",
     requires = {
       -- Automatically install LSPs to stdpath for neovim
       'williamboman/mason.nvim',
@@ -28,37 +29,41 @@ require('packer').startup(function(use)
 
   use { -- Autocompletion
     'hrsh7th/nvim-cmp',
+    commit = "11a95792a5be0f5a40bab5fc5b670e5b1399a939",
     requires = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   }
 
   use { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+		commit = "8e763332b7bf7b3a426fd8707b7f5aa85823a5ac",
     run = function()
       pcall(require('nvim-treesitter.install').update { with_sync = true })
     end,
   }
 
+
   use { -- Additional text objects via treesitter
     'nvim-treesitter/nvim-treesitter-textobjects',
+    commit="2fb97bd6c53d78517d2022a0b84422c18ce5686e",
     after = 'nvim-treesitter',
   }
 
   -- Git related plugins
-  use 'tpope/vim-fugitive'
-  use 'tpope/vim-rhubarb'
-  use 'lewis6991/gitsigns.nvim'
+  use { 'tpope/vim-fugitive', commit="2febbe1f00be04f16daa6464cb39214a8566ec4b" }
+  use { 'tpope/vim-rhubarb', commit="cad60fe382f3f501bbb28e113dfe8c0de6e77c75" }
+	use { "lewis6991/gitsigns.nvim", commit = "2c6f96dda47e55fa07052ce2e2141e8367cbaaf2" }
 
   use { "nekonako/xresources-nvim", commit = "745b4df924a6c4a7d8026a3fb3a7fa5f78e6f582" }
-  use 'nvim-lualine/lualine.nvim' -- Fancier statusline
-  use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
-  use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
-  use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+  use { 'nvim-lualine/lualine.nvim', commit = "0050b308552e45f7128f399886c86afefc3eb988" }-- Fancier statusline
+  use { 'lukas-reineke/indent-blankline.nvim', commit = "c4c203c3e8a595bc333abaf168fcb10c13ed5fb7" } -- Add indentation guides even on blank lines
+  use { 'numToStr/Comment.nvim', commit = "eab2c83a0207369900e92783f56990808082eac2" } -- "gc" to comment visual regions/lines
+  use { 'tpope/vim-sleuth', commit = "1cc4557420f215d02c4d2645a748a816c220e99b" } -- Detect tabstop and shiftwidth automatically
 
   -- Fuzzy Finder (files, lsp, etc)
-  use { 'nvim-telescope/telescope.nvim', branch = '0.1.x', requires = { 'nvim-lua/plenary.nvim' } }
+  use { 'nvim-telescope/telescope.nvim', commit = '2f32775405f6706348b71d0bb8a15a22852a61e4', requires = { 'nvim-lua/plenary.nvim' } }
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
-  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
+  use { 'nvim-telescope/telescope-fzf-native.nvim', commit = "fab3e2212e206f4f8b3bbaa656e129443c9b802e", run = 'make', cond = vim.fn.executable 'make' == 1 }
 
   use { "cljoly/telescope-repo.nvim", commit = "92598143f8c4cadb47f5aef3f7775932827df8f2" }
 
