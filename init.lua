@@ -62,6 +62,8 @@ require('packer').startup(function(use)
 
   use { "cljoly/telescope-repo.nvim", commit = "92598143f8c4cadb47f5aef3f7775932827df8f2" }
 
+	use { "jvgrootveld/telescope-zoxide", commit = "856af0d83d2e167b5efa080567456c1578647abe" }
+
   -- WhichKey
   use { "folke/which-key.nvim", commit="e4fa445065a2bb0bbc3cca85346b67817f28e83e" }
 
@@ -226,6 +228,9 @@ end, { desc = '[/] Fuzzily search in current buffer]' })
 
 -- Enable telescope repo extension
 require("telescope").load_extension('repo')
+
+-- Enable telescope zoxide extension
+require("telescope").load_extension('zoxide')
 
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
@@ -518,6 +523,7 @@ require("which-key").register({ -- mappings
   o = {
     name = "[o]pen",
     f = { "<cmd>Telescope find_files<cr>", "[o]pen [f]ile" },
+    d = { "<cmd>Telescope repo<cr>", "[o]pen [d]irectory (zoxide)" },
     o = { "<cmd>Telescope find_files<cr>", "[o]pen [o]ld file" },
     r = { "<cmd>Telescope repo<cr>", "[o]pen [r]epository" },
   },
