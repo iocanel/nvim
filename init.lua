@@ -562,6 +562,19 @@ require("which-key").register({ -- mappings
     m = { "<cmd>Telescope manpages<cr>", "[h]elp [m]an" },
     h = { "<cmd>Telescope help_tags<cr>", "[h]elp [t]ags" },
   },
+  w = {
+    name = "[w]indow",
+    s = {
+      name = "[w]indow [s]plit",
+      h = { "<cmd>horizontal split<cr>", "[w]indow [s]plit [h]orizontal" },
+      v = { "<cmd>vertical split<cr>", "[w]indow [s]plit [v]ertical" },
+    },
+    j = {
+      name = "[w]indow [j]ump",
+      h = { "<C-w>h", "[w]indow [j]ump [h]orizontal" },
+      v = { "<C-w>v", "[w]indow [j]jump [v]ertical" },
+    },
+  },
 },
   { -- opts
     mode = "n", -- NORMAL mode
