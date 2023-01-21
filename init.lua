@@ -63,6 +63,9 @@ require('packer').startup(function(use)
   -- WhichKey
   use { "folke/which-key.nvim", commit="e4fa445065a2bb0bbc3cca85346b67817f28e83e" }
 
+  use { "nvim-pack/nvim-spectre", commit = "24275beae382e6bd0180b3064cf5729548641a02" }
+
+
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
   if has_plugins then
@@ -516,6 +519,7 @@ require("which-key").register({ -- mappings
     name = "[s]earch",
     b = { "<cmd>Telescope current_buffer_fuzzy_find<cr>", "[s]earch [b]uffer" },
     g = { "<cmd>Telescope current_buffer_fuzzy_find<cr>", "[s]earch [g]rep" },
+    r = { "<cmd>Spectre<cr>", "[s]earch and [r]eplace" },
   },
   h = {
     name = "[h]elp",
