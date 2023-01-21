@@ -99,7 +99,7 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 -- See `:help vim.o`
 
 -- Set highlight on search
-vim.o.hlsearch = false
+vim.o.hlsearch = true
 
 -- Make line numbers default
 vim.wo.number = true
@@ -127,6 +127,11 @@ vim.cmd [[colorscheme xresources]]
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
+
+vim.o.clipboard = 'unnamedplus'                  -- allows neovim to access the system clipboard
+vim.o.cursorline = true                          -- allows neovim to access the system clipboard
+vim.o.relativenumber = true                        -- allows neovim to access the system clipboard
+vim.o.laststatus = 0
 
 -- [[ Basic Keymaps ]]
 -- Set <space> as the leader key
