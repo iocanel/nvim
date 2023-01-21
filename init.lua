@@ -60,6 +60,8 @@ require('packer').startup(function(use)
   -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
 
+  use { "cljoly/telescope-repo.nvim", commit = "92598143f8c4cadb47f5aef3f7775932827df8f2" }
+
   -- WhichKey
   use { "folke/which-key.nvim", commit="e4fa445065a2bb0bbc3cca85346b67817f28e83e" }
 
@@ -221,6 +223,9 @@ vim.keymap.set('n', '<leader>/', function()
     previewer = false,
   })
 end, { desc = '[/] Fuzzily search in current buffer]' })
+
+-- Enable telescope repo extension
+require("telescope").load_extension('repo')
 
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
@@ -514,6 +519,7 @@ require("which-key").register({ -- mappings
     name = "[o]pen",
     f = { "<cmd>Telescope find_files<cr>", "[o]pen [f]ile" },
     o = { "<cmd>Telescope find_files<cr>", "[o]pen [o]ld file" },
+    r = { "<cmd>Telescope repo<cr>", "[o]pen [r]epository" },
   },
   s = {
     name = "[s]earch",
