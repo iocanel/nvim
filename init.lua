@@ -184,10 +184,18 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- See `:help lualine.txt`
 require('lualine').setup {
   options = {
-    icons_enabled = false,
-    theme = 'onedark',
-    component_separators = '|',
-    section_separators = '',
+    icons_enabled = true,
+    theme = 'auto',
+    component_separators = '',
+    section_separators = { left = '', right = '' },
+  },
+  sections = {
+    lualine_a = {},
+    lualine_b = {'branch' },
+    lualine_c = {'filename' , 'location'},
+    lualine_x = { },
+    lualine_y = { },
+    lualine_z = { }
   },
 }
 
