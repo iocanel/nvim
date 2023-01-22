@@ -86,6 +86,83 @@ require('packer').startup(function(use)
   end
 end)
 
+local statusline_on = function ()
+  -- enable the status line
+    vim.o.laststatus = 3
+end
+
+local statusline_off = function ()
+  -- enable the status line
+    vim.o.laststatus = 0
+end
+
+local statusline_toggle = function ()
+  -- toggle the status line
+  if vim.o.laststatus == 0 then
+    statusline_on()
+  else
+    statusline_off()
+  end
+end
+
+local linenumber_on = function ()
+  -- enable line numbering
+    vim.wo.number = true
+end
+
+local linenumber_off = function ()
+  -- disable line numbering
+    vim.wo.number = false
+    vim.o.relativenumber = false
+end
+
+local relative_linenumber_on = function ()
+  -- disable relative line numbering
+    vim.o.relativenumber = false
+end
+
+local relative_linenumber_off = function ()
+  -- disable relative line numbering
+    vim.o.relativenumber = false
+end
+
+local linenumber_toggle = function ()
+  -- toggle line numbering and relative number on and off
+  -- states: relative=on -> relative=off -> number=off
+  if vim.o.relativenumber then
+    relative_linenumber_on()
+  elseif vim.wo.number then
+    linenumber_off()
+    relative_linenumber_off()
+  else
+    linenumber_on()
+    relative_linenumber_on()
+  end
+end
+
+local focus_on = function ()
+  -- enable focus mode
+    vim.wo.number=false
+    vim.o.relativenumber=false
+    vim.o.laststatus = 0
+end
+
+local focus_off = function ()
+  -- disable focus mode
+    vim.wo.number=true
+    vim.o.relativenumber=true
+    vim.o.laststatus = 3
+end
+
+local focus_toggle = function ()
+  -- toggle focus mode
+  if vim.o.number or vim.o.laststatus > 0 then
+    focus_on()
+  else
+    focus_off()
+  end
+end
+
 -- When we are bootstrapping a configuration, it doesn't
 -- make sense to execute the rest of the init.lua.
 --
@@ -137,6 +214,7 @@ vim.o.undofile = true
 -- Case insensitive searching UNLESS /C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
+vim.o.ruler = false
 
 -- Decrease update time
 vim.o.updatetime = 250
@@ -150,9 +228,11 @@ vim.cmd [[colorscheme xresources]]
 vim.o.completeopt = 'menuone,noselect'
 
 vim.o.clipboard = 'unnamedplus'                  -- allows neovim to access the system clipboard
-vim.o.cursorline = true                          -- allows neovim to access the system clipboard
-vim.o.relativenumber = true                        -- allows neovim to access the system clipboard
+vim.o.cursorline = true
+vim.o.relativenumber = true
 vim.o.laststatus = 0
+vim.o.showcmd = false
+vim.o.showmode = false
 
 -- [[ Basic Keymaps ]]
 -- Set <space> as the leader key
@@ -549,6 +629,12 @@ require("which-key").register({ -- mappings
     o = { "<cmd>Telescope find_files<cr>", "[o]pen [o]ld file" },
     r = { "<cmd>Telescope repo<cr>", "[o]pen [r]epository" },
   },
+  e = {
+    name = "[e]ditor",
+    s = { statusline_toggle, "toggle [s]tatus line" },
+    n = { linenumber_toggle, "toggle line [n]umber" },
+    f = { focus_toggle, "toggle focus" }
+  },
   s = {
     name = "[s]earch",
     b = { "<cmd>Telescope current_buffer_fuzzy_find<cr>", "[s]earch [b]uffer" },
@@ -597,6 +683,10 @@ require("which-key").register({ -- mappings
     nowait = false, -- use `nowait` when creating keymaps
   })
 
+
+-- finalize startup
+statusline_off()
+linenumber_off()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
