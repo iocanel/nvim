@@ -562,6 +562,18 @@ require("which-key").register({ -- mappings
     m = { "<cmd>Telescope manpages<cr>", "[h]elp [m]an" },
     h = { "<cmd>Telescope help_tags<cr>", "[h]elp [t]ags" },
   },
+  g = {
+    name = "[g]it",
+    c = { "<cmd>Git commit<cr>", "[g]it [c]ommit"},
+    h = {
+      name = "[h]unk",
+      s = { "<cmd>Gitsigns stage_hunk<cr>", "[g]it [h]unk [s]tage"},
+      r = { "<cmd>Gitsigns reset_hunk<cr>", "[g]it [h]unk [r]eset"},
+      n = { "<cmd>Gitsigns next_hunk<cr>", "[g]it [h]unk [n]ext"},
+      u = { "<cmd>Gitsigns undo_stage_hunk<cr>", "[g]it [h]unk [u]ndo stage"},
+      v = { "<cmd>Gitsigns select_hunk<cr>", "[g]it [h]unk [v]isually select"},
+    },
+  },
   w = {
     name = "[w]indow",
     s = {
