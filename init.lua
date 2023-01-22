@@ -589,11 +589,11 @@ require("which-key").setup({
     scroll_up = '<c-u>', -- binding to scroll up inside the popup
 },
   window = {
-    border = "none", -- none, single, double, shadow
+    border = "shadow", -- none, single, double, shadow
     position = "bottom", -- bottom, top
-    margin = { 1, 0, 1, 0 }, -- extra window margin [top, right, bottom, left]
-    padding = { 2, 2, 2, 2 }, -- extra window padding [top, right, bottom, left]
-    winblend = 0
+    margin = { 0, 7, 2, 1 }, -- extra window marg1n [top, right, bottom, left]
+    padding = { 1, 0, 1, 0 }, -- extra window padding [top, right, bottom, left]
+    winblend = 10
   },
   layout = {
   height = { min = 4, max = 25 }, -- min and max height of the columns
@@ -609,7 +609,7 @@ require("which-key").setup({
   -- triggers = {"<leader>"}, -- or specify a list manually
   triggers_blacklist = {
     -- list of mode / prefixes that should never be hooked by WhichKey
--- this is mostly relevant for key maps that start with a native binding
+    -- this is mostly relevant for key maps that start with a native binding
     -- most people should not need to change this
     i = { "j", "k" },
     v = { "j", "k" },
