@@ -639,7 +639,7 @@ require("which-key").register({ -- mappings
   s = {
     name = "[s]earch",
     b = { "<cmd>Telescope current_buffer_fuzzy_find<cr>", "[s]earch [b]uffer" },
-    g = { "<cmd>Telescope current_buffer_fuzzy_find<cr>", "[s]earch [g]rep" },
+    g = { "<cmd>Telescope live_grep<cr>", "[s]earch [g]rep" },
     r = { "<cmd>Spectre<cr>", "[s]earch and [r]eplace" },
   },
   h = {
