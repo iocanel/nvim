@@ -330,6 +330,21 @@ vim.keymap.set('n', '<leader>/', function()
 end, { desc = '[/] Fuzzily search in current buffer]' })
 
 -- Enable telescope repo extension
+require("telescope").setup {
+  extensions = {
+    repo = {
+      list = {
+        fd_opts = {
+          "--no-ignore-vcs",
+        },
+        search_dirs = {
+          "~/workspace",
+        },
+      },
+    },
+  },
+}
+
 require("telescope").load_extension('repo')
 
 -- Enable telescope zoxide extension
