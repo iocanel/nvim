@@ -77,6 +77,8 @@ require('packer').startup(function(use)
   -- Toggle term
   use { "akinsho/toggleterm.nvim", commit = "2a787c426ef00cb3488c11b14f5dcf892bbd0bda" }
 
+  -- Hydra
+  use { "anuvyklack/hydra.nvim", commit = "d00274f05363c13f29ed1fa571026a066a634cce" }
 
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
@@ -739,6 +741,44 @@ end
 
 vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
+local Hydra = require("hydra")
+local gitsigns = require('gitsigns')
+
+local git_hint = [[
+ _n_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
+ _p_: prev hunk   _u_: undo last stage   _v_: preview hunk   _B_: blame show full 
+ ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
+ ^
+ ^ ^              _<Enter>_: Neogit              _q_: exit
+]]
+Hydra({
+   name = 'Git',
+   hint = git_hint,
+   config = {
+      buffer = bufnr,
+      color = 'red',
+      invoke_on_body = true,
+      hint = {
+         border = 'rounded'
+      },
+   },
+   mode = {'n','x'},
+   body = '<leader>gH',
+   heads = {
+      { 'n', gitsigns.next_hunk, { desc = 'next hunk' } },
+      { 'p', gitsigns.prev_hunk, { desc = 'prev hunk' } },
+      { 's', ':Gitsigns stage_hunk<CR>', { silent = true, desc = 'stage hunk' } },
+      { 'u', gitsigns.undo_stage_hunk, { desc = 'undo last stage' } },
+      { 'S', gitsigns.stage_buffer, { desc = 'stage buffer' } },
+      { 'v', gitsigns.preview_hunk, { desc = 'preview hunk' } },
+      { 'd', gitsigns.toggle_deleted, { nowait = true, desc = 'toggle deleted' } },
+      { 'b', gitsigns.blame_line, { desc = 'blame' } },
+      { 'B', function() gitsigns.blame_line{ full = true } end, { desc = 'blame show full' } },
+      { '/', gitsigns.show, { exit = true, desc = 'show base file' } }, -- show the base of the file
+      { '<Enter>', '<Cmd>Neogit<CR>', { exit = true, desc = 'Neogit' } },
+      { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
+   }
+})
 -- finalize startup
 statusline_off()
 linenumber_off()
