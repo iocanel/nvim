@@ -646,9 +646,10 @@ require("which-key").register({ -- mappings
   o = {
     name = "[o]pen",
     f = { "<cmd>Telescope find_files<cr>", "[o]pen [f]ile" },
-    d = { "<cmd>Telescope repo<cr>", "[o]pen [d]irectory (zoxide)" },
+    d = { "<cmd>Telescope zoxide list<cr>", "[o]pen [d]irectory (zoxide)" },
     o = { "<cmd>Telescope find_files<cr>", "[o]pen [o]ld file" },
     r = { "<cmd>Telescope repo<cr>", "[o]pen [r]epository" },
+    t = { "<cmd>ToggleTerm<cr>", "[o]pen [t]erminal" },
   },
   e = {
     name = "[e]ditor",
