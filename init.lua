@@ -296,7 +296,8 @@ require('indent_blankline').setup {
 
 -- Gitsigns
 -- See `:help gitsigns.txt`
-require('gitsigns').setup {
+local gitsigns = require('gitsigns')
+gitsigns.setup {
   signs = {
     add = { text = '│' },
     change = { text = '│' },
@@ -309,7 +310,8 @@ require('gitsigns').setup {
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
-require('telescope').setup {
+local telescope = require('telescope')
+telescope.setup {
   defaults = {
     mappings = {
       i = {
@@ -321,7 +323,7 @@ require('telescope').setup {
 }
 
 -- Enable telescope fzf native, if installed
-pcall(require('telescope').load_extension, 'fzf')
+pcall(telescope.load_extension, 'fzf')
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
@@ -335,7 +337,7 @@ vim.keymap.set('n', '<leader>/', function()
 end, { desc = '[/] Fuzzily search in current buffer]' })
 
 -- Enable telescope repo extension
-require("telescope").setup {
+telescope.setup {
   extensions = {
     repo = {
       list = {
@@ -350,10 +352,10 @@ require("telescope").setup {
   },
 }
 
-require("telescope").load_extension('repo')
+telescope.load_extension('repo')
 
 -- Enable telescope zoxide extension
-require("telescope").load_extension('zoxide')
+telescope.load_extension('zoxide')
 
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
@@ -743,7 +745,6 @@ end
 vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
 
 local Hydra = require("hydra")
-local gitsigns = require('gitsigns')
 
 local git_hint = [[
  _n_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
@@ -766,9 +767,9 @@ Hydra({
    mode = {'n','x'},
    body = '<leader>gH',
    heads = {
-      { 'n', gitsigns.next_hunk, { desc = 'next hunk' } },
-      { 'p', gitsigns.prev_hunk, { desc = 'prev hunk' } },
-      { 's', ':Gitsigns stage_hunk<CR>', { silent = true, desc = 'stage hunk' } },
+      { 'n', gitsigns.next_hunk, { desc = 'next hunk', exit = false } },
+      { 'p', gitsigns.prev_hunk, { desc = 'prev hunk', exit = false} },
+      { 's', gitsigns.stage_hunk, { silent = true, desc = 'stage hunk' } },
       { 'u', gitsigns.undo_stage_hunk, { desc = 'undo last stage' } },
       { 'S', gitsigns.stage_buffer, { desc = 'stage buffer' } },
       { 'v', gitsigns.preview_hunk, { desc = 'preview hunk' } },
