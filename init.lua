@@ -38,7 +38,10 @@ require('packer').startup(function(use)
   use { 'tpope/vim-fugitive', commit="2febbe1f00be04f16daa6464cb39214a8566ec4b" }
   use { 'tpope/vim-rhubarb', commit="cad60fe382f3f501bbb28e113dfe8c0de6e77c75" }
 	use { "lewis6991/gitsigns.nvim", commit = "2c6f96dda47e55fa07052ce2e2141e8367cbaaf2" }
+	use { "TimUntersberger/neogit", commit = "089d388876a535032ac6a3f80e19420f09e4ddda" }
 
+  use { "norcalli/nvim-colorizer.lua" }
+  use { 'NTBBloodbath/doom-one.nvim'}
   use { "nekonako/xresources-nvim", commit = "745b4df924a6c4a7d8026a3fb3a7fa5f78e6f582" }
   use { 'nvim-lualine/lualine.nvim', commit = "0050b308552e45f7128f399886c86afefc3eb988" }-- Fancier statusline
   use { 'lukas-reineke/indent-blankline.nvim', commit = "c4c203c3e8a595bc333abaf168fcb10c13ed5fb7" } -- Add indentation guides even on blank lines
@@ -293,6 +296,10 @@ gitsigns.setup {
     untracked    = { text = '┆' },
   },
 }
+
+-- Neogit
+local neogit = require('neogit') 
+neogit.setup {}
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
