@@ -299,7 +299,19 @@ gitsigns.setup {
 
 -- Neogit
 local neogit = require('neogit') 
-neogit.setup {}
+neogit.setup {
+  disable_signs = false,
+  disable_hint = true,
+  disable_commit_confirmation = true,
+  auto_refresh = true,
+ -- customize displayed signs
+  signs = {
+    -- { CLOSED, OPENED }
+    section = { "", "" },
+    item = { "", "" },
+    hunk = { "", "" },
+  },
+}
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
@@ -639,6 +651,8 @@ require("which-key").register({ -- mappings
   g = {
     name = "[g]it",
     c = { "<cmd>Git commit<cr>", "[g]it [c]ommit"},
+    n = { "<cmd>Neogit<cr>", "[n]eogit"},
+    N = { "<cmd>Neogit kind=vsplit<cr>", "[n]eogit (vertical)"},
     h = {
       name = "[h]unk",
       s = { "<cmd>Gitsigns stage_hunk<cr>", "[g]it [h]unk [s]tage"},
