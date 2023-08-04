@@ -96,9 +96,9 @@ function setup_lsp_bindindgs()
   vim.keymap.set('n', '<leader>lrn', vim.lsp.buf.rename, { desc = 'rename'})
   vim.keymap.set('n', '<leader>lca', vim.lsp.buf.code_action, { desc = 'code action'})
 
-  vim.keymap.set('n', 'lgd', vim.lsp.buf.definition, { desc = 'goto definition'})
-  vim.keymap.set('n', 'lgr', require('telescope.builtin').lsp_references, { desc = 'goto references'})
-  vim.keymap.set('n', 'lgi', vim.lsp.buf.implementation, { desc = 'goto implementation'})
+  vim.keymap.set('n', '<leader>lgd', vim.lsp.buf.definition, { desc = 'goto definition'})
+  vim.keymap.set('n', '<leader>lgr', require('telescope.builtin').lsp_references, { desc = 'goto references'})
+  vim.keymap.set('n', '<leader>lgi', vim.lsp.buf.implementation, { desc = 'goto implementation'})
   vim.keymap.set('n', '<leader>ltd', vim.lsp.buf.type_definition, { desc = 'type definition'})
   vim.keymap.set('n', '<leader>lsd', require('telescope.builtin').lsp_document_symbols, { desc = 'document symbols'})
   vim.keymap.set('n', '<leader>lsw', require('telescope.builtin').lsp_dynamic_workspace_symbols, { desc = 'workspace symbols'})
@@ -110,19 +110,19 @@ function setup_coc_bindings()
   vim.keymap.set('n', '<leader>lca', '<Plug>(coc-codeaction)', { desc = 'code action'})
   vim.keymap.set('x', '<leader>lca', '<Plug>(coc-codeaction-selected)', { desc = 'code action'})
 
-  vim.keymap.set('n', 'lgd', '<Plug>(coc-definition)', { desc = 'goto definition'})
-  vim.keymap.set('n', 'lgr', '<Plug>(coc-references)', { desc = 'goto references'})
-  vim.keymap.set('n', 'lgi', '<Plug>(coc-implementation)', { desc = 'goto implementation'})
+  vim.keymap.set('n', '<leader>lgd', '<Plug>(coc-definition)', { desc = 'goto definition'})
+  vim.keymap.set('n', '<leader>lgr', '<Plug>(coc-references)', { desc = 'goto references'})
+  vim.keymap.set('n', '<leader>lgi', '<Plug>(coc-implementation)', { desc = 'goto implementation'})
   vim.keymap.set('n', '<leader>ltd', '<Plug>(coc-type-definition)', { desc = 'type definition'})
 end
 
 
 -- See `:help K` for why this keymap
-vim.keymap.set('n', 'ldh', vim.lsp.buf.hover, { desc = 'hover documentation'})
-vim.keymap.set('n', 'lds', vim.lsp.buf.signature_help, { desc = 'signature documentation'})
+vim.keymap.set('n', '<leader>ldh', vim.lsp.buf.hover, { desc = 'hover documentation'})
+vim.keymap.set('n', '<leader>lds', vim.lsp.buf.signature_help, { desc = 'signature documentation'})
 
 -- Lesser used LSP functionality
-vim.keymap.set('n', 'lgD', vim.lsp.buf.declaration, { desc = 'goto declaration'})
+vim.keymap.set('n', '<leader>lgD', vim.lsp.buf.declaration, { desc = 'goto declaration'})
 vim.keymap.set('n', '<leader>lwa', vim.lsp.buf.add_workspace_folder, { desc = 'workspace add folder'})
 vim.keymap.set('n', '<leader>lwr', vim.lsp.buf.remove_workspace_folder, { desc = 'workspace remove folder'})
 vim.keymap.set('n', '<leader>lwl', function()
