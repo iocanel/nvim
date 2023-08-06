@@ -29,6 +29,7 @@
   "telescope-repo.nvim": { "branch": "master", "commit": "92598143f8c4cadb47f5aef3f7775932827df8f2" },
   "telescope-zoxide": { "branch": "main", "commit": "856af0d83d2e167b5efa080567456c1578647abe" },
   "telescope.nvim": { "branch": "master", "commit": "2f32775405f6706348b71d0bb8a15a22852a61e4" },
+  "template.nvim": { "branch": "main", "commit": "0b9a02148fd2b7832f801e5ebb40684d4eea4ead" },
   "toggleterm.nvim": { "branch": "main", "commit": "2a787c426ef00cb3488c11b14f5dcf892bbd0bda" },
   "vim-fugitive": { "branch": "master", "commit": "2febbe1f00be04f16daa6464cb39214a8566ec4b" },
   "which-key.nvim": { "branch": "main", "commit": "e4fa445065a2bb0bbc3cca85346b67817f28e83e" },
