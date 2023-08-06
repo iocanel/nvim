@@ -3,7 +3,7 @@ return {
     'akinsho/toggleterm.nvim', 
     commit = '2a787c426ef00cb3488c11b14f5dcf892bbd0bda',
     opts = {
-      size = 20,
+      size = 10,
       open_mapping = [[<c-\>]],
       hide_numbers = true,
       shade_filetypes = {},
@@ -12,7 +12,7 @@ return {
       start_in_insert = true,
       insert_mappings = true,
       persist_size = true,
-      direction = "float",
+      direction = "horizontal",
       close_on_exit = true,
       shell = vim.o.shell,
       float_opts = {
@@ -33,6 +33,8 @@ return {
         vim.api.nvim_buf_set_keymap(0, 't', '<C-j>', [[<C-\><C-n><C-W>j]], opts)
         vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<C-\><C-n><C-W>k]], opts)
         vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
+        -- Close window on double escape
+        vim.api.nvim_buf_set_keymap(0, 't', '<esc><esc>', '<cmd>close<cr>', opts)
       end
       vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
     end
