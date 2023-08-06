@@ -23,7 +23,13 @@ vim.keymap.set('n', '<leader>oR', "<cmd>Telescope oldfiles<cr>", { desc = 'open 
 -- Zoxide
 vim.keymap.set('n', '<leader>od', "<cmd>Telescope zoxide list<cr>", { desc = 'open directory' })
 -- ToggleTerm
-vim.keymap.set('n', '<leader>ot', "<cmd>ToggleTerm<cr>", { desc = 'open terminal' })
+vim.keymap.set('n', '<leader>oc', "<cmd>ToggleTerm<cr>", { desc = 'open command line' })
+vim.keymap.set('n', '<leader>ot', "<cmd>Neotree<cr>", { desc = 'open tree' })
+
+--
+-- [[ Toggle ]]
+--
+vim.keymap.set('n', '<leader>ot', "<cmd>Neotree toggle<cr>", { desc = 'toggle tree' })
 
 --
 -- [[ Search ]]
