@@ -47,6 +47,80 @@ local config = {
   -- for a list of options
   settings = {
     java = {
+      maxConcurrentBuilds = 1,
+      autobuild = {
+        enabled = false
+      },
+      import = {
+        maven = {
+          enabled = true
+        },
+        exclusions = {
+          "**/node_modules/**",
+          "**/.metadata/**",
+          "**/archetype-resources/**",
+          "**/META-INF/maven/**"
+        }
+      },
+      configuration = {
+        updateBuildConfiguration = "automatic",
+        checkProjectSettingsExclusions = true,
+        runtimes = {
+           {
+            name = "JavaSE-1.8",
+            path = "/home/iocanel/.sdkman/candidates/java/8.0.282-open"
+          },
+          {
+            name = "JavaSE-11",
+            path = "/home/iocanel/.sdkman/candidates/java/11.0.12-tem"            
+          },
+          {
+            name = "JavaSE-17",
+            path = "/home/iocanel/.sdkman/candidates/java/17.0.7-tem",
+            default = true
+          },
+          {
+            name = "JavaSE-19",
+            path = "/home/iocanel/.sdkman/candidates/java/19.0.2-tem"
+          }
+        },
+      },
+      project = {
+        importHint = true,
+        importOnFirstTimeStartup = "automatic",
+        referencedLibraries = {
+          "lib/**"
+        },
+        resourceFilters = {
+          "node_modules",
+          "\\.git",
+          ".metadata",
+          "archetype-resources",
+          "META-INF/maven"
+        }
+      },
+      server = {
+        launchMode = "Hybrid"
+      },
+      contentProvider = {
+        preferred = "fernflower"
+      },
+      completion = {
+                guessMethodArguments = true,
+        overwrite = true,
+        enabled = true,
+        favoriteStaticMembers = {
+          "org.junit.Assert.*",
+          "org.junit.Assume.*",
+          "org.junit.jupiter.api.Assertions.*",
+          "org.junit.jupiter.api.Assumptions.*",
+          "org.junit.jupiter.api.DynamicContainer.*",
+          "org.junit.jupiter.api.DynamicTest.*",
+          "org.mockito.Mockito.*",
+          "org.mockito.ArgumentMatchers.*",
+          "org.mockito.Answers.*"
+        }
+      }
     }
   },
 
