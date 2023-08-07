@@ -24,7 +24,7 @@ return {
     build = 'make', cond =  vim.fn.executable 'make' == 1,
     config = function() 
       local telescope = require('telescope')
-      local repo_ext_installed, repo = pcall(telescope.load_extension, 'fzf')
+      pcall(telescope.load_extension, 'fzf')
     end
   },
   -- Telescope Zoxide
@@ -34,7 +34,7 @@ return {
     commit = '856af0d83d2e167b5efa080567456c1578647abe',
     config = function() 
       local telescope = require('telescope')
-      local repo_ext_installed, repo = pcall(telescope.load_extension, 'zoxide')
+       pcall(telescope.load_extension, 'zoxide')
     end
   },
   -- Telescope Repo
@@ -61,6 +61,14 @@ return {
           },
         }
       end
+    end
+  }, 
+  -- Telescope UI Select
+  {
+    'nvim-telescope/telescope-ui-select.nvim',
+    commit = '62ea5e58c7bbe191297b983a9e7e89420f581369',
+    config = function()
+      require("telescope").load_extension("ui-select")
     end
   }
 }
