@@ -1,4 +1,6 @@
 -- See `:help vim.lsp.start_client` for an overview of the supported `config` options.
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+local workspace_dir = '/home/iocanel/.local/nvim/lsp/eclipse.jdt.ls/data/' .. project_name
 local config = {
   -- The command that starts the language server
   -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
@@ -34,7 +36,7 @@ local config = {
 
     -- 💀
     -- See `data directory configuration` section in the README
-    '-data', '/home/iocanel/.local/nvim/lsp/eclipse.jdt.ls/data'
+    '-data', workspace_dir,
   },
 
   -- 💀
