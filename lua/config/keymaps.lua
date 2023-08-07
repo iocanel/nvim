@@ -29,7 +29,7 @@ vim.keymap.set('n', '<leader>ot', "<cmd>Neotree<cr>", { desc = 'open tree' })
 --
 -- [[ Toggle ]]
 --
-vim.keymap.set('n', '<leader>ot', "<cmd>Neotree toggle<cr>", { desc = 'toggle tree' })
+vim.keymap.set('n', '<leader>tt', "<cmd>Neotree toggle<cr>", { desc = 'toggle tree' })
 
 --
 -- [[ Search ]]
@@ -98,7 +98,7 @@ vim.keymap.set('n', '<leader>ds', vim.diagnostic.setloclist, {desc = "add to loc
 --
 -- [[ LSP ]]
 --
-function setup_lsp_bindindgs()
+function setup_lsp_bindings()
   vim.keymap.set('n', '<leader>lrn', vim.lsp.buf.rename, { desc = 'rename'})
   vim.keymap.set('n', '<leader>lca', vim.lsp.buf.code_action, { desc = 'code action'})
 
@@ -121,7 +121,6 @@ function setup_coc_bindings()
   vim.keymap.set('n', '<leader>lgi', '<Plug>(coc-implementation)', { desc = 'goto implementation'})
   vim.keymap.set('n', '<leader>ltd', '<Plug>(coc-type-definition)', { desc = 'type definition'})
 end
-
 
 -- See `:help K` for why this keymap
 vim.keymap.set('n', '<leader>ldh', vim.lsp.buf.hover, { desc = 'hover documentation'})
@@ -201,7 +200,7 @@ if which_key_installed then
     })
 end
 
-setup_lsp_bindindgs()
+setup_lsp_bindings()
 
 -- [Optional] use coc bindings for .java files if coc-java is installed
 local coc_installed, _ = pcall(require, 'coc-java')
