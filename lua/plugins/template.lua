@@ -13,6 +13,7 @@ return {
 
     -- Java templates
     vim.cmd('autocmd BufNewFile *.java :Template main')
+    vim.cmd('autocmd BufNewFile *.html :Template index')
     end
   } 
 }

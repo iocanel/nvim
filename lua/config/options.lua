@@ -54,3 +54,17 @@ vim.o.tabstop = 2
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+
+
+-- [[ Additional Filetypes ]]
+--
+-- Function vim.filetype.match does not recognize all filetypes
+-- This section manually registers needed filetypes
+-- Source: https://www.reddit.com/r/neovim/comments/rvwsl3/introducing_filetypelua_and_a_call_for_help/
+--
+-- html
+vim.filetype.add({
+  extension = {
+    html = "html"
+  }
+})
