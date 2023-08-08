@@ -25,7 +25,7 @@ return {
         -- Add languages to be installed here that you want installed for treesitter
         ensure_installed = { 'c', 'cpp', 'java', 'go', 'lua', 'python', 'rust', 'javascript', 'typescript', 'help', 'vim', 'json', 'yaml', 'toml' },
         sync_install = false,
-        auto_install = true,
+        auto_install = false,
         highlight = { enable = true },
         additional_vim_regex_highlighting = false,
         indent = { enable = true, disable = { 'python' } },

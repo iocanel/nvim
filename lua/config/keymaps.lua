@@ -78,6 +78,7 @@ vim.keymap.set('n', '<leader>ghr', "<cmd>Gitsigns reset_hunk<cr>", { desc = 'git
 vim.keymap.set('n', '<leader>ghv', "<cmd>Gitsigns preview_hunk<cr>", { desc = 'git hunk preview' })
 -- Neogit
 vim.keymap.set('n', '<leader>gn', "<cmd>Neogit<cr>", { desc = 'neogit' })
+vim.keymap.set('n', '<leader>gg', "<cmd>Neogit<cr>", { desc = 'neogit' })
 
 -- Octo list PR
 vim.keymap.set('n', '<leader>gopl', "<cmd>Octo pr list<cr>", { desc = 'list pull requests' })
