@@ -30,6 +30,7 @@ vim.keymap.set('n', '<leader>ot', "<cmd>Neotree<cr>", { desc = 'open tree' })
 -- [[ Toggle ]]
 --
 vim.keymap.set('n', '<leader>tt', "<cmd>Neotree toggle<cr>", { desc = 'toggle tree' })
+vim.keymap.set('n', '<leader>tu', "<cmd>Telescope undo<cr>", { desc = 'toggle undo tree' })
 
 --
 -- [[ Search ]]

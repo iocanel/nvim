@@ -70,5 +70,14 @@ return {
     config = function()
       require("telescope").load_extension("ui-select")
     end
+  },
+ -- Telescope Undo
+  {
+    'debugloop/telescope-undo.nvim',
+    commit = '3dec002ea3e7952071d26fbb5d01e2038a58a554',
+    config = function()
+      require('telescope').load_extension("undo")
+    end
   }
+
 }
