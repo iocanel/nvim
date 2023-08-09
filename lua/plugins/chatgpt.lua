@@ -113,7 +113,7 @@ return {
         win_options = {
           winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
         },
-        submit = "<M-Enter>",
+        submit = "<C-Enter>",
         submit_n = "<Enter>",
       },
       settings_window = {
