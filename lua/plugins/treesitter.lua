@@ -20,12 +20,23 @@ return {
         orig_notify(text, level, opts)
       end
       vim.notify = filter_notify
+
+      --
+      -- Prefer git for donwloading parsers
+      --
+      require("nvim-treesitter.install").prefer_git = true
+
       -- 
+      -- Setup custom dir
+      --
+      local parser_dir='/home/iocanel/.local/.share/nvim/treesitter/parsers'
+      vim.opt.runtimepath:append(parser_dir)
       require('nvim-treesitter.configs').setup({
         -- Add languages to be installed here that you want installed for treesitter
         ensure_installed = { 'c', 'cpp', 'java', 'go', 'lua', 'python', 'rust', 'javascript', 'typescript', 'help', 'vim', 'json', 'yaml', 'toml' },
         sync_install = false,
         auto_install = false,
+        parser_install_dir=parser_dir,
         highlight = { enable = true },
         additional_vim_regex_highlighting = false,
         indent = { enable = true, disable = { 'python' } },
@@ -95,10 +106,9 @@ return {
           }
         }
       })
-
     end,
     config = function()
-      pcall(require('nvim-treesitter.install').update { with_sync = true })
+      -- pcall(require('nvim-treesitter.install').update { with_sync = true })
       -- Re-enable notifications now
       require('config.editor').notifications_on()
     end
