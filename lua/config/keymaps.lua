@@ -99,6 +99,25 @@ vim.keymap.set('n', '<leader>dn', vim.diagnostic.goto_next, {desc = "go to next"
 vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, {desc = "open float"})
 vim.keymap.set('n', '<leader>ds', vim.diagnostic.setloclist, {desc = "add to location list"})
 
+--
+-- [Codeium]
+--
+vim.keymap.set('n', '<leader>ca', function()
+  return vim.fn['codeium#Accept']()
+end, {desc = "codeium accept"})
+
+vim.keymap.set('n', '<leader>cn', function()
+  return vim.fn['codeium#CycleCompletions'](1)
+end, {desc = "codeium next"})
+
+vim.keymap.set('n', '<leader>cp', function()
+  return vim.fn['codeium#CycleCompletions'](-1)
+end, {desc = "codeium previous"})
+
+vim.keymap.set('n', '<leader>tmci', function()
+  local mvn = require('config.mvn')
+  mvn.clean_install()
+end, { desc = 'mvn clean install' })
 
 --
 -- [[ LSP ]]
