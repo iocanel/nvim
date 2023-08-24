@@ -3,7 +3,7 @@ return {
     'catppuccin/nvim',
     name = 'cattpuccin',
     commit = '490078b1593c6609e6a50ad5001e7902ea601824',
-    priority = 1000, 
+    priority = 1000,
     opts = {
       flavour = "latte", -- latte, frappe, macchiato, mocha
       background = { -- :h background
