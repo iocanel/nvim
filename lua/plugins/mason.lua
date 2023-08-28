@@ -10,7 +10,7 @@ return {
     dependencies = { 'williamboman/mason.nvim' },
     commit = 'e86a4c84ff35240639643ffed56ee1c4d55f538e',
     opts = {
-      ensure_installed = { 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver' },
       automatic_installation = true,
     },
     config = function()
