@@ -1,0 +1,10 @@
+#!/bin/bash
+
+TEMP_DIR=$(mktemp -d)
+
+pushd $TEMP_DIR
+git clone git@github.com:microsoft/java-debug.git
+pushd java-debug
+mvn clean install
+popd
+popd
