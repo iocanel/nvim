@@ -2,7 +2,7 @@
 -- See `:help vim.o`
 
 -- Make vim silent
-vim.o.silenta = true
+vim.o.silent = true
 
 -- Set highlight on search
 vim.o.hlsearch = true
@@ -40,6 +40,7 @@ vim.o.relativenumber = true
 vim.o.laststatus = 0
 vim.o.showcmd = false
 vim.o.showmode = false
+vim.o.autoread = true
 
 -- Indentation
 vim.o.autoident = true
