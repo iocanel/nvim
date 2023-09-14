@@ -19,16 +19,16 @@ local config = {
     '--add-modules=ALL-SYSTEM',
     '--add-opens', 'java.base/java.util=ALL-UNNAMED',
     '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-
     -- 💀
-    '-jar', '/opt/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.500.v20230717-2134.jar',
+    "-javaagent:/home/iocanel/.m2/repository/org/projectlombok/lombok/1.18.28/lombok-1.18.28.jar",
+    '-jar', '/home/iocanel/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.500.v20230717-2134.jar',
          -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
          -- Must point to the                                                     Change this to
          -- eclipse.jdt.ls installation                                           the actual version
 
 
     -- 💀
-    '-configuration', '/opt/eclipse.jdt.ls/config_linux',
+    '-configuration', '/home/iocanel/.local/share/eclipse.jdt.ls/config_linux',
                     -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        ^^^^^^
                     -- Must point to the                      Change to one of `linux`, `win` or `mac`
                     -- eclipse.jdt.ls installation            Depending on your system.
@@ -134,7 +134,9 @@ local config = {
   --
   -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
   init_options = {
-    bundles = {}
+    bundles = {
+      vim.fn.glob("/home/iocanel/.local/shrae/eclipse.jdt.ls/bundles/com.microsoft.java.debug.plugin-0.49.0.jar");
+    };
   },
 }
 -- This starts a new client & server,
