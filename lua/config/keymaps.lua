@@ -26,6 +26,8 @@ vim.keymap.set('n', '<leader>od', "<cmd>Telescope zoxide list<cr>", { desc = 'op
 vim.keymap.set('n', '<leader>oc', "<cmd>ToggleTerm<cr>", { desc = 'open command line' })
 vim.keymap.set('n', '<leader>ot', "<cmd>Neotree<cr>", { desc = 'open tree' })
 
+vim.keymap.set('n', '<leader>.', "<cmd>Telescope resume<cr>", { desc = 'resume' })
+
 --
 -- [[ Toggle ]]
 --
