@@ -174,6 +174,15 @@ vim.keymap.set('n', '<leader>lwl', function()
   print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 end, { desc = 'workspace list folders'})
 
+
+--
+-- JDTLS
+--
+
+vim.keymap.set('n', '<leader>jtg', function() require("jdtls.tests").generate() end , { desc = 'generate tests'})
+vim.keymap.set('n', '<leader>jtj', function() require("jdtls.tests").generate() end , { desc = 'goto test or subjects'})
+
+
 -- [Optional] if which-key is installed register categories
 local which_key_installed, which_key = pcall(require, 'which-key')
 if which_key_installed then
