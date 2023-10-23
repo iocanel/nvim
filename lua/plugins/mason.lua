@@ -1,16 +1,16 @@
 return {
-  { 
+  {
     'williamboman/mason.nvim',
     commit = 'fe9e34a9ab4d64321cdc3ecab4ea1809239bb73f',
     opts = {
     }
   },
-  { 
+  {
     'williamboman/mason-lspconfig.nvim',
     dependencies = { 'williamboman/mason.nvim' },
     commit = 'e86a4c84ff35240639643ffed56ee1c4d55f538e',
     opts = {
-      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'intelephense', 'grammarly_languageserver' },
       automatic_installation = true,
     },
     config = function()
@@ -28,6 +28,35 @@ return {
       lspconfig.pyright.setup {}
       lspconfig.tsserver.setup {}
       lspconfig.rust_analyzer.setup {}
+      lspconfig.intelephense.setup {
+        settings = {
+          intelephense = {
+            stubs = {
+              "bcmath",
+              "bz2",
+              "calendar",
+              "Core",
+              "curl",
+              "zip",
+              "zlib",
+              "wordpress",
+              "woocommerce",
+              "acf-pro",
+              "wordpress-globals",
+              "wp-cli",
+              "genesis",
+              "polylang"
+            },
+            environment = {
+              includePaths = '/home/iocanel/.composer/vendor/php-stubs/' -- this line forces the composer path for the stubs in case inteliphense don't find it...
+            },
+            files = {
+              maxSize = 5000000;
+            };
+          };
+        }
+      }
+      lspconfig.grammarly_languageserver.setup {}
     end
   },
 }
