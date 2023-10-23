@@ -102,6 +102,20 @@ vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, {desc = "open float
 vim.keymap.set('n', '<leader>ds', vim.diagnostic.setloclist, {desc = "add to location list"})
 
 --
+-- [[Hop]]
+--
+local hop_installed, hop = pcall(require, 'hop');
+if hop_installed then
+  local directions = require('hop.hint').HintDirection
+  vim.keymap.set('n', '<leader>ha', function() hop.hint_anywhere() end, {remap=true})
+  vim.keymap.set('n', '<leader>hw', function() hop.hint_words() end, {remap=true})
+  vim.keymap.set('n', '<leader>hf', function() hop.hint_char1({ direction = directions.AFTER_CURSOR, current_line_only = false }) end, {remap=true})
+  vim.keymap.set('n', '<leader>hF', function() hop.hint_char1({ direction = directions.BEFORE_CURSOR, current_line_only = false }) end, {remap=true})
+  vim.keymap.set('n', '<leader>ht', function() hop.hint_char1({ direction = directions.AFTER_CURSOR, current_line_only = true, hint_offset = -1 }) end, {remap=true})
+  vim.keymap.set('n', '<leader>hT', function() hop.hint_char1({ direction = directions.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 }) end, {remap=true})
+end
+
+--
 -- [Codeium]
 --
 vim.keymap.set('n', '<leader>ca', function()
