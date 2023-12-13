@@ -40,7 +40,12 @@ vim.o.relativenumber = true
 vim.o.laststatus = 0
 vim.o.showcmd = false
 vim.o.showmode = false
+-- Autoread file when changed
 vim.o.autoread = true
+vim.cmd [[
+  autocmd CursorHold * checktime
+]]
+--
 
 -- Indentation
 vim.o.autoident = true
