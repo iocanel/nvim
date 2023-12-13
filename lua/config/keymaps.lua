@@ -148,6 +148,7 @@ function setup_lsp_bindings()
   vim.keymap.set('n', '<leader>ltd', vim.lsp.buf.type_definition, { desc = 'type definition'})
   vim.keymap.set('n', '<leader>lsd', require('telescope.builtin').lsp_document_symbols, { desc = 'document symbols'})
   vim.keymap.set('n', '<leader>lsw', require('telescope.builtin').lsp_dynamic_workspace_symbols, { desc = 'workspace symbols'})
+  vim.keymap.set('n', '<leader>lgb', '<cmd>e#<cr>', { desc = 'goto back'})
 end
 
 function setup_coc_bindings()
