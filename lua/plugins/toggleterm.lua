@@ -33,6 +33,7 @@ return {
         vim.api.nvim_buf_set_keymap(0, 't', '<C-j>', [[<C-\><C-n><C-W>j]], opts)
         vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<C-\><C-n><C-W>k]], opts)
         vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
+        vim.api.nvim_buf_set_keymap(0, 't', '<M-o>', '<cmd>WinpickNext<cr>', opts)
         -- Close window on double escape
         vim.api.nvim_buf_set_keymap(0, 't', '<esc><esc>', '<cmd>close<cr>', opts)
       end
