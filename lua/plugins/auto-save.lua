@@ -18,7 +18,10 @@ return {
       write_all_buffers = false,
       execution_message = {
         dim = 0.18,
-        cleaning_interval = 5000
+        cleaning_interval = 5000,
+        message = function()
+          return "";
+        end,
       }
     }
   }
