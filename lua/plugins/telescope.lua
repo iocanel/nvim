@@ -2,7 +2,7 @@ return {
   -- Telescope
   { 
     'nvim-telescope/telescope.nvim', 
-    commit = '2f32775405f6706348b71d0bb8a15a22852a61e4',
+    tag = '0.1.4',
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = {
       defaults = {
