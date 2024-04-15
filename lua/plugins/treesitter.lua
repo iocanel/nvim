@@ -33,7 +33,7 @@ return {
       vim.opt.runtimepath:append(parser_dir)
       require('nvim-treesitter.configs').setup({
         -- Add languages to be installed here that you want installed for treesitter
-        ensure_installed = { 'c', 'cpp', 'java', 'go', 'lua', 'python', 'rust', 'javascript', 'typescript', 'help', 'vim', 'json', 'yaml', 'toml' },
+        ensure_installed = { 'c', 'cpp', 'java', 'go', 'lua', 'python', 'rust', 'javascript', 'typescript', 'tsx', 'help', 'vim', 'json', 'yaml', 'toml', 'markdown', 'markdown_inline' },
         sync_install = false,
         auto_install = false,
         parser_install_dir=parser_dir,

@@ -56,6 +56,11 @@ vim.keymap.set('n', '<leader>wsh', "<cmd>horizontal split<cr>", { desc = 'window
 vim.keymap.set('n', '<leader>wsv', "<cmd>vertical split<cr>", { desc = 'window split vertically' })
 vim.keymap.set('n', '<leader>wjh', "<C-w>h", { desc = 'window jump horizontally' })
 vim.keymap.set('n', '<leader>wjv', "<C-w>v", { desc = 'window jump vertically' })
+vim.keymap.set('n', '<leader>wc', "<cmd>q<cr>", { desc = 'window close' })
+vim.keymap.set('n', '<leader>wbk', "<cmd>q|bd<cr>", { desc = 'window and buffer kill' })
+vim.keymap.set('n', '<C-x>k', "<cmd>q|bd<cr>", { desc = 'window and buffer kill' })
+
+
 local winpick_installed, winpick = pcall(require, 'winpick')
 if winpick_installed then
   vim.keymap.set('n', '<leader>wp', function()

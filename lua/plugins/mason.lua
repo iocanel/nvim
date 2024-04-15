@@ -10,7 +10,7 @@ return {
     dependencies = { 'williamboman/mason.nvim' },
     commit = 'e86a4c84ff35240639643ffed56ee1c4d55f538e',
     opts = {
-      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'intelephense', 'grammarly_languageserver' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'pyright', 'intelephense', 'grammarly_languageserver' },
       automatic_installation = true,
     },
     config = function()
@@ -25,6 +25,7 @@ return {
           }
         }
       }
+      lspconfig.gopls.setup {}
       lspconfig.pyright.setup {}
       lspconfig.tsserver.setup {}
       lspconfig.rust_analyzer.setup {}
