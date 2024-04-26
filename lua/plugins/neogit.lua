@@ -1,7 +1,7 @@
 return {
   {
-    "TimUntersberger/neogit",
-    commit = "089d388876a535032ac6a3f80e19420f09e4ddda",
+    "NeogitOrg/neogit",
+    commit = "0cae7abc30cb91d661f28257c331fcb5b5198e31",
     opts = {
       disable_signs = false,
       disable_hint = true,
