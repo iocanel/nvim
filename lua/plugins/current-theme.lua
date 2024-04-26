@@ -1,1 +1,1 @@
-../themes/light-theme.lua
+../themes/dark-theme.lua
