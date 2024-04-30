@@ -21,7 +21,7 @@ local config = {
     '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
     -- 💀
     "-javaagent:/home/iocanel/.m2/repository/org/projectlombok/lombok/1.18.28/lombok-1.18.28.jar",
-    '-jar', '/home/iocanel/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_1.6.500.v20230717-2134.jar',
+    '-jar', vim.fn.glob('/home/iocanel/.local/share/eclipse.jdt.ls/plugins/org.eclipse.equinox.launcher_*.jar'),
          -- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                       ^^^^^^^^^^^^^^
          -- Must point to the                                                     Change this to
          -- eclipse.jdt.ls installation                                           the actual version
@@ -42,7 +42,7 @@ local config = {
   -- 💀
   -- This is the default if not provided, you can remove it. Or adjust as needed.
   -- One dedicated LSP server & client will be started per unique root_dir
-  root_dir = require('jdtls.setup').find_root({'.git', 'mvnw', 'gradlew'}),
+  root_dir = require('jdtls.setup').find_root({'.git', 'pom.xml', 'mvnw', 'build.gralde', 'gradlew'}),
 
   -- Here you can configure eclipse.jdt.ls specific settings
   -- See https://github.com/eclipse/eclipse.jdt.ls/wiki/Running-the-JAVA-LS-server-from-the-command-line#initialize-request
@@ -74,7 +74,7 @@ local config = {
           },
           {
             name = "JavaSE-11",
-            path = "/home/iocanel/.sdkman/candidates/java/11.0.12-tem"            
+            path = "/home/iocanel/.sdkman/candidates/java/11.0.12-tem"
           },
           {
             name = "JavaSE-17",
@@ -108,7 +108,7 @@ local config = {
         preferred = "fernflower"
       },
       completion = {
-                guessMethodArguments = true,
+        guessMethodArguments = true,
         overwrite = true,
         enabled = true,
         favoriteStaticMembers = {
@@ -125,7 +125,6 @@ local config = {
       }
     }
   },
-
   -- Language server `initializationOptions`
   -- You need to extend the `bundles` with paths to jar files
   -- if you want to use additional eclipse.jdt.ls plugins.
@@ -135,10 +134,25 @@ local config = {
   -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
   init_options = {
     bundles = {
-      vim.fn.glob("/home/iocanel/.local/shrae/eclipse.jdt.ls/bundles/com.microsoft.java.debug.plugin-0.49.0.jar");
+      vim.fn.glob("/home/iocanel/.local/shrae/eclipse.jdt.ls/bundles/com.microsoft.java.debug.plugin-*.jar", 1);
     };
   },
 }
+require('jdtls').setup_dap({ hotcodereplace = 'auto' })
 -- This starts a new client & server,
 -- or attaches to an existing client & server depending on the `root_dir`.
 require('jdtls').start_or_attach(config)
+
+function attach_to_debug()
+  local dap = require('dap')
+  dap.configurations.java = {
+    {
+      type = 'java';
+      request = 'attach';
+      name = "Attach to the process";
+      hostName = 'localhost';
+      port = '5005';
+    },
+  }
+  dap.continue()
+end
