@@ -100,12 +100,27 @@ vim.keymap.set('n', '<leader>en', editor.linenumber_toggle, { desc = 'line numbe
 vim.keymap.set('n', '<leader>ef', editor.focus_toggle, { desc = 'focus mode toggle' })
 
 --
+-- [[ Debug ]]
+--
+local dap_java = require("config.dap.java")
+local dapui = require("dapui")
+vim.keymap.set('n', '<leader>da', dap_java.attach_to_remote, {desc = "debug remote"})
+vim.keymap.set('n', '<leader>di', "<cmd>DapStepIn<cr>", {desc = "dap step in"})
+vim.keymap.set('n', '<leader>do', "<cmd>DapStepOut<cr>", {desc = "dap step out"})
+vim.keymap.set('n', '<leader>dO', "<cmd>DapStepOver<cr>", {desc = "dap step over"})
+vim.keymap.set('n', '<leader>db', "<cmd>DapToggleBreakpoint<cr>", {desc = "dap toggle breakpoint"})
+vim.keymap.set('n', '<leader>dr', "<cmd>DapToggleRepl<cr>", {desc = "dap toggle repl"})
+vim.keymap.set('n', '<leader>dtt', function()dapui.toggle('tray')end, {desc = "dap ui toggle"})
+vim.keymap.set('n', '<leader>dts', function()dapui.toggle('sidebar')end, {desc = "dap ui toggle"})
+vim.keymap.set('n', '<leader>du', dapui.toggle, {desc = "dap ui toggle"})
+
+--
 -- [[ Diagnostic keymaps ]]
 --
-vim.keymap.set('n', '<leader>dp', vim.diagnostic.goto_prev, {desc = "go to previous"})
-vim.keymap.set('n', '<leader>dn', vim.diagnostic.goto_next, {desc = "go to next"})
-vim.keymap.set('n', '<leader>df', vim.diagnostic.open_float, {desc = "open float"})
-vim.keymap.set('n', '<leader>ds', vim.diagnostic.setloclist, {desc = "add to location list"})
+vim.keymap.set('n', '<leader>Dp', vim.diagnostic.goto_prev, {desc = "go to previous"})
+vim.keymap.set('n', '<leader>Dn', vim.diagnostic.goto_next, {desc = "go to next"})
+vim.keymap.set('n', '<leader>Df', vim.diagnostic.open_float, {desc = "open float"})
+vim.keymap.set('n', '<leader>Ds', vim.diagnostic.setloclist, {desc = "add to location list"})
 
 --
 -- [[Hop]]
@@ -198,7 +213,10 @@ if which_key_installed then
     e = {
       name = "editor",
     },
-    d= {
+    d = {
+      name = "debug",
+    },
+    D= {
       name = "diagnostics",
     },
     g = {
