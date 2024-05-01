@@ -27,6 +27,19 @@ return {
       vim.fn.sign_define('DapBreakpoint', { text='', texthl='red', linehl='', numhl='' })
       vim.fn.sign_define('DapStopped', { text='', texthl='green', linehl='', numhl= '' })
       vim.fn.sign_define('DapBreakpointRejected', { text='', texthl='red', linehl='', numhl= '' })
+
+      function dapui.bp_mouse_toggle()
+        local buf = vim.api.nvim_get_current_buf()
+        local row, col = table.unpack(vim.api.nvim_win_get_cursor(0))
+        local line = vim.api.nvim_buf_get_lines(buf, row-1, row, false)[1]
+        if col == 0 and line ~= "" then
+            require('dap').toggle_breakpoint()
+        end
+      end
+
+      -- Let's define the particular keymap here, instead of in keymaps.lua because I only want it to be active when dap is loaded.
+      -- If we move it to keymaps.lua, it will possibly cause issues when dap is not yet full loaded (lsp initialized).
+      vim.keymap.set('n', '<LeftMouse>', "<LeftMouse><cmd>lua require('dapui').bp_mouse_toggle()<cr>", {desc = "dap toggle breakpoint"})
     end
   },
   -- dap-ui
