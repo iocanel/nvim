@@ -1,7 +1,7 @@
 return {
   { 
     'nvim-treesitter/nvim-treesitter',
-    commit = "8e763332b7bf7b3a426fd8707b7f5aa85823a5ac",
+    commit = "ead283734bf0310f6ae2f05243ce0367de9e14b0",
     init = function()
       -- Disable notifications to prevent 'All parsers are up-to-date!' message
       require('config.editor').notifications_off()
