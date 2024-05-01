@@ -1,4 +1,3 @@
-local Path = require('plenary.path')
 local project = require('config.project')
 local is_windows = vim.loop.os_uname().version:match('Windows')
 
@@ -7,8 +6,12 @@ local M = {
   mvnw = is_windows and 'mvnw.cmd' or './mvnw'
 };
 
-vim.g.maven = vim.g.maven or {
-  profile = nil
+vim.g.maven = vim.g.maven or project.load_project_settings('maven') or {
+  profile = nil,
+  clean = false,
+  skip_tests = false,
+  errors = false,
+  offline = false,
 };
 
 --
@@ -55,32 +58,52 @@ end
 -- Run maven goals in the specified directory
 --
 function M.build(goals, module, resume, also_make, dir)
-  goals = goals or "clean install"
+  goals = goals or "install"
   local project_root = project.find_root()
   dir = dir or project_root or M.find_module_root()
-  local goals_with_flags = goals
 
   local loaded_maven = project.load_project_settings('maven')
   if loaded_maven then
     vim.g.maven = loaded_maven
   end
 
+  -- if user explicitly requested the <current> module, then replace it with the actual module name
   if module == "<current>" then
     module = M.get_module_name()
   end
 
+  -- handle clean flag
+  if vim.g.maven.clean and goals ~= "clean" then
+    goals = "clean " .. goals
+  end
+
+  -- handle skip tests flag
+  if vim.g.maven.skip_tests and not goals:find("test") then
+    goals = goals .. " -DskipTests"
+  end
+
+  -- handle errors flag
+  if vim.g.maven.errors then
+    goals = goals .. " -e"
+  end
+
+  -- handle offline flag
+  if vim.g.maven.offline then
+    goals = goals .. " -o"
+  end
+
   if resume then
-    goals_with_flags = "-rf :" .. (module or M.get_module_name()) .. " " .. goals_with_flags
+    goals = "-rf :" .. (module or M.get_module_name()) .. " " .. goals
   elseif module then
-    goals_with_flags = "-pl :" .. module .. " " .. goals_with_flags
+    goals = "-pl :" .. module .. " " .. goals
   end
 
   if module and also_make then
-    goals_with_flags = "-am " .. goals_with_flags
+    goals = "-am " .. goals
   end
 
   if vim.g.maven.profile then
-    goals_with_flags = "-P" .. vim.g.maven.profile .. " " .. goals_with_flags
+    goals = "-P" .. vim.g.maven.profile .. " " .. goals
   end
 
   if not dir or dir == "" then
@@ -91,11 +114,11 @@ function M.build(goals, module, resume, also_make, dir)
   local toggleterm = require("toggleterm")
   -- check if mvnw exists in the dir and use that
   if project_root and vim.loop.fs_stat(M.join(dir, M.mvnw)) then
-    toggleterm.exec(M.mvnw .. ' ' .. goals_with_flags, 0, 10, dir)
+    toggleterm.exec(M.mvnw .. ' ' .. goals, 0, 10, dir)
   elseif project_root and vim.loop.fs_stat(M.join(project_root, 'mvnw')) then
-    toggleterm.exec(M.join(project_root, M.mvnw .. ' ' .. goals_with_flags), 0, 10, dir)
+    toggleterm.exec(M.join(project_root, M.mvnw .. ' ' .. goals), 0, 10, dir)
   else
-    toggleterm.exec("mvn " .. goals_with_flags, 0, 10, dir)
+    toggleterm.exec("mvn " .. goals, 0, 10, dir)
   end
 end
 
@@ -265,15 +288,151 @@ function M.print_module_name()
   print(M.get_module_name())
 end
 
+--
+-- Toogle
+--
+
+function M.toggle_clean()
+  local m = vim.g.maven
+  m.clean = not m.clean
+  vim.g.maven = m
+  project.save_project_settings(vim.g.maven, 'maven')
+end
+
+function M.toggle_skip_tests()
+  local m = vim.g.maven
+  m.skip_tests = not m.skip_tests
+  vim.g.maven = m
+  project.save_project_settings(vim.g.maven, 'maven')
+end
+
+function M.toggle_errors()
+  local m = vim.g.maven
+  m.errors = not m.errors
+  vim.g.maven = m
+  project.save_project_settings(vim.g.maven, 'maven')
+end
+
+function M.toggle_offline()
+  local m = vim.g.maven
+  m.offline = not m.offline
+  vim.g.maven = m
+  project.save_project_settings(vim.g.maven, 'maven')
+end
+
 -- define vim command to print the fully qualified class name of the current buffer
 vim.cmd('command! JavaFQCN lua require("config.maven").print_fqcn()')
 vim.cmd('command! JavaClass lua require("config.maven").print_class_name()')
 vim.cmd('command! JavaMethod lua require("config.maven").print_method_name()')
 vim.cmd('command! MavenModuleName lua require("config.maven").print_module_name()')
-vim.cmd('command! MavenCleanInstall lua require("config.maven").build("clean install")')
-vim.cmd('command! MavenModuleInstall lua require("config.maven").build("clean install", "<current>")')
-vim.cmd('command! MavenModuleResumeFrom lua require("config.maven").build("clean install", "<current>", true)')
-vim.cmd('command! MavenModuleAlsoMake lua require("config.maven").build("clean install", "<current>", false, true)')
 vim.cmd('command! MavenSetProfile lua require("config.maven").select_profile()')
+
+vim.cmd('command! MavenProjectClean lua require("config.maven").build("clean")')
+vim.cmd('command! MavenProjectPackage lua require("config.maven").build("package")')
+vim.cmd('command! MavenProjectInstall lua require("config.maven").build("install")')
+
+vim.cmd('command! MavenModuleClean lua require("config.maven").build("clean", "<current>")')
+vim.cmd('command! MavenModulePackage lua require("config.maven").build("package", "<current>")')
+vim.cmd('command! MavenModuleInstall lua require("config.maven").build("install", "<current>")')
+vim.cmd('command! MavenModuleAlsoMake lua require("config.maven").build("clean install", "<current>", false, true)')
+vim.cmd('command! MavenModuleResumeFrom lua require("config.maven").build("clean install", "<current>", true)')
+
+vim.cmd('command! MavenToggleClean lua require("config.maven").toggle_clean()')
+vim.cmd('command! MavenToggleSkipTests lua require("config.maven").toggle_skip_tests()')
+vim.cmd('command! MavenToggleErrors lua require("config.maven").toggle_errors()')
+vim.cmd('command! MavenToggleOffline lua require("config.maven").toggle_offline()')
+
+
+local is_hydra_installed, Hydra = pcall(require, 'hydra')
+if is_hydra_installed then
+
+  local cmd = require('hydra.keymap-util').cmd
+  local maven_hint = [[
+        Project^              ^Module^                 ^File^                             ^Execute^                    ^Toggle^ 
+        ?P? 
+    --------------------------------------------------------------------------------------------------------------------------------------   
+    _pc_: clean            _mc_: clean              _fr_: run                          _h_: from history            _tc_: [%{tc}] clean
+    _pp_: package          _mp_: package          _fstc_: surefire test                _s_: from project settings   _tt_: [%{tt}] skip tests
+    _pi_: install          _mi_: install          _fftc_: failsafe test                _v_: version set             _te_: [%{te}] errors 
+    _po_: edit pom         _mo_: edit pom         _fstm_: surefire test method                                    ^^_to_: [%{to}] offline
+                        ^^_mrf_: resume from      _fftm_: failsafe test method                                    ^^_tp_: profiles [%{tp}]
+                        ^^_mai_: also install
+   _pd_: debug             _md_: debug              _fd_: debug file
+  _psd_: surfire debug    _msd_: surefire debug   _fsdc_: debug surefire test class
+  _pfd_: failsafe debug   _mfd_: failsafe debug   _ffdc_: debug failsafe test class
+                                              ^^^^_fsdm_: debug surefire test method
+                                              ^^^^_ffdm_: debug failsafe test method
+  [_q_]: quit
+        ]]
+  Hydra({
+    name = 'Maven',
+    hint = maven_hint,
+    config = {
+      buffer = bufnr,
+      color = 'red',
+      invoke_on_body = true,
+      hint = {
+        border = 'rounded',
+        funcs = {
+          tc = function() return vim.g.maven.clean and 'x' or ' ' end,
+          tt = function() return vim.g.maven.skip_tests and 'x' or ' ' end,
+          te = function() return vim.g.maven.errors and 'x' or ' ' end,
+          to = function() return vim.g.maven.offline and 'x' or ' ' end,
+          tp = function() return vim.g.maven.profile or 'default' end,
+        }
+      },
+    },
+    mode = {'n','x'},
+    body = '<leader>tm',
+    heads = {
+      { 'pc', cmd 'MavenProjectClean', { exit = true, nowait = true, desc = 'exit' } },
+      { 'pp', cmd 'MavenProjectPackage', { exit = true, nowait = true, desc = 'exit' } },
+      { 'pi', cmd 'MavenProjectInstall', { exit = true, nowait = true, desc = 'exit' } },
+      { 'po', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'pd', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'psd', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'pfd', nil, { exit = true, nowait = true, desc = 'exit' } },
+
+      { 'mc', cmd 'MavenModuleClean', { exit = true, nowait = true, desc = 'exit' } },
+      { 'mp', cmd 'MavenModulePackage', { exit = true, nowait = true, desc = 'exit' } },
+      { 'mi', cmd 'MavenModuleInstall', { exit = true, nowait = true, desc = 'exit' } },
+      { 'mo', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'mrf', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'mai', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'md', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'msd', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'mfd', nil, { exit = true, nowait = true, desc = 'exit' } },
+
+
+      { 'fr', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fstc', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fftc', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fftm', nil, { exit = true, nowait = true, desc = 'exit' } },
+
+      { 'fd', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fsdc', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fsdm', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'ffdc', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'ffdm', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fstm', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fftm', nil, { exit = true, nowait = true, desc = 'exit' } },
+
+
+      { 'h', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 's', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'v', nil, { exit = true, nowait = true, desc = 'exit' } },
+
+
+      { 'tt', cmd 'MavenToggleSkipTests', { exit = false, nowait = true, desc = 'toggle skip testes' } },
+      { 'tc', cmd 'MavenToggleClean', { exit = false, nowait = true, desc = 'toggle clean' } },
+      { 'te', cmd 'MavenToggleErrors', { exit = false, nowait = true, desc = 'toggle errors' } },
+      { 'to', cmd 'MavenToggleOffline', { exit = false, nowait = true, desc = 'toggle offline' } },
+      { 'tp', cmd 'MavenSetProfile', { exit = true, nowait = true, desc = 'select profie' } },
+
+      { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
+    }
+  })
+end
+
 
 return M;
