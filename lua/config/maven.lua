@@ -348,21 +348,25 @@ if is_hydra_installed then
 
   local cmd = require('hydra.keymap-util').cmd
   local maven_hint = [[
-        Project^              ^Module^                 ^File^                             ^Execute^                    ^Toggle^ 
+     aven
+    ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
+       Project^             ^Module^               ^File^                            ^Execute^                   ^Toggle^ 
         ?P? 
-    --------------------------------------------------------------------------------------------------------------------------------------   
-    _pc_: clean            _mc_: clean              _fr_: run                          _h_: from history            _tc_: [%{tc}] clean
-    _pp_: package          _mp_: package          _fstc_: surefire test                _s_: from project settings   _tt_: [%{tt}] skip tests
-    _pi_: install          _mi_: install          _fftc_: failsafe test                _v_: version set             _te_: [%{te}] errors 
-    _po_: edit pom         _mo_: edit pom         _fstm_: surefire test method                                    ^^_to_: [%{to}] offline
-                        ^^_mrf_: resume from      _fftm_: failsafe test method                                    ^^_tp_: profiles [%{tp}]
+    ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
+    _pc_: clean            _mc_: clean              _fr_: run                          _h_: from history            _tc_:  [%{tc}] clean
+    _pp_: package          _mp_: package          _fstc_: surefire test                _s_: from project settings   _tt_:  [%{tt}] skip tests
+    _pi_: install          _mi_: install          _fftc_: failsafe test                _v_: version set             _te_:  [%{te}] errors 
+    _po_: edit pom         _mo_: edit pom         _fstm_: surefire test method                                    ^^_to_:  [%{to}] offline
+                        ^^_mrf_: resume from      _fftm_: failsafe test method                                    ^^_tp_:  profiles [ %{tp} ]
                         ^^_mai_: also install
+    
+   ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
    _pd_: debug             _md_: debug              _fd_: debug file
   _psd_: surfire debug    _msd_: surefire debug   _fsdc_: debug surefire test class
   _pfd_: failsafe debug   _mfd_: failsafe debug   _ffdc_: debug failsafe test class
                                               ^^^^_fsdm_: debug surefire test method
                                               ^^^^_ffdm_: debug failsafe test method
-  [_q_]: quit
+  [_q_]: 
         ]]
   Hydra({
     name = 'Maven',
@@ -374,10 +378,10 @@ if is_hydra_installed then
       hint = {
         border = 'rounded',
         funcs = {
-          tc = function() return vim.g.maven.clean and 'x' or ' ' end,
-          tt = function() return vim.g.maven.skip_tests and 'x' or ' ' end,
-          te = function() return vim.g.maven.errors and 'x' or ' ' end,
-          to = function() return vim.g.maven.offline and 'x' or ' ' end,
+          tc = function() return vim.g.maven.clean and '  ' or '   ' end,
+          tt = function() return vim.g.maven.skip_tests and '  ' or '   ' end,
+          te = function() return vim.g.maven.errors and '  ' or '   ' end,
+          to = function() return vim.g.maven.offline and '  ' or '   ' end,
           tp = function() return vim.g.maven.profile or 'default' end,
         }
       },
