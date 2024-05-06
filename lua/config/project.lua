@@ -77,6 +77,7 @@ function M.save_project_settings(settings, name)
   local settings_str = "return {\n"
   for key, value in pairs(settings) do
     settings_str = settings_str .. string.format("    %s = %q,\n", key, value)
+    settings_str = settings_str:gsub("\"true\"", "true"):gsub("\"false\"", "false")
   end
   settings_str = settings_str .. "}\n"
 
