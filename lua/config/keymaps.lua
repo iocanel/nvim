@@ -15,11 +15,13 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 --
 -- [[ Open ]]
 --
-vim.keymap.set('n', '<leader>of', "<cmd>Telescope find_files<cr>", { desc = 'open files' })
-vim.keymap.set('n', '<leader><space>', "<cmd>Telescope find_files<cr>", { desc = 'open files' })
-vim.keymap.set('n', '<leader>ob', "<cmd>Telescope buffers<cr>", { desc = 'open buffer' })
-vim.keymap.set('n', '<leader>or', "<cmd>Telescope repo<cr>", { desc = 'open repository' })
-vim.keymap.set('n', '<leader>oR', "<cmd>Telescope oldfiles<cr>", { desc = 'open recent' })
+local telescope = require('telescope.builtin')
+local themes = require('telescope.themes')
+vim.keymap.set('n', '<leader>of', function() telescope.find_files(themes.get_ivy()) end, { desc = 'open files' })
+vim.keymap.set('n', '<leader><space>', function() telescope.find_files(themes.get_ivy()) end, { desc = 'open files' })
+vim.keymap.set('n', '<leader>ob', function() telescope.buffers(themes.get_ivy()) end, { desc = 'open buffer' })
+vim.keymap.set('n', '<leader>or', function() telescope.repo(themes.get_ivy()) end, { desc = 'open repository' })
+vim.keymap.set('n', '<leader>oR', function() telescope.repo(themes.get_ivy()) end, { desc = 'open recent' })
 -- Zoxide
 vim.keymap.set('n', '<leader>od', "<cmd>Telescope zoxide list<cr>", { desc = 'open directory' })
 -- ToggleTerm
@@ -164,7 +166,7 @@ function setup_lsp_bindings()
   vim.keymap.set('n', '<leader>lca', vim.lsp.buf.code_action, { desc = 'code action'})
 
   vim.keymap.set('n', '<leader>lgd', vim.lsp.buf.definition, { desc = 'goto definition'})
-  vim.keymap.set('n', '<leader>lgr', require('telescope.builtin').lsp_references, { desc = 'goto references'})
+  vim.keymap.set('n', '<leader>lgr', function()telescope.lsp_references(themes.get_ivy()) end, { desc = 'goto references'})
   vim.keymap.set('n', '<leader>lgi', vim.lsp.buf.implementation, { desc = 'goto implementation'})
   vim.keymap.set('n', '<leader>ltd', vim.lsp.buf.type_definition, { desc = 'type definition'})
   vim.keymap.set('n', '<leader>lsd', require('telescope.builtin').lsp_document_symbols, { desc = 'document symbols'})

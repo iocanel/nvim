@@ -40,17 +40,21 @@ end
 -- loads project settings from a file in the .nvim directory
 -- name is the name of the lua file to load from .nvim/<name>.lua
 --
-function M.load_project_settings(name)
-  local project_dir = Path:new(M.find_root() .. '/.nvim')
-  local file_path = project_dir:joinpath(name .. '.lua')
-  if project_dir:exists() then
+function M.load_project_settings(name, default_settings)
+  local project_dir = M.find_root()
+  if project_dir == nil then
+    return default_settings
+  end
+  local settings_dir = Path:new(project_dir .. '/.nvim')
+  if settings_dir:exists() then
+    local file_path = settings_dir:joinpath(name .. '.lua')
     if file_path:exists() then
       local settings = dofile(file_path:absolute())
       return settings
     else
     end
   end
-  return nil
+  return default_settings
 end
 
 --
