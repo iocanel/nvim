@@ -1,7 +1,7 @@
 return {
   -- Telescope
   {
-    'nvim-telescope/telescope.nvim',
+    'nvim-telescope/telescope.nvim', 
     tag = '0.1.4',
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = {
@@ -14,39 +14,6 @@ return {
         },
       }
     },
-    config = function()
-      -- Importing Telescope
-      local telescope = require('telescope')
-
-      -- Telescope setup
-      telescope.setup {
-          defaults = {
-              path_display = {"truncate"},
-
-              -- Removing borders
-              -- border = true,
-              -- borderchars = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-
-              -- Setting the layout strategy to bottom_pane
-              layout_strategy = 'bottom_pane',
-              layout_config = {
-                  preview_width = 0.65,  -- Width of the preview window as a percentage of the total screen width
-                  -- Height of the Telescope window as a percentage of the total screen
-                  height = 0.4,  -- Adjust the height as necessary
-                  -- Width of the Telescope window as a percentage of the total screen
-                  width = 0.9,  -- Adjust the width as necessary
-                  -- Adjust these values if you need more control over the positioning
-                  prompt_position = "bottom",
-              },
-          },
-          pickers = {
-              -- Configuration for specific pickers can be customized here
-          },
-          extensions = {
-              -- Extension specific configurations go here
-          },
-      }
-    end,
     init = function()
     end
   },
