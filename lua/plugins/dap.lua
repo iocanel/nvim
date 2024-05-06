@@ -30,6 +30,11 @@ return {
 
       function dapui.bp_mouse_toggle()
         local buf = vim.api.nvim_get_current_buf()
+        local buftype = vim.api.nvim_buf_get_option(buf, 'buftype')
+        local is_file = buftype == ''
+        if not is_file then
+          return
+        end
         local row, col = table.unpack(vim.api.nvim_win_get_cursor(0))
         local line = vim.api.nvim_buf_get_lines(buf, row-1, row, false)[1]
         if col == 0 and line ~= "" then
