@@ -3,17 +3,18 @@ local is_windows = vim.loop.os_uname().version:match('Windows')
 
 local M = {
   sep = is_windows and '\\' or '/',
-  mvnw = is_windows and 'mvnw.cmd' or './mvnw'
+  mvnw = is_windows and 'mvnw.cmd' or './mvnw',
+  default_settings = {
+    profile = nil,
+    clean = false,
+    skip_tests = false,
+    errors = false,
+    offline = false,
+  },
+  settings = nil;
 };
 
-vim.g.maven = vim.g.maven or project.load_project_settings('maven') or {
-  profile = nil,
-  clean = false,
-  skip_tests = false,
-  errors = false,
-  offline = false,
-};
-
+M.settings = project.load_project_settings('maven', M.default_settings)
 --
 -- quote the expression for use in gsub
 --
@@ -29,6 +30,7 @@ function M.join(...)
   return result
 end
 
+
 --
 -- get the module root directory using pom.xml
 --
@@ -39,10 +41,13 @@ end
 --
 -- get the module name / artifact id from the module pom.xml
 --
-function M.get_module_name()
-  local root = M.find_module_root()
+function M.get_module_name(root)
+  root = root or M.find_module_root()
   local pom = M.join(root, 'pom.xml')
   local f = io.open(pom, 'r')
+  if f == nil then
+    return nil
+  end
   local content = f:read('*a')
   f:close()
 
@@ -55,17 +60,21 @@ function M.get_module_name()
 end
 
 --
+-- get the project name
+--
+function M.get_project_name()
+  local root = project.find_root()
+  return M.get_module_name(root)
+end
+
+--
 -- Run maven goals in the specified directory
 --
 function M.build(goals, module, resume, also_make, dir)
   goals = goals or "install"
   local project_root = project.find_root()
   dir = dir or project_root or M.find_module_root()
-
-  local loaded_maven = project.load_project_settings('maven')
-  if loaded_maven then
-    vim.g.maven = loaded_maven
-  end
+  M.settings = project.load_project_settings('maven', M.default_settings)
 
   -- if user explicitly requested the <current> module, then replace it with the actual module name
   if module == "<current>" then
@@ -73,22 +82,22 @@ function M.build(goals, module, resume, also_make, dir)
   end
 
   -- handle clean flag
-  if vim.g.maven.clean and goals ~= "clean" then
+  if M.settings.clean and goals ~= "clean" then
     goals = "clean " .. goals
   end
 
   -- handle skip tests flag
-  if vim.g.maven.skip_tests and not goals:find("test") then
+  if M.settings.skip_tests and not goals:find("test") then
     goals = goals .. " -DskipTests"
   end
 
   -- handle errors flag
-  if vim.g.maven.errors then
+  if M.settings.errors then
     goals = goals .. " -e"
   end
 
   -- handle offline flag
-  if vim.g.maven.offline then
+  if M.settings.offline then
     goals = goals .. " -o"
   end
 
@@ -102,8 +111,8 @@ function M.build(goals, module, resume, also_make, dir)
     goals = "-am " .. goals
   end
 
-  if vim.g.maven.profile then
-    goals = "-P" .. vim.g.maven.profile .. " " .. goals
+  if M.settings.profile then
+    goals = "-P" .. M.settings.profile .. " " .. goals
   end
 
   if not dir or dir == "" then
@@ -251,10 +260,10 @@ function M.select_profile()
       map('i', '<CR>', function()
         local selection = actions_state.get_selected_entry()
         -- Do something with the selected profile
-        local m = vim.g.maven
+        local m = M.settings
         m.profile = selection.value
-        vim.g.maven = m
-        project.save_project_settings(vim.g.maven, 'maven')
+        M.settings = m
+        project.save_project_settings(M.settings, 'maven')
         vim.api.nvim_buf_delete(prompt_bufnr, {force = true})
       end)
 
@@ -288,36 +297,98 @@ function M.print_module_name()
   print(M.get_module_name())
 end
 
+
+--
+-- Test
+--
+
+function M.surefire_test_class()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  M.build("test -Dtest=" .. class_name, module)
+end
+
+function M.surefire_debug_class()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  M.build("test -Dtest=" .. class_name .. " -Dmaven.surefire.debug", module)
+  vim.cmd('JavaDebugAttachRemote')
+end
+
+function M.surefire_test_method()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  local method_name = M.get_method_name_at_point()
+  M.build("test -Dtest=" .. class_name .. '#' .. method_name, module)
+end
+
+function M.surefire_debug_method()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  local method_name = M.get_method_name_at_point()
+  M.build("test -Dtest=" .. class_name .. '#' .. method_name .. " -Dmaven.surefire.debug", module)
+  vim.cmd('JavaDebugAttachRemote')
+end
+
+function M.failsafe_test_class()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  M.build("test -Dtest=" .. class_name, module)
+end
+
+function M.failsafe_debug_class()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  M.build("test -Dtest=" .. class_name .. " -Dmaven.failsafe.debug", module)
+  vim.cmd('JavaDebugAttachRemote')
+end
+
+function M.failsafe_test_method()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  local method_name = M.get_method_name_at_point()
+  M.build("test -Dtest=" .. class_name .. '#' .. method_name, module)
+end
+
+function M.failsafe_debug_method()
+  local module = M.get_module_name()
+  local class_name = M.get_class_name_at_point()
+  local method_name = M.get_method_name_at_point()
+  M.build("test -Dtest=" .. class_name .. '#' .. method_name .. " -Dmaven.failsafe.debug", module)
+  vim.cmd('JavaDebugAttachRemote')
+end
+
+
 --
 -- Toogle
 --
 
 function M.toggle_clean()
-  local m = vim.g.maven
+  local m = M.settings
   m.clean = not m.clean
-  vim.g.maven = m
-  project.save_project_settings(vim.g.maven, 'maven')
+  M.settings = m
+  project.save_project_settings(M.settings, 'maven')
 end
 
 function M.toggle_skip_tests()
-  local m = vim.g.maven
+  local m = M.settings
   m.skip_tests = not m.skip_tests
-  vim.g.maven = m
-  project.save_project_settings(vim.g.maven, 'maven')
+  M.settings = m
+  project.save_project_settings(M.settings, 'maven')
 end
 
 function M.toggle_errors()
-  local m = vim.g.maven
+  local m = M.settings
   m.errors = not m.errors
-  vim.g.maven = m
-  project.save_project_settings(vim.g.maven, 'maven')
+  M.settings = m
+  project.save_project_settings(M.settings, 'maven')
 end
 
 function M.toggle_offline()
-  local m = vim.g.maven
+  local m = M.settings
   m.offline = not m.offline
-  vim.g.maven = m
-  project.save_project_settings(vim.g.maven, 'maven')
+  M.settings = m
+  project.save_project_settings(M.settings, 'maven')
 end
 
 -- define vim command to print the fully qualified class name of the current buffer
@@ -337,6 +408,16 @@ vim.cmd('command! MavenModuleInstall lua require("config.maven").build("install"
 vim.cmd('command! MavenModuleAlsoMake lua require("config.maven").build("clean install", "<current>", false, true)')
 vim.cmd('command! MavenModuleResumeFrom lua require("config.maven").build("clean install", "<current>", true)')
 
+vim.cmd('command! MavenSureFireTestClass lua require("config.maven").surefire_test_class()')
+vim.cmd('command! MavenSureFireTestMethod lua require("config.maven").surefire_test_method()')
+vim.cmd('command! MavenSureFireDebugClass lua require("config.maven").surefire_debug_class()')
+vim.cmd('command! MavenSureFireDebugMethod lua require("config.maven").surefire_debug_method()')
+
+vim.cmd('command! MavenFailSafeTestClass lua require("config.maven").failsafe_test_class()')
+vim.cmd('command! MavenFailSafeTestMethod lua require("config.maven").failsafe_test_method()')
+vim.cmd('command! MavenFailSafeDebugClass lua require("config.maven").failsafe_debug_class()')
+vim.cmd('command! MavenFailSafeDebugMethod lua require("config.maven").failsafe_debug_method()')
+
 vim.cmd('command! MavenToggleClean lua require("config.maven").toggle_clean()')
 vim.cmd('command! MavenToggleSkipTests lua require("config.maven").toggle_skip_tests()')
 vim.cmd('command! MavenToggleErrors lua require("config.maven").toggle_errors()')
@@ -350,8 +431,8 @@ if is_hydra_installed then
   local maven_hint = [[
      aven
     ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
-       Project^             ^Module^               ^File^                            ^Execute^                   ^Toggle^ 
-        ?P? 
+       ^Project^             ^Module^               ^File^                            ^Execute^                   ^Toggle^ 
+        %{project}           
     ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
     _pc_: clean            _mc_: clean              _fr_: run                          _h_: from history            _tc_:  [%{tc}] clean
     _pp_: package          _mp_: package          _fstc_: surefire test                _s_: from project settings   _tt_:  [%{tt}] skip tests
@@ -375,14 +456,18 @@ if is_hydra_installed then
       buffer = bufnr,
       color = 'red',
       invoke_on_body = true,
+      on_enter = function()
+       M.settings = project.load_project_settings('maven', M.default_settings)
+      end,
       hint = {
         border = 'rounded',
         funcs = {
-          tc = function() return vim.g.maven.clean and '  ' or '   ' end,
-          tt = function() return vim.g.maven.skip_tests and '  ' or '   ' end,
-          te = function() return vim.g.maven.errors and '  ' or '   ' end,
-          to = function() return vim.g.maven.offline and '  ' or '   ' end,
-          tp = function() return vim.g.maven.profile or 'default' end,
+          project = function() return M.get_project_name() or 'not found' end,
+          tc = function() if M.settings.clean then return '  ' else return '   ' end end,
+          tt = function() if M.settings.skip_tests then return '  ' else return '   ' end end,
+          te = function() if M.settings.errors then return '  ' else return '   ' end end,
+          to = function() if M.settings.offline then return '  ' else return '   ' end end,
+          tp = function() return M.settings.profile or 'default' end,
         }
       },
     },
@@ -409,18 +494,16 @@ if is_hydra_installed then
 
 
       { 'fr', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'fstc', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'fftc', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'fftm', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'fstc', cmd 'MavenSureFireTestClass', { exit = true, nowait = true, desc = 'test class' } },
+      { 'fstm', cmd 'MavenSureFireTestMethod', { exit = true, nowait = true, desc = 'test method' } },
+      { 'fftc', cmd 'MavneFailSafeTestClass', { exit = true, nowait = true, desc = 'integration test class' } },
+      { 'fftm', cmd 'MavenFailSafeTestMethod', { exit = true, nowait = true, desc = 'integration test method' } },
 
       { 'fd', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'fsdc', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'fsdm', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'ffdc', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'ffdm', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'fstm', nil, { exit = true, nowait = true, desc = 'exit' } },
-      { 'fftm', nil, { exit = true, nowait = true, desc = 'exit' } },
-
+      { 'fsdc', cmd 'MavenSureFireDebugClass', { exit = true, nowait = true, desc = 'debug test class' } },
+      { 'fsdm', cmd 'MavenSureFireDebugMethod', { exit = true, nowait = true, desc = 'debug test method' } },
+      { 'ffdc', cmd 'MavneFailSafeDebugClass', { exit = true, nowait = true, desc = 'debug integration test class' } },
+      { 'ffdm', cmd 'MavenFailSafeDebugMethod', { exit = true, nowait = true, desc = 'debug integration test method' } },
 
       { 'h', nil, { exit = true, nowait = true, desc = 'exit' } },
       { 's', nil, { exit = true, nowait = true, desc = 'exit' } },
