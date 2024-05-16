@@ -39,10 +39,10 @@ return {
   },
   -- Telescope Repo
   {
-    'cljoly/telescope-repo.nvim', 
+    'cljoly/telescope-repo.nvim',
     dependencies = { 'nvim-telescope/telescope.nvim' },
     commit = '92598143f8c4cadb47f5aef3f7775932827df8f2',
-    config = function() 
+    config = function()
       local telescope = require('telescope')
       local repo_ext_installed, repo = pcall(telescope.load_extension, 'repo')
       if repo_ext_installed then

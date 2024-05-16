@@ -17,8 +17,8 @@ return {
       if is_hydra_installed then
         local git_hint = [[
         _n_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
-        _p_: prev hunk   _u_: undo last stage   _v_: preview hunk   _B_: blame show full 
-        ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
+        _p_: prev hunk   _r_: reset hunk        _v_: preview hunk   _B_: blame show full 
+        ^ ^              _u_: unstage hunk      ^ ^                 _/_: show base file
         ^
         ^ ^              _<Enter>_: Neogit              _q_: exit
         ]]
@@ -39,6 +39,7 @@ return {
             { 'n', "<cmd>Gitsigns next_hunk<cr>", { desc = 'next hunk', exit = false } },
             { 'p', "<cmd>Gitsigns prev_hunk<cr>", { desc = 'prev hunk', exit = false} },
             { 's', "<cmd>Gitsigns stage_hunk<cr>", { silent = true, desc = 'stage hunk' } },
+            { 'r', "<cmd>Gitsigns reset_hunk<cr>", { silent = true, desc = 'reset hunk' } },
             { 'u', "<cmd>Gitsigns undo_stage_hunk<cr>", { desc = 'undo last stage' } },
             { 'S', "<cmd>Gitsigns stage_buffer<cr>", { desc = 'stage buffer' } },
             { 'v', "<cmd>Gitsigns preview_hunk<cr>", { desc = 'preview hunk' } },

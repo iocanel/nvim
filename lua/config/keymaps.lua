@@ -20,8 +20,8 @@ local themes = require('telescope.themes')
 vim.keymap.set('n', '<leader>of', function() telescope.find_files(themes.get_ivy()) end, { desc = 'open files' })
 vim.keymap.set('n', '<leader><space>', function() telescope.find_files(themes.get_ivy()) end, { desc = 'open files' })
 vim.keymap.set('n', '<leader>ob', function() telescope.buffers(themes.get_ivy()) end, { desc = 'open buffer' })
-vim.keymap.set('n', '<leader>or', function() telescope.repo(themes.get_ivy()) end, { desc = 'open repository' })
-vim.keymap.set('n', '<leader>oR', function() telescope.repo(themes.get_ivy()) end, { desc = 'open recent' })
+vim.keymap.set('n', '<leader>or', function() telescope.oldfiles(themes.get_ivy()) end, { desc = 'open recent' })
+vim.keymap.set('n', '<leader>oR', '<cmd>Telescope Repo<cr>', { desc = 'open repository' })
 -- Zoxide
 vim.keymap.set('n', '<leader>od', "<cmd>Telescope zoxide list<cr>", { desc = 'open directory' })
 -- ToggleTerm
