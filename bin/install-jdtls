@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ECLIPSE_JDTLS_DIR=$HOME/.local/share/eclipse.jdt.ls
+ECLIPSE_JDTLS_DIR=$HOME/.local/share/nvim/mason/packages/jdtls
 
 #ECLIPSE_JDTLS_VERSION=1.26.0
 #ECLIPSE_JDTLS_URL=https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.26.0/jdt-language-server-1.26.0-202307271613.tar.gz
