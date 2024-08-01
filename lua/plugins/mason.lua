@@ -1,7 +1,7 @@
 return {
   {
     'williamboman/mason.nvim',
-    commit = 'fe9e34a9ab4d64321cdc3ecab4ea1809239bb73f',
+    commit = 'c43eeb5614a09dc17c03a7fb49de2e05de203924',
     opts = {
     }
   },
