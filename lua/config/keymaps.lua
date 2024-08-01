@@ -138,6 +138,16 @@ if hop_installed then
   vim.keymap.set('n', '<leader>hT', function() hop.hint_char1({ direction = directions.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 }) end, {remap=true})
 end
 
+
+
+--
+-- [[ Copilot ]]
+--
+vim.keymap.set('n', '<leader>cpc', '<cmd>CopilotChat<cr>', {desc = "copilot chat"})
+vim.keymap.set('n', '<leader>cpf', '<cmd>CopilotChatFix<cr>', {desc = "copilot fix"})
+vim.keymap.set('n', '<leader>cpe', '<cmd>CopilotChatFix<cr>', {desc = "copilot explain"})
+
+
 --
 -- [Codeium]
 --
