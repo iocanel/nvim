@@ -1,1 +1,1 @@
-theme-doom-one.lua
+theme-catppuccin-mocha.lua

@@ -1,1 +1,1 @@
-theme-catppuccin.lua
+theme-catppuccin-latte.lua
