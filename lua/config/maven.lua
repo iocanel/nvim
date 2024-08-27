@@ -60,6 +60,33 @@ function M.get_module_name(root)
 end
 
 --
+-- edit module pom
+--
+function M.edit_module_pom()
+  local root = M.find_module_root()
+  local pom = M.join(root, 'pom.xml')
+  vim.cmd('edit ' .. pom)
+end
+
+
+--
+-- get the project root directory (not module root)
+--
+function M.find_project_root()
+  -- find the project root directory
+  local root = project.find_root({'.git', '.nvim', '.mvnw'})
+end 
+
+--
+-- edit project pom
+--
+function M.edit_project_pom()
+  local root = M.find_project_root()
+  local pom = M.join(root, 'pom.xml')
+  vim.cmd('edit ' .. pom)
+end  
+
+--
 -- get the project name
 --
 function M.get_project_name()
@@ -401,12 +428,14 @@ vim.cmd('command! MavenSetProfile lua require("config.maven").select_profile()')
 vim.cmd('command! MavenProjectClean lua require("config.maven").build("clean")')
 vim.cmd('command! MavenProjectPackage lua require("config.maven").build("package")')
 vim.cmd('command! MavenProjectInstall lua require("config.maven").build("install")')
+vim.cmd('command! MavenProjectEditPom lua require("config.maven").edit_project_pom()')
 
 vim.cmd('command! MavenModuleClean lua require("config.maven").build("clean", "<current>")')
 vim.cmd('command! MavenModulePackage lua require("config.maven").build("package", "<current>")')
 vim.cmd('command! MavenModuleInstall lua require("config.maven").build("install", "<current>")')
 vim.cmd('command! MavenModuleAlsoMake lua require("config.maven").build("clean install", "<current>", false, true)')
 vim.cmd('command! MavenModuleResumeFrom lua require("config.maven").build("clean install", "<current>", true)')
+vim.cmd('command! MavenModuleEditPom lua require("config.maven").edit_module_pom()')
 
 vim.cmd('command! MavenSureFireTestClass lua require("config.maven").surefire_test_class()')
 vim.cmd('command! MavenSureFireTestMethod lua require("config.maven").surefire_test_method()')
@@ -477,7 +506,7 @@ if is_hydra_installed then
       { 'pc', cmd 'MavenProjectClean', { exit = true, nowait = true, desc = 'exit' } },
       { 'pp', cmd 'MavenProjectPackage', { exit = true, nowait = true, desc = 'exit' } },
       { 'pi', cmd 'MavenProjectInstall', { exit = true, nowait = true, desc = 'exit' } },
-      { 'po', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'po', cmd 'MavenProjectEditPom', { exit = true, nowait = true, desc = 'exit' } },
       { 'pd', nil, { exit = true, nowait = true, desc = 'exit' } },
       { 'psd', nil, { exit = true, nowait = true, desc = 'exit' } },
       { 'pfd', nil, { exit = true, nowait = true, desc = 'exit' } },
@@ -485,7 +514,7 @@ if is_hydra_installed then
       { 'mc', cmd 'MavenModuleClean', { exit = true, nowait = true, desc = 'exit' } },
       { 'mp', cmd 'MavenModulePackage', { exit = true, nowait = true, desc = 'exit' } },
       { 'mi', cmd 'MavenModuleInstall', { exit = true, nowait = true, desc = 'exit' } },
-      { 'mo', nil, { exit = true, nowait = true, desc = 'exit' } },
+      { 'mo', cmd 'MavenModuleEditPom', { exit = true, nowait = true, desc = 'exit' } },
       { 'mrf', nil, { exit = true, nowait = true, desc = 'exit' } },
       { 'mai', nil, { exit = true, nowait = true, desc = 'exit' } },
       { 'md', nil, { exit = true, nowait = true, desc = 'exit' } },
