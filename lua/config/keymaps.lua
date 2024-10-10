@@ -110,11 +110,12 @@ vim.keymap.set('n', '<leader>da', dap_java.attach_to_remote, {desc = "debug remo
 vim.keymap.set('n', '<leader>di', "<cmd>DapStepIn<cr>", {desc = "dap step in"})
 vim.keymap.set('n', '<leader>do', "<cmd>DapStepOver<cr>", {desc = "dap step over"})
 vim.keymap.set('n', '<leader>dO', "<cmd>DapStepOut<cr>", {desc = "dap step out"})
+vim.keymap.set('n', '<leader>dc', "<cmd>DapContinue<cr>", {desc = "dap continue"})
 vim.keymap.set('n', '<leader>db', "<cmd>DapToggleBreakpoint<cr>", {desc = "dap toggle breakpoint"})
 vim.keymap.set('n', '<leader>dr', "<cmd>DapToggleRepl<cr>", {desc = "dap toggle repl"})
-vim.keymap.set('n', '<leader>dtt', function()dapui.toggle('tray')end, {desc = "dap ui toggle"})
-vim.keymap.set('n', '<leader>dts', function()dapui.toggle('sidebar')end, {desc = "dap ui toggle"})
-vim.keymap.set('n', '<leader>du', dapui.toggle, {desc = "dap ui toggle"})
+vim.keymap.set('n', '<leader>dut', function()dapui.toggle('tray')end, {desc = "dap ui toggle"})
+vim.keymap.set('n', '<leader>dus', function()dapui.toggle('sidebar')end, {desc = "dap ui toggle"})
+vim.keymap.set('n', '<leader>dui', dapui.toggle, {desc = "dap ui toggle"})
 
 --
 -- [[ Diagnostic keymaps ]]
