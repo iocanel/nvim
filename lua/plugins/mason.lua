@@ -1,7 +1,7 @@
 return {
   {
     'williamboman/mason.nvim',
-    commit = 'c43eeb5614a09dc17c03a7fb49de2e05de203924',
+    commit = 'e2f7f9044ec30067bc11800a9e266664b88cda22',
     opts = {
     }
   },
@@ -10,7 +10,7 @@ return {
     dependencies = { 'williamboman/mason.nvim' },
     commit = 'e86a4c84ff35240639643ffed56ee1c4d55f538e',
     opts = {
-      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'pyright', 'intelephense', 'grammarly_languageserver' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'pyright', 'intelephense' },
       automatic_installation = true,
     },
     config = function()
@@ -57,7 +57,6 @@ return {
           };
         }
       }
-      lspconfig.grammarly_languageserver.setup {}
     end
   },
 }
