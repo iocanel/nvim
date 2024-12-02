@@ -48,5 +48,14 @@ return {
         desc = "CopilotChat - Reset chat history and clear buffer",
       }
     },
+    init = function ()
+      vim.api.nvim_create_autocmd("FileType", {
+          pattern = "copilot-chat", -- Replace with the actual filetype or buffer type for Copilot chat
+          callback = function()
+              local opts = { buffer = true, silent = true,  expr = true, replace_keycodes = false }
+              vim.keymap.set('i', '<CR>', 'copilot#Accept()', opts)
+          end,
+      })
+    end,
   },
 }
