@@ -82,7 +82,20 @@ local config = {
           "org.mockito.Answers.*"
         }
       }
-    }
+    },
+    maven = {
+      downloadSources = true,
+      downloadJavaDoc = true
+    },
+    implementationsCodeLens = {
+      enabled = true
+    },
+    referencesCodeLens = {
+      enabled = true
+    },
+    references = {
+      includeDecompiledSources = true,
+    },
   },
   -- Language server `initializationOptions`
   -- You need to extend the `bundles` with paths to jar files
