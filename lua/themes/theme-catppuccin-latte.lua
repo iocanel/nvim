@@ -3,7 +3,7 @@ return {
     'catppuccin/nvim',
     name = 'cattpuccin',
     commit = '490078b1593c6609e6a50ad5001e7902ea601824',
-    init = function()
+    config = function()
       vim.cmd [[colorscheme catppuccin-latte]]
     end,
     priority = 1000,
