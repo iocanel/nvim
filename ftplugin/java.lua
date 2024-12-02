@@ -93,7 +93,7 @@ local config = {
   -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
   init_options = {
     bundles = {
-      vim.fn.glob("/home/iocanel/.local/shrae/eclipse.jdt.ls/bundles/com.microsoft.java.debug.plugin-*.jar", 1);
+      vim.fn.glob("/home/iocanel/.local/share/nvim/mason/share/java-debug-adapter/com.microsoft.java.debug.plugin-*.jar", 1);
     };
   },
 }
