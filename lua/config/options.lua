@@ -2,7 +2,7 @@
 -- See `:help vim.o`
 
 -- Make vim silent
-vim.o.silent = true
+--vim.o.silent = true -- no longer available after upgrading to latest version of neovim
 
 -- Set highlight on search
 vim.o.hlsearch = true
@@ -48,7 +48,7 @@ vim.cmd [[
 --
 
 -- Indentation
-vim.o.autoident = true
+--vim.o.autoident = true -- no longer available after upgrading to latest version of neovim
 vim.o.expandtab = true
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
