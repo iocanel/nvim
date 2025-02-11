@@ -1,8 +1,8 @@
 return {
   -- Telescope
   {
-    'nvim-telescope/telescope.nvim', 
-    tag = '0.1.4',
+    'nvim-telescope/telescope.nvim',
+    tag = '0.1.8',
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = {
       defaults = {
@@ -29,10 +29,10 @@ return {
   },
   -- Telescope Zoxide
   {
-    'jvgrootveld/telescope-zoxide', 
+    'jvgrootveld/telescope-zoxide',
     dependencies = { 'nvim-telescope/telescope.nvim' },
     commit = '856af0d83d2e167b5efa080567456c1578647abe',
-    config = function() 
+    config = function()
       local telescope = require('telescope')
        pcall(telescope.load_extension, 'zoxide')
     end
@@ -66,7 +66,7 @@ return {
   -- Telescope UI Select
   {
     'nvim-telescope/telescope-ui-select.nvim',
-    commit = '62ea5e58c7bbe191297b983a9e7e89420f581369',
+    commit = '6e51d7da30bd139a6950adf2a47fda6df9fa06d2',
     config = function()
       require("telescope").load_extension("ui-select")
     end
