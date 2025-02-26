@@ -192,7 +192,7 @@ function M.get_class_name_at_point()
     if node:type() == "class_declaration" then
       local class_name_node = node:field("name")[1]
       if class_name_node then
-        local class_name = vim.treesitter.query.get_node_text(class_name_node, 0)
+        local class_name = vim.treesitter.get_node_text(class_name_node, 0)
         return class_name
       end
     end
@@ -207,7 +207,7 @@ function M.get_class_name_at_point()
   for id, match, metadata in query:iter_matches(root, 0) do
     for _, node in pairs(match) do
       if node:type() == "identifier" then
-        local class_name = vim.treesitter.query.get_node_text(node, 0)
+        local class_name = vim.treesitter.get_node_text(node, 0)
         return class_name
       end
     end
