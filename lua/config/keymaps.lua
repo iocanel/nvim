@@ -35,6 +35,8 @@ vim.keymap.set('n', '<leader>.', "<cmd>Telescope resume<cr>", { desc = 'resume' 
 --
 vim.keymap.set('n', '<leader>tt', "<cmd>Neotree toggle<cr>", { desc = 'toggle tree' })
 vim.keymap.set('n', '<leader>tu', "<cmd>Telescope undo<cr>", { desc = 'toggle undo tree' })
+-- [[ Template ]]
+vim.keymap.set('n', '<leader>ts', "<cmd>TemplateSelect<cr>", { desc = 'template select' })
 
 --
 -- [[ Search ]]
