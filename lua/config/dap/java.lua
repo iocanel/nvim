@@ -10,6 +10,8 @@ function M:attach_to_remote(port)
   M.settings = project.load_project_settings('debug', M.default_settings)
   port = port or M.settings.debug_port or 5005
   local dap = require('dap')
+
+  local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t') -- Extract project name
   dap.configurations.java = {
     {
       type = 'java';
@@ -17,6 +19,7 @@ function M:attach_to_remote(port)
       name = "Attach to the process";
       hostName = 'localhost';
       port = port;
+      projectName = project_name;
     },
   }
   dap.continue()
