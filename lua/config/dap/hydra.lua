@@ -135,7 +135,14 @@ if is_hydra_installed then
          M.settings = project.load_project_settings('debug', M.default_settings)
         end,
         hint = {
-          border = 'rounded',
+          float_opts = {
+              -- row, col, height, width, relative, and anchor should not be
+              -- overridden
+              style = "minimal",
+              border = "rounded",
+              focusable = false,
+              noautocmd = true,
+          },
           funcs = {
             dp = function() return tonumber(M.settings.debug_port) end,
           },

@@ -30,7 +30,14 @@ return {
             color = 'red',
             invoke_on_body = true,
             hint = {
-              border = 'rounded'
+              float_opts = {
+                  -- row, col, height, width, relative, and anchor should not be
+                  -- overridden
+                  style = "minimal",
+                  border = "rounded",
+                  focusable = false,
+                  noautocmd = true,
+              },
             },
           },
           mode = {'n','x'},
