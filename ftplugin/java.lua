@@ -1,13 +1,74 @@
 -- See `:help vim.lsp.start_client` for an overview of the supported `config` options.
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-local workspace_dir = '/home/iocanel/.local/share/nvim/mason/packages/jdtls/data/' .. project_name
-local lombok_jar = vim.fn.glob('/home/iocanel/.m2/repository/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar')
+local workspace_dir = '/home/iocanel/.cache/nvim/jdtls/data/' .. project_name
+
+-- Find the latest Lombok JAR
+local lombok_jar_list = vim.fn.split(vim.fn.glob("/home/iocanel/.m2/repository/org/projectlombok/lombok/*/lombok-*.jar", 1), "\n")
+table.sort(lombok_jar_list)  -- Sort versions
+local lombok_jar = #lombok_jar_list > 0 and lombok_jar_list[#lombok_jar_list] or nil
+
+local launcher_jar = vim.fn.glob("/home/iocanel/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1)
+
 local config = {
   -- The command that starts the language server
-  -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
+--  -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
+--  
+--  /home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/jre/21.0.6-linux-x86_64/bin/java 
+  --  --add-modules=ALL-SYSTEM 
+  --  --add-opens java.base/java.util=ALL-UNNAMED 
+  --  --add-opens java.base/java.lang=ALL-UNNAMED 
+  --  --add-opens java.base/sun.nio.fs=ALL-UNNAMED 
+  --  -Declipse.application=org.eclipse.jdt.ls.core.id1 
+  --  -Dosgi.bundles.defaultStartLevel=4 
+  --  -Declipse.product=org.eclipse.jdt.ls.core.product 
+  --  -Djava.import.generatesMetadataFilesAtProjectRoot=false 
+  --  -DDetectVMInstallationsJob.disabled=true 
+  --  -Dfile.encoding=utf8 
+  --  -XX:+UseParallelGC 
+  --  -XX:GCTimeRatio=4 
+  --  -XX:AdaptiveSizePolicyWeight=90 
+  --  -Dsun.zip.disableMemoryMapping=true 
+  --  -Xmx1G 
+  --  -Xms100m 
+  --  -Xlog:disable 
+  --  -javaagent:/home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/lombok/lombok-1.18.36.jar 
+  --  -XX:+HeapDumpOnOutOfMemoryError 
+  --  -XX:HeapDumpPath=/home/iocanel/.config/Code/User/workspaceStorage/84e3648a41ba8f3364fb9bc34a2dfeaf/redhat.java 
+  --  -Daether.dependencyCollector.impl=bf 
+  --  -jar /home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/server/plugins/org.eclipse.equinox.launcher_1.6.1000.v20250131-0606.jar 
+  --  -configuration /home/iocanel/.config/Code/User/globalStorage/redhat.java/1.40.0/config_linux 
+  --  -data /home/iocanel/.config/Code/User/workspaceStorage/84e3648a41ba8f3364fb9bc34a2dfeaf/redhat.java/jdt_ws 
+  --  --pipe=/run/user/1000/lsp-20381af389549d3e8cff28c4e40f57c9.sock
   cmd = {
-       '/home/iocanel/.local/share/nvim/mason/bin/jdtls',
-       '-javaagent:' .. lombok_jar,
+    -- Using the script -- Disabled: I wanted project per workspace and custom jvm tuning
+    --     '/home/iocanel/.local/share/nvim/mason/bin/jdtls',
+    --     '-javaagent:' .. lombok_jar,
+    --
+    'java',
+    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+    '-Dosgi.bundles.defaultStartLevel=4',
+    '-Declipse.product=org.eclipse.jdt.ls.core.product',
+    '-Djava.import.generatesMetadataFilesAtProjectRoot=false',
+    '-DDetectVMInstallationsJob.disabled=true',
+    '-Dfile.encoding=utf8',
+    '-XX:+UseParallelGC',
+    '-XX:GCTimeRatio=4',
+    '-XX:AdaptiveSizePolicyWeight=90',
+    '-Dsun.zip.disableMemoryMapping=true',
+    '-Xmx1G',
+    '-Xms100m',
+    '-Xlog:disable',
+    '-javaagent:' .. lombok_jar,
+    '--add-modules=ALL-SYSTEM',
+    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+    '--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED',
+    -- 💀
+    '-jar', launcher_jar,
+    -- 💀
+    '-configuration', '/home/iocanel/.local/share/nvim/mason/packages/jdtls/config_linux',
+    -- See `data directory configuration` section in the README
+    '-data', workspace_dir,
   },
 
   -- 💀
@@ -33,7 +94,13 @@ local config = {
           "**/.metadata/**",
           "**/archetype-resources/**",
           "**/META-INF/maven/**"
-        }
+        },
+        -- ✅ Ensure java.util is ranked higher than Guava in auto-imports
+        preferredPackages = {
+          "java.util",
+          "java.util.concurrent",
+          "java.util.stream"
+        },
       },
       configuration = {
         updateBuildConfiguration = "automatic",
@@ -110,7 +177,30 @@ local config = {
     };
   },
 }
+
 require('jdtls').setup_dap({ hotcodereplace = 'auto' })
 -- This starts a new client & server,
 -- or attaches to an existing client & server depending on the `root_dir`.
 require('jdtls').start_or_attach(config)
+
+local project_config_updated = false
+
+-- Mark that JDTLS needs an update when saving pom.xml
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = { "pom.xml", "mvnw", "mvnw.cmd", ".mvn/**/*" },
+  callback = function()
+    project_config_updated = true
+  end
+})
+
+-- Perform JDTLS update when entering a Java buffer
+vim.api.nvim_create_autocmd("BufEnter", {
+  pattern = "*.java",
+  callback = function()
+    if project_config_updated then
+      project_config_updated = false
+      vim.cmd("JdtUpdateConfig")
+      vim.cmd("LspRestart")
+    end
+  end
+})
