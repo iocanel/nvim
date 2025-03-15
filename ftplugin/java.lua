@@ -64,6 +64,11 @@ local config = {
     '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
     '--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED',
     -- 💀
+    --
+    -- JFR
+    '-XX:+FlightRecorder',
+    '-XX:FlightRecorderOptions=stackdepth=128',
+    -- 💀
     '-jar', launcher_jar,
     -- 💀
     '-configuration', '/home/iocanel/.local/share/nvim/mason/packages/jdtls/config_linux',
