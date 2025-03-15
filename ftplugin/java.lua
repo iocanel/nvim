@@ -9,6 +9,21 @@ local lombok_jar = #lombok_jar_list > 0 and lombok_jar_list[#lombok_jar_list] or
 
 local launcher_jar = vim.fn.glob("/home/iocanel/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1)
 
+-- Function to find the latest installed Temurin JDK for a given version
+local function find_temurin_jdk(version)
+    local jdk_paths = vim.fn.split(vim.fn.glob("/nix/store/*-temurin-bin-" .. version .. "*/bin/java", 1), "\n")
+    table.sort(jdk_paths) -- Sort to get the latest version if multiple exist
+
+    if #jdk_paths > 0 then
+        return jdk_paths[#jdk_paths]:gsub("/bin/java", "") -- Extract JDK root path
+    end
+    return nil
+end
+
+-- Detect Temurin JDK 21 and 23 dynamically
+local jdk21_path = find_temurin_jdk("21")
+local jdk23_path = find_temurin_jdk("23")
+
 local config = {
   -- The command that starts the language server
 --  -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
@@ -44,7 +59,10 @@ local config = {
     --     '/home/iocanel/.local/share/nvim/mason/bin/jdtls',
     --     '-javaagent:' .. lombok_jar,
     --
-    'java',
+    jdk23_path .. '/bin/java',
+    -- 💀
+    '--enable-preview',
+    -- 💀
     '-Declipse.application=org.eclipse.jdt.ls.core.id1',
     '-Dosgi.bundles.defaultStartLevel=4',
     '-Declipse.product=org.eclipse.jdt.ls.core.product',
@@ -112,8 +130,8 @@ local config = {
         checkProjectSettingsExclusions = true,
         runtimes = {
           {
-            name = "JavaSE-17",
-            path = os.getenv("JAVA_HOME"),
+            name = "JavaSE-23",
+            path = jdk23_path,
             default = true
           },
         },
