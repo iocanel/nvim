@@ -235,3 +235,12 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
   end
 })
+
+-- Add new files to Lsp
+vim.api.nvim_create_autocmd("BufNewFile", {
+  pattern = "*.java",
+  callback = function()
+    vim.cmd("JdtUpdateConfig")
+    vim.cmd("LspRestart")
+  end
+})
