@@ -8,6 +8,9 @@ return {
      	condition = function(buf)
         local fn = vim.fn
         local utils = require("auto-save.utils.data")
+        if not utils.not_in(fn.bufname(buf), {"pom.xml"}) then
+          return false -- Disable autosave for pom.xml
+        end
         if
           fn.getbufvar(buf, "&modifiable") == 1 and
           utils.not_in(fn.getbufvar(buf, "&filetype"), {}) then
