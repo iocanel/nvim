@@ -155,6 +155,7 @@ local function open_jpa_entity(selected_entity)
     vim.cmd("edit " .. selected_entity.file)
 end
 
+
 local function generate_dto(selected_entity)
     local entity_file = selected_entity.file
     local class_name = selected_entity.class
@@ -167,7 +168,7 @@ local function generate_dto(selected_entity)
     local package_line = ""
     local entity_imports = {}
     local fields = {}
-    
+
     -- Scan file for package, imports, and fields
     for line in io.lines(entity_file) do
         -- Capture package
@@ -182,16 +183,17 @@ local function generate_dto(selected_entity)
             table.insert(entity_imports, import_stmt)
         end
 
-        -- Match private fields
+        -- Match private and public fields, unwrap Optional<T>
         local p_type, p_name = line:match("private%s+([%w<>%[%]_%.]+)%s+([%w_]+)%s*;")
-        -- Match public fields (Panache-style)
         local pub_type, pub_name = line:match("public%s+([%w<>%[%]_%.]+)%s+([%w_]+)%s*;")
 
         local field_type = p_type or pub_type
         local field_name = p_name or pub_name
 
+        -- Unwrap Optional<T> (convert "Optional<T>" to "T")
         if field_type and field_name then
-            table.insert(fields, { type = field_type, name = field_name })
+            local unwrapped_type = field_type:gsub("Optional<", ""):gsub(">", "")
+            table.insert(fields, { type = unwrapped_type, name = field_name })
         end
     end
 
@@ -201,7 +203,7 @@ local function generate_dto(selected_entity)
         return
     end
 
-    -- Identify required imports (only include imports related to the fields)
+    -- Identify required imports (only copy imports relevant to fields)
     local required_imports = {}
     for _, field in ipairs(fields) do
         for _, import_stmt in ipairs(entity_imports) do
@@ -213,6 +215,9 @@ local function generate_dto(selected_entity)
             end
         end
     end
+
+    -- Remove unnecessary Optional import
+    required_imports["java.util.Optional"] = nil
 
     -- Generate import statements
     local import_statements = ""
