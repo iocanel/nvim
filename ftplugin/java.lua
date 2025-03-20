@@ -59,7 +59,7 @@ local config = {
     --     '/home/iocanel/.local/share/nvim/mason/bin/jdtls',
     --     '-javaagent:' .. lombok_jar,
     --
-    jdk23_path .. '/bin/java',
+    'java',
     -- 💀
     '--enable-preview',
     -- 💀
@@ -112,6 +112,9 @@ local config = {
         maven = {
           enabled = true
         },
+        gradle = {
+          enabled = true
+        },
         exclusions = {
           "**/node_modules/**",
           "**/.metadata/**",
@@ -130,10 +133,15 @@ local config = {
         checkProjectSettingsExclusions = true,
         runtimes = {
           {
+            name = "JavaSE-21",
+            path = jdk21_path,
+          },
+          {
             name = "JavaSE-23",
             path = jdk23_path,
             default = true
           },
+
         },
       },
       project = {
