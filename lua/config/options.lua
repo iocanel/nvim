@@ -57,7 +57,7 @@ vim.o.softtabstop = 2
 -- Centralized logic to enable/disable spell checking based on file buffer type
 vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
   callback = function()
-    local file_types = { "markdown", "gitcommit", "text", "java", "go", "rust", "python" }
+    local file_types = { "asciidoc", "markdown", "org", "gitcommit", "text", "java", "go", "rust", "python" }
 
     -- Check if the buffer has an associated file and the file type matches
     if vim.fn.bufname('%') ~= '' and vim.tbl_contains(file_types, vim.bo.filetype) then
