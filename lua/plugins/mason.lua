@@ -10,7 +10,7 @@ return {
     dependencies = { 'williamboman/mason.nvim' },
     commit = '1a31f824b9cd5bc6f342fc29e9a53b60d74af245',
     opts = {
-      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'pyright', 'solidity', 'intelephense' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'pyright', 'solidity', 'intelephense', 'ltex' },
       automatic_installation = true,
     },
     config = function()
@@ -57,6 +57,24 @@ return {
           };
         }
       }
+      lspconfig.ltex.setup({
+        filetypes = { "markdown", "text", "asciidoc", "org" },
+        settings = {
+          ltex = {
+            language = "en-US",
+            additionalRules = {
+              enablePickyRules = true,
+              motherTongue = "en",
+            },
+            disabledRules = {
+              ["en-US"] = { "WHITESPACE_RULE" }
+            },
+            dictionary = {
+              ["en-US"] = {}, -- you can add custom words here
+            }
+          },
+        },
+      })
     end
   },
 }
