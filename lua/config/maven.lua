@@ -231,7 +231,7 @@ function M.get_method_name_at_point()
     if node:type() == "method_declaration" then
       local method_name_node = node:field("name")[1]
       if method_name_node then
-        local method_name = vim.treesitter.query.get_node_text(method_name_node, 0)
+        local method_name = vim.treesitter.get_node_text(method_name_node, 0)
         return method_name
       end
     end
