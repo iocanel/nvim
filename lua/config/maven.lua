@@ -11,7 +11,7 @@ local M = {
     errors = false,
     offline = false,
   },
-  settings = nil;
+  settings = nil
 };
 
 M.settings = project.load_project_settings('maven', M.default_settings)
@@ -74,8 +74,8 @@ end
 --
 function M.find_project_root()
   -- find the project root directory
-  local root = project.find_root({'.git', '.nvim', '.mvnw'})
-end 
+  return project.find_root({'.git', '.nvim', '.mvnw'})
+end
 
 --
 -- edit project pom
@@ -482,7 +482,6 @@ if is_hydra_installed then
     name = 'Maven',
     hint = maven_hint,
     config = {
-      buffer = bufnr,
       color = 'red',
       invoke_on_body = true,
       on_enter = function()
@@ -532,13 +531,13 @@ if is_hydra_installed then
       { 'fr', nil, { exit = true, nowait = true, desc = 'exit' } },
       { 'fstc', cmd 'MavenSureFireTestClass', { exit = true, nowait = true, desc = 'test class' } },
       { 'fstm', cmd 'MavenSureFireTestMethod', { exit = true, nowait = true, desc = 'test method' } },
-      { 'fftc', cmd 'MavneFailSafeTestClass', { exit = true, nowait = true, desc = 'integration test class' } },
+      { 'fftc', cmd 'MavenFailSafeTestClass', { exit = true, nowait = true, desc = 'integration test class' } },
       { 'fftm', cmd 'MavenFailSafeTestMethod', { exit = true, nowait = true, desc = 'integration test method' } },
 
       { 'fd', nil, { exit = true, nowait = true, desc = 'exit' } },
       { 'fsdc', cmd 'MavenSureFireDebugClass', { exit = true, nowait = true, desc = 'debug test class' } },
       { 'fsdm', cmd 'MavenSureFireDebugMethod', { exit = true, nowait = true, desc = 'debug test method' } },
-      { 'ffdc', cmd 'MavneFailSafeDebugClass', { exit = true, nowait = true, desc = 'debug integration test class' } },
+      { 'ffdc', cmd 'MavenFailSafeDebugClass', { exit = true, nowait = true, desc = 'debug integration test class' } },
       { 'ffdm', cmd 'MavenFailSafeDebugMethod', { exit = true, nowait = true, desc = 'debug integration test method' } },
 
       { 'h', nil, { exit = true, nowait = true, desc = 'exit' } },
