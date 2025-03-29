@@ -1,14 +1,14 @@
 return {
   {
     'williamboman/mason.nvim',
-    commit = 'e2f7f9044ec30067bc11800a9e266664b88cda22',
+    commit = 'fc98833b6da5de5a9c5b1446ac541577059555be',
     opts = {
     }
   },
   {
     'williamboman/mason-lspconfig.nvim',
     dependencies = { 'williamboman/mason.nvim' },
-    commit = 'e86a4c84ff35240639643ffed56ee1c4d55f538e',
+    commit = '1a31f824b9cd5bc6f342fc29e9a53b60d74af245',
     opts = {
       ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'pyright', 'solidity', 'intelephense' },
       automatic_installation = true,
