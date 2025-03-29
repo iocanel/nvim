@@ -24,7 +24,7 @@ return {
     end
   },
   {
-    'hrsh7th/cmp-nvim-lsp', 
+    'hrsh7th/cmp-nvim-lsp',
     commit = '44b16d11215dce86f253ce0c30949813c0a90765',
     dependencies = {
       'hrsh7th/nvim-cmp'
