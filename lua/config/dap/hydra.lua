@@ -56,7 +56,7 @@ M.select_debug_port = function()
             if port and port >= 1 and port <= 65535 then
               M.settings.debug_port = port
               vim.notify("Selected custom port: " .. port)
-              
+
               -- Save the selected port to project settings
               project.save_project_settings(M.settings, 'debug')
             else
@@ -66,7 +66,7 @@ M.select_debug_port = function()
         elseif port and port >= 1 and port <= 65535 then
           M.settings.debug_port = port
           vim.notify("Selected port: " .. port)
-          
+
           -- Save the selected port to project settings
           project.save_project_settings(M.settings, 'debug')
         else

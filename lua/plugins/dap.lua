@@ -4,16 +4,16 @@ return {
     "mfussenegger/nvim-dap",
     commit = "6ae8a14828b0f3bff1721a35a1dfd604b6a933bb",
     dependencies = {
+      "leoluz/nvim-dap-go",
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
     },
     init = function()
       -- Set breakpoint icons
       vim.fn.sign_define('DapBreakpoint', { text='', texthl='red', linehl='', numhl='' })
-      vim.fn.sign_define('DapStopped', { text='', texthl='green', linehl='', numhl= '' })
+      vim.fn.sign_define('DapStopped', { text='→', texthl='green', linehl='', numhl= '' })
       vim.fn.sign_define('DapBreakpointRejected', { text='', texthl='red', linehl='', numhl= '' })
 
-      
       -- Let's define the particular keymap here, instead of in keymaps.lua because I only want it to be active when dap is loaded.
       -- If we move it to keymaps.lua, it will possibly cause issues when dap is not yet full loaded (lsp initialized).
       vim.keymap.set('n', '<LeftMouse>', "<LeftMouse><cmd>lua require('dapui').bp_mouse_toggle()<cr>", {desc = "dap toggle breakpoint"})
@@ -119,6 +119,10 @@ return {
         if not is_file then
           return
         end
+        -- Fix issues with table.unpack falling back to the global unpack
+        if not table.unpack then
+          table.unpack = unpack
+        end
         local row, col = table.unpack(vim.api.nvim_win_get_cursor(0))
         local line = vim.api.nvim_buf_get_lines(buf, row-1, row, false)[1]
         if col == 0 and line ~= "" then
@@ -141,5 +145,30 @@ return {
       virt_lines = false,
       virt_text_win_col = nil,
     },
+  },
+  -- dap-python
+  {
+    -- https://github.com/mfussenegger/nvim-dap-python
+    'mfussenegger/nvim-dap-python',
+    ft = 'python',
+    dependencies = {
+      -- https://github.com/mfussenegger/nvim-dap
+      'mfussenegger/nvim-dap',
+    },
+    config = function ()
+      -- Update the path passed to setup to point to your system or virtual env python binary
+      require('dap-python').setup('python3')
+    end
+  }, 
+  -- dap-go
+  {
+    "leoluz/nvim-dap-go",
+    ft = "go",
+    dependencies = {
+      "mfussenegger/nvim-dap"
+    },
+    config = function()
+      require("dap-go").setup()
+    end
   }
 }

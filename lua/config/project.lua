@@ -1,23 +1,18 @@
 local Path = require('plenary.path')
 local is_windows = vim.loop.os_uname().version:match('Windows')
+local build_system = nil
 
 local M = {
   sep = is_windows and '\\' or '/',
 };
 
---
--- join pats (borrowed from jdtls)
---
+-- Join paths (borrowed from jdtls)
 function M.join(...)
   local result = table.concat(vim.tbl_flatten {...}, M.sep):gsub(M.sep .. '+', M.sep)
   return result
 end
 
---
---
--- get project root directory using .git
--- it's borrowed from jdtls
---
+-- Get project root directory using .git
 function M.find_root(markers)
   markers = markers or {'.git'}
   local bufname = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
@@ -35,11 +30,7 @@ function M.find_root(markers)
   end
 end
 
-
---
--- loads project settings from a file in the .nvim directory
--- name is the name of the lua file to load from .nvim/<name>.lua
---
+-- Loads project settings from a file in the .nvim directory
 function M.load_project_settings(name, default_settings)
   local project_dir = M.find_root()
   if project_dir == nil then
@@ -51,23 +42,17 @@ function M.load_project_settings(name, default_settings)
     if file_path:exists() then
       local settings = dofile(file_path:absolute())
       return settings
-    else
     end
   end
   return default_settings
 end
 
---
--- saves project settings to a file in the .nvim directory
--- settings is a Lua table
--- name is the name of the file
---
+-- Saves project settings to a file in the .nvim directory
 function M.save_project_settings(settings, name)
   local project_dir = Path:new(vim.fn.getcwd() .. '/.nvim')
 
   -- Ensure the .nvim directory exists
   if not project_dir:exists() then
-    -- Create the directory if it does not exist
     project_dir:mkdir()
   end
 
@@ -90,6 +75,26 @@ function M.save_project_settings(settings, name)
   else
     print("Error saving settings: " .. err)
   end
+end
+
+function M.set_build_system(b)
+  M.build_system = b
+end
+
+-- Delegate to build_system for project name
+function M.get_project_name()
+  if M.build_system == nil then
+    return require('config.maven').get_project_name()
+  end
+  return M.build_system.get_project_name()
+end
+
+-- Delegate to build_system for module name
+function M.get_module_name()
+  if M.build_system == nil then
+    return require('config.maven').get_module_name()
+  end
+  return M.build_system.get_project_name()
 end
 
 return M

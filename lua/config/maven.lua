@@ -338,6 +338,7 @@ end
 function M.surefire_debug_class()
   local module = M.get_module_name()
   local class_name = M.get_class_name_at_point()
+  project.set_build_system(M)
   M.build("test -Dtest=" .. class_name .. " -Dmaven.surefire.debug", module)
   vim.cmd('JavaDebugAttachRemote')
 end
@@ -353,6 +354,7 @@ function M.surefire_debug_method()
   local module = M.get_module_name()
   local class_name = M.get_class_name_at_point()
   local method_name = M.get_method_name_at_point()
+  project.set_build_system(M)
   M.build("test -Dtest=" .. class_name .. '#' .. method_name .. " -Dmaven.surefire.debug", module)
   vim.cmd('JavaDebugAttachRemote')
 end
@@ -366,6 +368,7 @@ end
 function M.failsafe_debug_class()
   local module = M.get_module_name()
   local class_name = M.get_class_name_at_point()
+  project.set_build_system(M)
   M.build("test -Dtest=" .. class_name .. " -Dmaven.failsafe.debug", module)
   vim.cmd('JavaDebugAttachRemote')
 end
@@ -378,9 +381,12 @@ function M.failsafe_test_method()
 end
 
 function M.failsafe_debug_method()
+
   local module = M.get_module_name()
   local class_name = M.get_class_name_at_point()
   local method_name = M.get_method_name_at_point()
+
+  project.set_build_system(M)
   M.build("test -Dtest=" .. class_name .. '#' .. method_name .. " -Dmaven.failsafe.debug", module)
   vim.cmd('JavaDebugAttachRemote')
 end

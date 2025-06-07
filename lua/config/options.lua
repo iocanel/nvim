@@ -89,3 +89,9 @@ vim.filetype.add({
     html = "html"
   }
 })
+-- golang
+vim.filetype.add({
+  extension = {
+    go = "go"
+  }
+})

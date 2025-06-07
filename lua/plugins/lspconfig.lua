@@ -1,7 +1,8 @@
 return {
   {
     'neovim/nvim-lspconfig',
-     commit = "0eecf453d33248e9d571ad26559f35175c37502d",
+--     commit = "0eecf453d33248e9d571ad26559f35175c37502d",
+     commit = "3ea99227e316c5028f57a4d86a1a7fd01dd876d0",
      dependencies = {
       -- Automatically install LSPs to stdpath for neovim
 --      'williamboman/mason.nvim',
@@ -21,6 +22,10 @@ return {
         client.server_capabilities.semanticTokensProvider = nil
       end,
     });
+    -- Fix LspInfo related errors
+    local util = require("lspconfig.util")
+    -- if util._trim is missing, alias it to the old name
+    util._trim = util._trim or util._trim_and_pad
     end
   },
   {

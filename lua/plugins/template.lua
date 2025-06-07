@@ -22,6 +22,24 @@ return {
       vim.cmd('autocmd BufNewFile *.html :Template index')
       vim.cmd('autocmd BufNewFile *.sol :Template main')
       vim.cmd('autocmd BufNewFile *.nix :Template main')
+      vim.cmd('autocmd BufNewFile *.vue :Template main')
+
+      vim.api.nvim_create_autocmd("BufNewFile", {
+        pattern = "*.go",
+        callback = function(args)
+          local fname = vim.fn.fnamemodify(args.file, ":t")
+          local template
+
+          if fname:match("_test%.go$") then
+            template = "main_test"
+          else
+            template = "main"
+          end
+
+          -- Run the template command if it exists
+          vim.cmd("silent! Template " .. template)
+        end,
+      })
 
       -- Function to select templates using Telescope
       local function select_template()

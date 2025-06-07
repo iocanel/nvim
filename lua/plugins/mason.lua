@@ -10,12 +10,14 @@ return {
     dependencies = { 'williamboman/mason.nvim' },
     commit = '1a31f824b9cd5bc6f342fc29e9a53b60d74af245',
     opts = {
-      ensure_installed = { 'html', 'cssls', 'jsonls', 'sumneko_lua', 'rust_analyzer', 'gopls', 'tsserver', 'pyright', 'solidity', 'intelephense', 'ltex' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'lua_ls', 'rust_analyzer', 'gopls', 'ts_ls', 'pyright', 'solidity', 'intelephense', 'ltex' },
       automatic_installation = true,
     },
     config = function()
       local lspconfig = require('lspconfig')
-      lspconfig.sumneko_lua.setup{
+      local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      lspconfig.lua_ls.setup{
+        capabilities = capabilities,
         settings = {
           Lua = {
             diagnostics = {
@@ -25,11 +27,13 @@ return {
           }
         }
       }
-      lspconfig.gopls.setup {}
-      lspconfig.pyright.setup {}
-      lspconfig.tsserver.setup {}
-      lspconfig.rust_analyzer.setup {}
+      lspconfig.gopls.setup { capabilities = capabilities }
+      lspconfig.pyright.setup { capabilities = capabilities }
+      lspconfig.html.setup { capabilities = capabilities }
+      lspconfig.ts_ls.setup { capabilities = capabilities }
+      lspconfig.rust_analyzer.setup { capabilities = capabilities }
       lspconfig.intelephense.setup {
+        capabilities = capabilities,
         settings = {
           intelephense = {
             stubs = {
