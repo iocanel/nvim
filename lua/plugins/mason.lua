@@ -10,7 +10,7 @@ return {
     dependencies = { 'williamboman/mason.nvim' },
     commit = '1a31f824b9cd5bc6f342fc29e9a53b60d74af245',
     opts = {
-      ensure_installed = { 'html', 'cssls', 'jsonls', 'lua_ls', 'rust_analyzer', 'gopls', 'ts_ls', 'pyright', 'solidity', 'intelephense', 'ltex' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'ts_ls', 'vue-langage-server', 'js-debug-adapter', 'lua_ls', 'rust_analyzer', 'gopls', 'ts_ls', 'pyright', 'solidity', 'intelephense', 'ltex' },
       automatic_installation = true,
     },
     config = function()
@@ -30,7 +30,66 @@ return {
       lspconfig.gopls.setup { capabilities = capabilities }
       lspconfig.pyright.setup { capabilities = capabilities }
       lspconfig.html.setup { capabilities = capabilities }
-      lspconfig.ts_ls.setup { capabilities = capabilities }
+      lspconfig.ts_ls.setup {
+        capabilities = capabilities,
+        filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact", "typescript.tsx", "vue" },
+        init_options = {
+          plugins = {
+            {
+              name = '@vue/typescript-plugin',
+              location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+              languages = { 'vue' }
+            }
+          }
+        },
+        settings = {
+          typescript = {
+            tsserver = {
+              useSyntaxServer = false,
+            },
+            inlayHints = {
+              includeInlayParameterNameHints = 'all',
+              includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+              includeInlayFunctionParameterTypeHints = true,
+              includeInlayVariableTypeHints = true,
+              includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
+            }
+          }
+        }
+      }
+      lspconfig.volar.setup {
+        capabilities = capabilities,
+        init_options = {
+          vue = {
+            hybridMode = false,
+          },
+        },
+        settings = {
+          typescript = {
+            inlayHints = {
+              enumMemberValues = {
+                enabled = true,
+              },
+              functionLikeReturnTypes = {
+                enabled = true,
+              },
+              propertyDeclarationTypes = {
+                enabled = true,
+              },
+              parameterTypes = {
+                enabled = true,
+                suppressWhenArgumentMatchesName = true,
+              },
+              variableTypes = {
+                enabled = true,
+              },
+            },
+          },
+        },
+      }
       lspconfig.rust_analyzer.setup { capabilities = capabilities }
       lspconfig.intelephense.setup {
         capabilities = capabilities,
