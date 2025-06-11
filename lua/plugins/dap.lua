@@ -172,6 +172,15 @@ return {
       require("dap-go").setup()
     end
   },
+
+  -- Credits to: https://github.com/nikolovlazar/dotfiles/blob/92c91ed035348c74e387ccd85ca19a376ea2f35e/.config/nvim/lua/plugins/dap.lua
+  -- Install the vscode-js-debug adapter
+  {
+    "microsoft/vscode-js-debug",
+    -- After install, build it and rename the dist directory to out
+    build = "npm install --legacy-peer-deps --no-save && npx gulp vsDebugServerBundle && rm -rf out && mv dist out",
+    version = "1.*",
+  },
   -- nvim-dap-vscode-js
   {
     "mxsdev/nvim-dap-vscode-js",
@@ -181,40 +190,83 @@ return {
     },
     config = function()
       require("dap-vscode-js").setup({
+        debugger_path = vim.fn.resolve(vim.fn.stdpath("data") .. "/lazy/vscode-js-debug"),
         -- node_path = "node", -- Path of node executable. Defaults to $NODE_PATH, and then "node"
-        debugger_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter",
-        debugger_cmd = { "js-debug-adapter" }, -- Command to use to launch the debug server. Takes precedence over `node_path` and `debugger_path`.
-        -- debugger_path = "(runtimedir)/site/pack/packer/opt/vscode-js-debug", -- Path to vscode-js-debug installation.
-        adapters = { 'pwa-node', 'pwa-chrome', 'pwa-msedge', 'node-terminal', 'pwa-extensionHost' }, -- which adapters to register in nvim-dap
+        -- debugger_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter",
+        -- debugger_cmd = { "js-debug-adapter" }, -- Command to use to launch the debug server. Takes precedence over `node_path` and `debugger_path`.
+        adapters = {
+          "chrome",
+          "pwa-node",
+          "pwa-chrome",
+          "pwa-msedge",
+          "pwa-extensionHost",
+          "node-terminal",
+        },
         -- log_file_path = "(stdpath cache)/dap_vscode_js.log" -- Path for file logging
         -- log_file_level = false -- Logging level for output to file. Set to false to disable file logging.
         -- log_console_level = vim.log.levels.ERROR -- Logging level for output to console. Set to false to disable console output.
       })
-      for _, language in ipairs({ "typescript", "javascript" }) do
+      for _, language in ipairs({ "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" }) do
         require("dap").configurations[language] = {
           {
-	         -- use nvim-dap-vscode-js's pwa-node debug adapter
-	         type = "pwa-node",
-	         -- launch a new process to attach the debugger to
-	         request = "launch",
-	         -- name of the debug action you have to select for this config
-	         name = "Launch current file in new node process",
-	         program = "${file}",
-	      }
+            type = "pwa-node",
+            request = "launch",
+            name = "Launch file",
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+          },
+          {
+            type = "pwa-node",
+            request = "attach",
+            name = "Attach",
+            processId = require'dap.utils'.pick_process,
+            cwd = "${workspaceFolder}",
+          },
+          -- Jest
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Debug Jest Tests",
+            -- trace = true, -- include debugger info
+            runtimeExecutable = "node",
+            runtimeArgs = {
+              "./node_modules/jest/bin/jest.js",
+              "--runInBand",
+            },
+            rootPath = "${workspaceFolder}",
+            cwd = "${workspaceFolder}",
+            console = "integratedTerminal",
+            internalConsoleOptions = "neverOpen",
+          }, 
+          -- Mocha
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Debug Mocha Tests",
+            -- trace = true, -- include debugger info
+            runtimeExecutable = "node",
+            runtimeArgs = {
+              "./node_modules/mocha/bin/mocha.js",
+            },
+            rootPath = "${workspaceFolder}",
+            cwd = "${workspaceFolder}",
+            console = "integratedTerminal",
+            internalConsoleOptions = "neverOpen",
+          }
       }
       end
-      require("dap").adapters["pwa-node"] = {
-        type = "server",
-        host = "localhost",
-        port = "8123",
-        executable = {
-          command = "node",
-          args = {
-            "~/.local/share/nvim/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
-            "8123",
-          }
-        }
-      }
+--      require("dap").adapters["pwa-node"] = {
+--        type = "server",
+--        host = "localhost",
+--        port = "8123",
+--        executable = {
+--          command = "node",
+--          args = {
+--            "~/.local/share/nvim/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+--            "8123",
+--          }
+--        }
+--      }
     end
   }
 }
