@@ -2,11 +2,13 @@ return {
   {
     'glepnir/template.nvim',
     commit = '0b9a02148fd2b7832f801e5ebb40684d4eea4ead',
-    opts = {
-      temp_dir = '/home/iocanel/.config/nvim/templates/',
-      author = "Ioannis Canellos",
-      email = "iocanel@gmail.com"
-    },
+    config = function()
+      require('template').setup({
+        temp_dir = '/home/iocanel/.config/nvim/templates/',
+        author = "Ioannis Canellos",
+        email = "iocanel@gmail.com",
+      })
+    end,
     init = function()
       local telescope = require("telescope.builtin")
       local previewers = require("telescope.previewers")
