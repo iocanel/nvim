@@ -132,6 +132,8 @@ return {
       end
     end
   },
+    cwd = "${workspaceFolder}",
+    console = "integratedTerminal",
   -- dap-virtual-text
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -184,30 +186,22 @@ return {
   -- nvim-dap-vscode-js
   {
     "mxsdev/nvim-dap-vscode-js",
-    ft = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
-    dependencies = {
-      "mfussenegger/nvim-dap"
-    },
+    ft = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" },
+    dependencies = { "mfussenegger/nvim-dap" },
     config = function()
+      local dap = require("dap")
+
+      -- let the plugin register all pwa-* adapters for you
       require("dap-vscode-js").setup({
-        debugger_path = vim.fn.resolve(vim.fn.stdpath("data") .. "/lazy/vscode-js-debug"),
-        -- node_path = "node", -- Path of node executable. Defaults to $NODE_PATH, and then "node"
-        -- debugger_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter",
-        -- debugger_cmd = { "js-debug-adapter" }, -- Command to use to launch the debug server. Takes precedence over `node_path` and `debugger_path`.
-        adapters = {
-          "chrome",
-          "pwa-node",
-          "pwa-chrome",
-          "pwa-msedge",
-          "pwa-extensionHost",
-          "node-terminal",
-        },
-        -- log_file_path = "(stdpath cache)/dap_vscode_js.log" -- Path for file logging
-        -- log_file_level = false -- Logging level for output to file. Set to false to disable file logging.
-        -- log_console_level = vim.log.levels.ERROR -- Logging level for output to console. Set to false to disable console output.
+        debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
+        adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "pwa-extensionHost", "node-terminal" },
+        log_file_level = vim.log.levels.DEBUG,
       })
-      for _, language in ipairs({ "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" }) do
-        require("dap").configurations[language] = {
+
+      -- now define your Jest launch configuration
+      for _, lang in ipairs({ "javascript", "typescript" }) do
+        dap.configurations[lang] = {
+          -- Regular Launch configuration
           {
             type = "pwa-node",
             request = "launch",
@@ -215,6 +209,7 @@ return {
             program = "${file}",
             cwd = "${workspaceFolder}",
           },
+          -- Attach
           {
             type = "pwa-node",
             request = "attach",
@@ -222,51 +217,45 @@ return {
             processId = require'dap.utils'.pick_process,
             cwd = "${workspaceFolder}",
           },
-          -- Jest
+          -- Lauch Typescript
           {
-            type = "pwa-node",
-            request = "launch",
-            name = "Debug Jest Tests",
-            -- trace = true, -- include debugger info
-            runtimeExecutable = "node",
-            runtimeArgs = {
+            name               = "Launch TS (ts-node)",
+            type               = "pwa-node",
+            request            = "launch",
+            runtimeExecutable  = "node",
+            runtimeArgs        = {
+              "-r", "ts-node/register",   -- hook ts-node
+              "--inspect-brk",            -- pause on entry
+              "${file}",                  -- your current .ts
+            },
+            cwd                    = "${workspaceFolder}",
+            console                = "integratedTerminal",
+            internalConsoleOptions = "neverOpen",
+            sourceMaps             = true,
+            skipFiles = {
+              "<node_internals>/**/*.js",
+              "${workspaceFolder}/node_modules/**/*.js",   -- skip all node_modules
+            },
+          },
+          {
+            name               = "Debug Jest Tests",
+            type               = "pwa-node",
+            request            = "launch",
+            runtimeExecutable  = "node",
+            runtimeArgs        = {
               "./node_modules/jest/bin/jest.js",
               "--runInBand",
+              "--inspect-brk",              -- pause before tests run
+              "${file}",                    -- only this test file
             },
-            rootPath = "${workspaceFolder}",
-            cwd = "${workspaceFolder}",
-            console = "integratedTerminal",
+            cwd                    = "${workspaceFolder}",
+            console                = "integratedTerminal",
             internalConsoleOptions = "neverOpen",
-          }, 
-          -- Mocha
-          {
-            type = "pwa-node",
-            request = "launch",
-            name = "Debug Mocha Tests",
-            -- trace = true, -- include debugger info
-            runtimeExecutable = "node",
-            runtimeArgs = {
-              "./node_modules/mocha/bin/mocha.js",
-            },
-            rootPath = "${workspaceFolder}",
-            cwd = "${workspaceFolder}",
-            console = "integratedTerminal",
-            internalConsoleOptions = "neverOpen",
-          }
-      }
+            sourceMaps             = true,
+            skipFiles              = { "<node_internals>/**/*.js" },
+          },
+        }
       end
---      require("dap").adapters["pwa-node"] = {
---        type = "server",
---        host = "localhost",
---        port = "8123",
---        executable = {
---          command = "node",
---          args = {
---            "~/.local/share/nvim/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
---            "8123",
---          }
---        }
---      }
-    end
+    end,
   }
 }
