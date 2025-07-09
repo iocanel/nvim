@@ -89,6 +89,14 @@ vim.filetype.add({
     html = "html"
   }
 })
+
+-- typescript
+vim.filetype.add({
+  extension = {
+    ts = "typescript"
+  }
+})
+
 -- golang
 vim.filetype.add({
   extension = {
