@@ -2,7 +2,6 @@ return {
   -- Telescope
   {
     'nvim-telescope/telescope.nvim',
-    tag = '0.1.8',
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = {
       defaults = {
@@ -19,7 +18,7 @@ return {
   },
   -- Telescope FZF
   {
-    'nvim-telescope/telescope-fzf-native.nvim', commit = 'fab3e2212e206f4f8b3bbaa656e129443c9b802e',
+    'nvim-telescope/telescope-fzf-native.nvim',
     dependencies = { 'nvim-telescope/telescope.nvim' },
     build = 'make', cond =  vim.fn.executable 'make' == 1,
     config = function() 
@@ -41,7 +40,6 @@ return {
   {
     'cljoly/telescope-repo.nvim',
     dependencies = { 'nvim-telescope/telescope.nvim' },
-    commit = '92598143f8c4cadb47f5aef3f7775932827df8f2',
     config = function()
       local telescope = require('telescope')
       local repo_ext_installed, repo = pcall(telescope.load_extension, 'repo')
@@ -66,7 +64,6 @@ return {
   -- Telescope UI Select
   {
     'nvim-telescope/telescope-ui-select.nvim',
-    commit = '6e51d7da30bd139a6950adf2a47fda6df9fa06d2',
     config = function()
       require("telescope").load_extension("ui-select")
     end
@@ -74,7 +71,7 @@ return {
  -- Telescope Undo
   {
     'debugloop/telescope-undo.nvim',
-    commit = '3dec002ea3e7952071d26fbb5d01e2038a58a554',
+--    commit = '3dec002ea3e7952071d26fbb5d01e2038a58a554',
     config = function()
       require('telescope').load_extension("undo")
     end
