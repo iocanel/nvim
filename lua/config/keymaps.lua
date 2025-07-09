@@ -76,6 +76,19 @@ if winpick_installed then
 end
 
 --
+-- Avante
+--
+vim.keymap.set('n', '<leader>aa', "<cmd>AvanteAsk<cr>", { desc = 'avante ask' })
+vim.keymap.set('n', '<leader>at', "<cmd>AvanteToggle<cr>", { desc = 'avante toggle' })
+vim.keymap.set('n', '<leader>ax', "<cmd>AvanteClear<cr>", { desc = 'avante clear' })
+vim.keymap.set('n', '<leader>am', "<cmd>AvanteModels<cr>", { desc = 'avante models' })
+vim.keymap.set('n', '<leader>am', "<cmd>AvanteHistory<cr>", { desc = 'avante history selec' })
+
+vim.keymap.set('v', '<leader>ae', "<cmd>AvanteEdit<cr>", { desc = 'avante edit selected block' })
+
+
+
+--
 -- [[ Git ]]
 --
 vim.keymap.set('n', '<leader>gc', "<cmd>Git commit<cr>", { desc = 'git commit' })
