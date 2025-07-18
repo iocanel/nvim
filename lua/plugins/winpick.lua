@@ -21,23 +21,9 @@ return {
   {
     'gbrlsnchs/winpick.nvim', commit = '044623e236750a2f61a2cb96ce0833e113921b88',
     init = function()
-      window_next = function()
-        local current_win = vim.fn.win_getid()
-        local all_wins = vim.fn.getwininfo()
-        local next_win = nil
-
-        for i, win in ipairs(all_wins) do
-          if win.winid == current_win then
-            next_win = all_wins[(i % #all_wins) + 1]
-            break
-          end
-        end
-
-        if next_win then
-          vim.fn.win_gotoid(next_win.winid)
-        end
-      end
-    vim.cmd('command! WinpickNext lua window_next()')
+      -- Make the window_next function globally accessible
+      _G.window_next = M.window_next
+      vim.cmd('command! WinpickNext lua window_next()')
     end,
     keys = {
       {
