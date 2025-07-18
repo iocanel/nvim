@@ -75,17 +75,6 @@ if winpick_installed then
   end, { desc = 'window pick' })
 end
 
---
--- Avante
---
-vim.keymap.set('n', '<leader>aa', "<cmd>AvanteAsk<cr>", { desc = 'avante ask' })
-vim.keymap.set('n', '<leader>at', "<cmd>AvanteToggle<cr>", { desc = 'avante toggle' })
-vim.keymap.set('n', '<leader>ax', "<cmd>AvanteClear<cr>", { desc = 'avante clear' })
-vim.keymap.set('n', '<leader>am', "<cmd>AvanteModels<cr>", { desc = 'avante models' })
-vim.keymap.set('n', '<leader>ah', "<cmd>AvanteHistory<cr>", { desc = 'avante history selec' })
-
-vim.keymap.set('v', '<leader>ae', "<cmd>AvanteEdit<cr>", { desc = 'avante edit selected block' })
-
 
 
 --

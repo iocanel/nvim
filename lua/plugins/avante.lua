@@ -17,12 +17,20 @@ return {
   end,
   event = "VeryLazy",
   version = false, -- Never set this value to "*"! Never!
+  keys = {
+    { '<leader>aa', "<cmd>AvanteAsk<cr>", desc = 'avante ask' },
+    { '<leader>at', "<cmd>AvanteToggle<cr>", desc = 'avante toggle' },
+    { '<leader>ax', "<cmd>AvanteClear<cr>", desc = 'avante clear' },
+    { '<leader>am', "<cmd>AvanteModels<cr>", desc = 'avante models' },
+    { '<leader>ah', "<cmd>AvanteHistory<cr>", desc = 'avante history select' },
+    { '<leader>ae', "<cmd>AvanteEdit<cr>", desc = 'avante edit selected block', mode = 'v' },
+  },
   ---@module 'avante'
   ---@type avante.Config
   opts = {
     -- add any opts here
-
-    provider = "openai",
+    mode = "agentic",
+    provider = "copilot",
     providers = {
       openai = {
         endpoint = "https://api.openai.com/v1",
@@ -33,9 +41,18 @@ return {
             max_tokens = 16384,
           },
       },
-      claude = {
+      anthropic = {
         endpoint = "https://api.anthropic.com",
-        model = "claude-sonnet-4-20250514",
+        model = "claude-3.7-sonnet",
+        timeout = 30000, -- Timeout in milliseconds
+          extra_request_body = {
+            temperature = 0.75,
+            max_tokens = 20480,
+          },
+      },
+      copilot = {
+        endpoint = "https://api.githubcopilot.com",
+        model = "claude-3.7-sonnet",
         timeout = 30000, -- Timeout in milliseconds
           extra_request_body = {
             temperature = 0.75,
@@ -56,6 +73,7 @@ return {
     "folke/snacks.nvim", -- for input provider snacks
     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
     "zbirenbaum/copilot.lua", -- for providers='copilot'
+    "nvim-neo-tree/neo-tree.nvim", -- for neotree support,
     {
       -- support for image pasting
       "HakonHarnes/img-clip.nvim",
