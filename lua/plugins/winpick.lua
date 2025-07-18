@@ -66,7 +66,7 @@ return {
         "<leader>wn", "<cmd>WinpickNext<cr>", desc = 'window next'
       },
       {
-        "<M-o>", "<cmd>WinpickNext<cr>", desc = 'window next'
+        "<M-o>", "<cmd>WinpickNext<cr>", desc = 'window next', mode = {"n", "i"}
       }
     }
   }
