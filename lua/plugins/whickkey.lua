@@ -76,66 +76,25 @@ return {
     config = function()
       local which_key_installed, which_key = pcall(require, 'which-key')
       if which_key_installed then
-        which_key.register({ -- mappings 
-          e = {
-            name = "editor",
-          },
-          d= {
-            name = "diagnostics",
-          },
-          g = {
-            name = "git",
-            h = {
-              name = "hunk",
-            },
-          },
-          h = {
-            name = "help",
-          },
-          l = {
-            name = "lsp",
-            c = {
-              name = "code"
-            },
-            d = {
-              name = "diagnostics"
-            },
-            r = {
-              name = "refactor"
-            },
-            s = {
-              name = "symbol"
-            },
-            t = {
-              name = "type"
-            },
-            w = {
-              name = "workspace"
-            }
-          },
-          s = {
-            name = "search",
-          },
-          o = {
-            name = "open",
-          },
-          w = {
-            name = "window",
-            s = {
-              name = "window split",
-            },
-            j = {
-              name = "window jump",
-            },
-          },
-        },
-        { -- opts
-          mode = "n", -- NORMAL mode
-          prefix = " ",
-          buffer = nil, -- Global mappings. Specify a buffer number for buffer local mappings
-          silent = true, -- use `silent` when creating keymaps
-          noremap = true, -- use `noremap` when creating keymaps
-          nowait = false, -- use `nowait` when creating keymaps
+        which_key.add({
+          { "<leader>e", group = "editor" },
+          { "<leader>d", group = "debug" },
+          { "<leader>D", group = "diagnostics" },
+          { "<leader>g", group = "git" },
+          { "<leader>gh", group = "hunk" },
+          { "<leader>h", group = "help" },
+          { "<leader>l", group = "lsp" },
+          { "<leader>lc", group = "code" },
+          { "<leader>ld", group = "diagnostics" },
+          { "<leader>lr", group = "refactor" },
+          { "<leader>ls", group = "symbol" },
+          { "<leader>lt", group = "type" },
+          { "<leader>lw", group = "workspace" },
+          { "<leader>s", group = "search" },
+          { "<leader>o", group = "open" },
+          { "<leader>w", group = "window" },
+          { "<leader>ws", group = "window split" },
+          { "<leader>wj", group = "window jump" },
         })
       end
     end
