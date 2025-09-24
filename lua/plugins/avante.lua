@@ -72,7 +72,7 @@ return {
     "stevearc/dressing.nvim", -- for input provider dressing
     "folke/snacks.nvim", -- for input provider snacks
     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-    "zbirenbaum/copilot.lua", -- for providers='copilot'
+    -- "zbirenbaum/copilot.lua", -- for providers='copilot' -- disabled to avoid conflict with copilot.vim
     "nvim-neo-tree/neo-tree.nvim", -- for neotree support,
     {
       -- support for image pasting
