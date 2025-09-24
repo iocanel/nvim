@@ -231,7 +231,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
     if project_config_updated then
       project_config_updated = false
       vim.cmd("JdtUpdateConfig")
-      vim.cmd("LspRestart")
+      vim.cmd("LspRestart jdtls")
     end
   end
 })
@@ -241,6 +241,6 @@ vim.api.nvim_create_autocmd("BufNewFile", {
   pattern = "*.java",
   callback = function()
     vim.cmd("JdtUpdateConfig")
-    vim.cmd("LspRestart")
+    vim.cmd("LspRestart jdtls")
   end
 })
