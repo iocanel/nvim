@@ -188,6 +188,7 @@ function setup_lsp_bindings()
   vim.keymap.set('n', '<leader>lsw', require('telescope.builtin').lsp_dynamic_workspace_symbols, { desc = 'workspace symbols'})
   vim.keymap.set('n', '<leader>lgb', require('config.navigation').go_back, { desc = 'goto back'})
   vim.keymap.set('n', '<leader>lgf', require('config.navigation').go_forward, { desc = 'goto forward'})
+  vim.keymap.set('n', '<leader>lf', vim.lsp.buf.format, { desc = 'format buffer'})
 end
 
 function setup_coc_bindings()
