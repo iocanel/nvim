@@ -305,7 +305,13 @@ local config = {
   -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
   init_options = {
     bundles = (function()
+      local bundles = {}
+
+      -- Java Debug Adapter
       local debug_jar = vim.fn.glob(mason_data .. "/share/java-debug-adapter/com.microsoft.java.debug.plugin-*.jar", 1)
+
+      -- Java Test Adapter - get all JAR files
+      local test_jars = vim.fn.split(vim.fn.glob(mason_data .. "/share/java-test/**/*.jar", 1), "\n")
 
       if debug_jar == "" then
         -- Try to install java-debug-adapter silently via Mason
@@ -331,10 +337,43 @@ local config = {
         else
           vim.notify("Mason not available. Install java-debug-adapter manually with: :MasonInstall java-debug-adapter", vim.log.levels.WARN)
         end
-        return {}
       else
-        return { debug_jar }
+        table.insert(bundles, debug_jar)
+        -- vim.notify("Java debug adapter found: " .. debug_jar, vim.log.levels.DEBUG)
       end
+
+      if #test_jars == 0 then
+        -- Try to install java-test silently via Mason
+        local mason_registry_ok, mason_registry = pcall(require, "mason-registry")
+        if mason_registry_ok then
+          local java_test_pkg = mason_registry.get_package("java-test")
+          if java_test_pkg and not java_test_pkg:is_installed() then
+            vim.notify("Installing java-test automatically...", vim.log.levels.INFO)
+            java_test_pkg:install():once("closed", function()
+              -- Re-check for the JARs after installation
+              local new_test_jars = vim.fn.split(vim.fn.glob(mason_data .. "/share/java-test/**/*.jar", 1), "\n")
+              if #new_test_jars > 0 then
+                vim.notify("java-test installed successfully (" .. #new_test_jars .. " JARs)", vim.log.levels.INFO)
+                -- Restart JDTLS to pick up the new test adapter
+                vim.defer_fn(function()
+                  pcall(vim.cmd, "LspRestart jdtls")
+                end, 1000)
+              else
+                vim.notify("java-test installation may have failed", vim.log.levels.WARN)
+              end
+            end)
+          end
+        else
+          vim.notify("Mason not available. Install java-test manually with: :MasonInstall java-test", vim.log.levels.WARN)
+        end
+      else
+        -- Add ALL test JAR files
+        for _, jar in ipairs(test_jars) do
+          table.insert(bundles, jar)
+        end
+        -- vim.notify("Java test adapter found: " .. #test_jars .. " JAR files", vim.log.levels.INFO)
+      end
+      return bundles
     end)();
   },
 }
@@ -411,16 +450,16 @@ vim.api.nvim_create_autocmd("BufEnter", {
 local function dump_jdtls_config()
   local config_dir = xdg_data_home .. '/nvim/jdtls'
   local config_file = config_dir .. '/current.config'
-  
+
   -- Ensure directory exists
   vim.fn.mkdir(config_dir, 'p')
-  
+
   -- Convert config to readable format
   local config_str = vim.inspect(config, {
     indent = "  ",
     depth = 10
   })
-  
+
   -- Write to file
   local file = io.open(config_file, 'w')
   if file then
@@ -435,4 +474,4 @@ local function dump_jdtls_config()
 end
 
 -- Add command to dump config
-vim.cmd('command! JdtlsDumpConfig lua dump_jdtls_config()')
+vim.api.nvim_create_user_command("JdtlsDumpConfig", function() dump_jdtls_config() end, {})

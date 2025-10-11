@@ -1,0 +1,10 @@
+* Java Maven Template
+[[../../actions/workflows/main.yml/badge.svg]]
+
+A simple maven project template.
+
+** Requirements
+
+- Java 17+
+- Maven 3.x
+
