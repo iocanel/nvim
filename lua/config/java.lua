@@ -36,7 +36,7 @@ org.eclipse.jdt.core.compiler.problem.enablePreviewFeatures=enabled
     end
 
     -- Reload JDT LS configuration
-    local clients = vim.lsp.get_active_clients()
+    local clients = vim.lsp.get_clients()
     for _, client in ipairs(clients) do
         if client.name == "jdtls" then
             print("Restarting jdtls...")
