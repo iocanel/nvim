@@ -68,7 +68,7 @@ if not ok_jdtls then
   die("require('jdtls') failed — nvim-jdtls not available.")
 end
 
--- In CI/headless, compile first so JavaDebugMain has something to run
+-- In CI/headless, compile first so JavaDebug has something to run
 pcall(function() jdtls.compile("full") end)
 
 -- Prepare breakpoint on line 9 (cursor-based API)
@@ -160,8 +160,8 @@ local function test_debug_command(command_name, file_path, breakpoint_line)
   return true
 end
 
--- Test JavaDebugMain
-test_debug_command("JavaDebugMain", main_file, 9)
+-- Test JavaDebug
+test_debug_command("JavaDebug", main_file, 9)
 
 -- Test JavaDebugTestClass
 test_debug_command("JavaDebugTestClass", test_file, 11)
@@ -177,7 +177,7 @@ pcall(vim.fn.chdir, prev_cwd)
 local jdtls_root = (jdtls_client.config and jdtls_client.config.root_dir) or "(unknown)"
 
 print("🎉 All debug commands tested successfully!")
-print("   Commands tested: JavaDebugMain, JavaDebugTestClass, JavaDebugTestMethod")
+print("   Commands tested: JavaDebug, JavaDebugTestClass, JavaDebugTestMethod")
 print("   main_file: " .. vim.trim(main_file))
 print("   test_file: " .. vim.trim(test_file))
 print("   project_root: " .. vim.trim(project_root))

@@ -1,6 +1,6 @@
 local M = {}
 
-function M:debug_file()
+function M:debug()
   local dap = require("dap")
   
   -- Get current file path
@@ -49,7 +49,7 @@ function M:debug_file()
   dap.run(launch_config)
 end
 
-function M:debug_test_file()
+function M:debug_test()
   local dap = require("dap")
   
   -- Get current file path
@@ -116,7 +116,7 @@ function M:debug_test_file()
 end
 
 -- Create Vim commands
-vim.cmd("command! JavascriptDebugFile lua require('config.dap.javascript'):debug_file()")
-vim.cmd("command! JavascriptDebugTestFile lua require('config.dap.javascript'):debug_test_file()")
+vim.cmd("command! JavascriptDebug lua require('config.dap.javascript'):debug()")
+vim.cmd("command! JavascriptDebugTest lua require('config.dap.javascript'):debug_test()")
 
 return M

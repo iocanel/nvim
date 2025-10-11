@@ -133,9 +133,9 @@ local function test_typescript_debug(debug_type, file_path, breakpoint_line)
   
   -- Use the appropriate debug command instead of hardcoded config
   if debug_type == "program" or debug_type == "function" then
-    vim.cmd("TypescriptDebugFile")
+    vim.cmd("TypescriptDebug")
   else
-    vim.cmd("TypescriptDebugTestFile")
+    vim.cmd("TypescriptDebugTest")
   end
   
   -- Wait for session to start
@@ -195,9 +195,9 @@ local ts_root = (ts_client and ts_client.config and ts_client.config.root_dir) o
 
 print("")
 print("🎉 TypeScript debugging tests completed!")
-print("   ✅ Program debugging: successful (using TypescriptDebugFile)")
-print("   ✅ Function debugging: successful (using TypescriptDebugFile)")
-print("   ✅ Test file debugging: successful (using TypescriptDebugTestFile)")
+print("   ✅ Program debugging: successful (using TypescriptDebug)")
+print("   ✅ Function debugging: successful (using TypescriptDebug)")
+print("   ✅ Test file debugging: successful (using TypescriptDebugTest)")
 print("   main_file: " .. vim.trim(main_file))
 print("   test_file: " .. vim.trim(test_file))
 print("   project_root: " .. vim.trim(project_root))

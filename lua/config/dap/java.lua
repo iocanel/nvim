@@ -45,7 +45,7 @@ local function get_current_class()
   return class_name or "UnknownClass"
 end
 
-function M:debug_main()
+function M:debug()
   local dap = require("dap")
   local jdtls = require("jdtls") -- Ensure jdtls is loaded
 
@@ -88,7 +88,14 @@ function M:debug_main()
   dap.run(launch_config)
 end
 
-vim.cmd("command! JavaDebugMain lua require('config.dap.java').debug_main()")
+function M:debug_test()
+  -- For now, just call the main debug function
+  -- In the future, this could be enhanced to handle test-specific logic
+  self:debug()
+end
+
+vim.cmd("command! JavaDebug lua require('config.dap.java'):debug()")
+vim.cmd("command! JavaDebugTest lua require('config.dap.java'):debug_test()")
 vim.cmd('command! JavaDebugAttachRemote lua require("config.dap.java").attach_to_remote()')
 
 local dap_ok, dap = pcall(require, "dap")

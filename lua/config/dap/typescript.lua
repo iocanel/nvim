@@ -1,6 +1,6 @@
 local M = {}
 
-function M:debug_file()
+function M:debug()
   local dap = require("dap")
   
   -- Get current file path
@@ -58,7 +58,7 @@ function M:debug_file()
   dap.run(launch_config)
 end
 
-function M:debug_test_file()
+function M:debug_test()
   local dap = require("dap")
   
   -- Get current file path
@@ -129,7 +129,7 @@ function M:debug_test_file()
 end
 
 -- Create Vim commands
-vim.cmd("command! TypescriptDebugFile lua require('config.dap.typescript'):debug_file()")
-vim.cmd("command! TypescriptDebugTestFile lua require('config.dap.typescript'):debug_test_file()")
+vim.cmd("command! TypescriptDebug lua require('config.dap.typescript'):debug()")
+vim.cmd("command! TypescriptDebugTest lua require('config.dap.typescript'):debug_test()")
 
 return M
