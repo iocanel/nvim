@@ -316,32 +316,64 @@ require('jdtls').setup_dap({ hotcodereplace = 'auto' })
 require('jdtls').start_or_attach(config)
 
 local project_config_updated = false
+local restart_attempts = {}
+
+-- Robust JDTLS refresh function with comprehensive error handling
+local function safe_jdt_refresh()
+  -- Prevent restart spam (10 second cooldown)
+  local now = vim.loop.now()
+  if restart_attempts[project_name] and (now - restart_attempts[project_name]) < 10000 then
+    vim.notify("JDTLS restart attempted recently, skipping to prevent spam", vim.log.levels.WARN)
+    return
+  end
+  restart_attempts[project_name] = now
+
+  local update_ok = pcall(vim.cmd, "JdtUpdateConfig")
+  if not update_ok then
+    vim.notify("JdtUpdateConfig command failed", vim.log.levels.WARN)
+  end
+
+  -- Wait briefly then try restart if needed
+  vim.defer_fn(function()
+    local restart_ok = pcall(vim.cmd, "LspRestart jdtls")
+    if not restart_ok then
+      vim.notify("LspRestart failed, trying nuclear option...", vim.log.levels.WARN)
+
+      -- Final fallback: JdtWipeDataAndRestart
+      local wipe_ok = pcall(vim.cmd, "JdtWipeDataAndRestart")
+      if not wipe_ok then
+        vim.notify("All JDTLS refresh methods failed. Try manual restart with :JdtWipeDataAndRestart", vim.log.levels.ERROR)
+      else
+        vim.notify("JDTLS workspace wiped and restarted", vim.log.levels.DEBUG)
+      end
+    else
+      vim.notify("JDTLS configuration refreshed successfully", vim.log.levels.DEBUG)
+    end
+  end, 1000)
+
+  -- Timeout safety net
+  vim.defer_fn(function()
+    if project_config_updated then
+      vim.notify("JDTLS refresh may have timed out. Consider manual restart if issues persist", vim.log.levels.WARN)
+    end
+  end, 30000)  -- 30 second timeout
+end
 
 -- Mark that JDTLS needs an update when saving pom.xml
 vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = { "pom.xml", "mvnw", "mvnw.cmd", ".mvn/**/*" },
+  pattern = { "pom.xml", "mvnw", "mvnw.cmd", ".mvn/**/*", "build.gradle", "settings.gradle", "gradlew" },
   callback = function()
     project_config_updated = true
   end
 })
 
--- Perform JDTLS update when entering a Java buffer
+-- Perform JDTLS update when entering a Java buffer (with robust error handling)
 vim.api.nvim_create_autocmd("BufEnter", {
   pattern = "*.java",
   callback = function()
     if project_config_updated then
       project_config_updated = false
-      vim.cmd("JdtUpdateConfig")
-      vim.cmd("LspRestart jdtls")
+      safe_jdt_refresh()
     end
-  end
-})
-
--- Add new files to Lsp
-vim.api.nvim_create_autocmd("BufNewFile", {
-  pattern = "*.java",
-  callback = function()
-    vim.cmd("JdtUpdateConfig")
-    vim.cmd("LspRestart jdtls")
   end
 })
