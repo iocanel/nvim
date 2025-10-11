@@ -1,0 +1,26 @@
+{
+  "name": "nvim-javascript-test",
+  "version": "1.0.0",
+  "description": "JavaScript test project for Neovim LSP and DAP testing",
+  "main": "helloworld.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node helloworld.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^2.0.0",
+    "@types/jest": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageDirectory": ".coverage"
+  },
+  "keywords": ["neovim", "testing", "javascript", "lsp", "dap"],
+  "author": "Neovim Test Suite",
+  "license": "MIT"
+}
