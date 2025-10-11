@@ -407,3 +407,33 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
   end
 })
+
+-- Function to dump JDTLS config to file
+local function dump_jdtls_config()
+  local config_dir = xdg_data_home .. '/nvim/jdtls'
+  local config_file = config_dir .. '/current.config'
+  
+  -- Ensure directory exists
+  vim.fn.mkdir(config_dir, 'p')
+  
+  -- Convert config to readable format
+  local config_str = vim.inspect(config, {
+    indent = "  ",
+    depth = 10
+  })
+  
+  -- Write to file
+  local file = io.open(config_file, 'w')
+  if file then
+    file:write("-- JDTLS Configuration dump\n")
+    file:write("-- Generated on: " .. os.date() .. "\n\n")
+    file:write("return " .. config_str)
+    file:close()
+    vim.notify("JDTLS config dumped to: " .. config_file, vim.log.levels.INFO)
+  else
+    vim.notify("Failed to write config to: " .. config_file, vim.log.levels.ERROR)
+  end
+end
+
+-- Add command to dump config
+vim.cmd('command! JdtlsDumpConfig lua dump_jdtls_config()')
