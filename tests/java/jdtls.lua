@@ -15,7 +15,7 @@ local this_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h")
 -- Project root that jdtls should detect (contains pom.xml/gradle files)
 -- Default to <test_dir>/test_project, override with TEST_PROJECT_ROOT if you prefer.
 local project_root = this_dir .. "/test_project"
-project_root = vim.fn.fnamemodify(project_root, ":p")
+project_root = vim.fn.fnamemodify(project_root, ":p"):gsub("/$", "")
 file = project_root .. "/src/main/java/com/iocanel/App.java"
 
 -- Sanity: project_root must exist and contain a build file

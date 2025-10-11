@@ -15,7 +15,7 @@ local uv = vim.uv or vim.loop
 
 -- Paths
 local this_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h")
-local project_root = vim.fn.fnamemodify(this_dir .. "/test_project", ":p")
+local project_root = vim.fn.fnamemodify(this_dir .. "/test_project", ":p"):gsub("/$", "")
 local main_file = project_root .. "/src/main/java/com/iocanel/App.java"
 local test_file = project_root .. "/src/test/java/com/iocanel/AppTest.java"
 
@@ -167,7 +167,7 @@ test_debug_command("JavaDebugMain", main_file, 9)
 test_debug_command("JavaDebugTestClass", test_file, 11)
 
 -- Test JavaDebugTestMethod (cursor should be on the test method)
-vim.cmd.edit(vim.fn.fnameescape(test_file))
+vim.cmd("edit! " .. vim.fn.fnameescape(test_file))
 vim.api.nvim_win_set_cursor(0, { 10, 0 }) -- Position cursor on @Test annotation
 test_debug_command("JavaDebugTestMethod", test_file, 11)
 
