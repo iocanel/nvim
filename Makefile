@@ -1,6 +1,6 @@
 all: test
 
-test: test_java test_go
+test: test_java test_go test_python
 
 test_java: jdtls dap_java
 
@@ -17,3 +17,11 @@ go_lsp:
 
 go_dap:
 	nvim --headless "+luafile tests/go/dap.lua"
+
+test_python: python_lsp python_dap
+
+python_lsp:
+	nvim --headless "+luafile tests/python/lsp.lua"
+
+python_dap:
+	nvim --headless "+luafile tests/python/dap.lua"
