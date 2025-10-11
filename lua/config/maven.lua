@@ -394,7 +394,19 @@ function M.failsafe_debug_class()
   local class_name = M.get_class_name_at_point()
   project.set_build_system(M)
   M.build("test -Dtest=" .. class_name .. " -Dmaven.failsafe.debug", module)
-  vim.cmd('JavaDebugAttachRemote')
+  
+  -- Attach debugger using DAP with the correct module context
+  vim.defer_fn(function()
+    local dap = require('dap')
+    dap.run({
+      type = 'java',
+      request = 'attach',
+      name = "Attach to Maven Failsafe Debug",
+      hostName = 'localhost',
+      port = 5005,
+      projectName = module,
+    })
+  end, 2000) -- Wait 2 seconds for Maven to start and be ready for attachment
 end
 
 function M.failsafe_test_method()
@@ -405,14 +417,25 @@ function M.failsafe_test_method()
 end
 
 function M.failsafe_debug_method()
-
   local module = M.get_module_name()
   local class_name = M.get_class_name_at_point()
   local method_name = M.get_method_name_at_point()
 
   project.set_build_system(M)
   M.build("test -Dtest=" .. class_name .. '#' .. method_name .. " -Dmaven.failsafe.debug", module)
-  vim.cmd('JavaDebugAttachRemote')
+  
+  -- Attach debugger using DAP with the correct module context
+  vim.defer_fn(function()
+    local dap = require('dap')
+    dap.run({
+      type = 'java',
+      request = 'attach',
+      name = "Attach to Maven Failsafe Debug Method",
+      hostName = 'localhost',
+      port = 5005,
+      projectName = module,
+    })
+  end, 2000) -- Wait 2 seconds for Maven to start and be ready for attachment
 end
 
 
