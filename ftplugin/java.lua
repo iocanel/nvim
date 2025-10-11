@@ -1,13 +1,92 @@
 -- See `:help vim.lsp.start_client` for an overview of the supported `config` options.
+
+-- Use XDG Base Directory specification with fallbacks
+local home = os.getenv("HOME")
+local xdg_cache_home = os.getenv("XDG_CACHE_HOME") or (home .. "/.cache")
+local xdg_data_home = os.getenv("XDG_DATA_HOME") or (home .. "/.local/share")
+
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
-local workspace_dir = '/home/iocanel/.cache/nvim/jdtls/data/' .. project_name
+-- JDTLS workspace uses cache directory (can be regenerated)
+local workspace_dir = xdg_cache_home .. '/nvim/jdtls/data/' .. project_name
 
--- Find the latest Lombok JAR
-local lombok_jar_list = vim.fn.split(vim.fn.glob("/home/iocanel/.m2/repository/org/projectlombok/lombok/*/lombok-*.jar", 1), "\n")
-table.sort(lombok_jar_list)  -- Sort versions
-local lombok_jar = #lombok_jar_list > 0 and lombok_jar_list[#lombok_jar_list] or nil
+-- Maven repository location
+local m2_repo = os.getenv("MAVEN_REPOSITORY") or (home .. "/.m2/repository")
 
-local launcher_jar = vim.fn.glob("/home/iocanel/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1)
+-- Mason uses data directory (persistent tools/plugins)
+local mason_data = xdg_data_home .. '/nvim/mason'
+
+-- Function to download Maven artifact using mvn dependency:get
+local function download_maven_artifact(group_id, artifact_id, version)
+  local cmd = string.format("mvn dependency:get -Dartifact=%s:%s:%s", group_id, artifact_id, version)
+  local result = vim.fn.system(cmd)
+  return vim.v.shell_error == 0, result
+end
+
+-- Function to download file via HTTP
+local function download_file_http(url, destination)
+  local cmd = string.format("curl -L -o '%s' '%s'", destination, url)
+  local result = vim.fn.system(cmd)
+  if vim.v.shell_error == 0 and vim.fn.filereadable(destination) == 1 then
+    return true, result
+  end
+  
+  -- Try with wget if curl fails
+  cmd = string.format("wget -O '%s' '%s'", destination, url)
+  result = vim.fn.system(cmd)
+  return vim.v.shell_error == 0 and vim.fn.filereadable(destination) == 1, result
+end
+
+-- Function to ensure Maven artifact is available
+local function ensure_maven_artifact(group_id, artifact_id, version, glob_pattern, central_url)
+  local jar_list = vim.fn.split(vim.fn.glob(glob_pattern, 1), "\n")
+  table.sort(jar_list)
+  
+  if #jar_list > 0 then
+    return jar_list[#jar_list]
+  end
+  
+  vim.notify(string.format("Downloading %s:%s:%s...", group_id, artifact_id, version), vim.log.levels.INFO)
+  
+  -- Try Maven first
+  local success, result = download_maven_artifact(group_id, artifact_id, version)
+  if success then
+    jar_list = vim.fn.split(vim.fn.glob(glob_pattern, 1), "\n")
+    table.sort(jar_list)
+    if #jar_list > 0 then
+      vim.notify(string.format("Successfully downloaded %s:%s:%s", group_id, artifact_id, version), vim.log.levels.INFO)
+      return jar_list[#jar_list]
+    end
+  end
+  
+  -- Try HTTP download if Maven fails and URL is provided
+  if central_url then
+    local destination_dir = string.format("%s/%s/%s/%s", 
+      m2_repo, group_id:gsub("%.", "/"), artifact_id, version)
+    vim.fn.mkdir(destination_dir, "p")
+    local destination = string.format("%s/%s-%s.jar", destination_dir, artifact_id, version)
+    
+    success, result = download_file_http(central_url, destination)
+    if success then
+      vim.notify(string.format("Successfully downloaded %s:%s:%s via HTTP", group_id, artifact_id, version), vim.log.levels.INFO)
+      return destination
+    end
+  end
+  
+  vim.notify(string.format("Failed to download %s:%s:%s", group_id, artifact_id, version), vim.log.levels.ERROR)
+  return nil
+end
+
+-- Find or download Lombok JAR
+local lombok_version = "1.18.36"
+local lombok_glob = m2_repo .. "/org/projectlombok/lombok/*/lombok-*.jar"
+local lombok_url = "https://repo1.maven.org/maven2/org/projectlombok/lombok/" .. lombok_version .. "/lombok-" .. lombok_version .. ".jar"
+local lombok_jar = ensure_maven_artifact("org.projectlombok", "lombok", lombok_version, lombok_glob, lombok_url)
+
+local launcher_jar = vim.fn.glob(mason_data .. "/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1)
+if launcher_jar == "" then
+  vim.notify("JDTLS launcher JAR not found in Mason packages", vim.log.levels.ERROR)
+  return
+end
 
 -- Function to find the latest installed Temurin JDK for a given version
 local function find_temurin_jdk(version)
@@ -54,45 +133,67 @@ local config = {
   --  -configuration /home/iocanel/.config/Code/User/globalStorage/redhat.java/1.40.0/config_linux 
   --  -data /home/iocanel/.config/Code/User/workspaceStorage/84e3648a41ba8f3364fb9bc34a2dfeaf/redhat.java/jdt_ws 
   --  --pipe=/run/user/1000/lsp-20381af389549d3e8cff28c4e40f57c9.sock
-  cmd = {
-    -- Using the script -- Disabled: I wanted project per workspace and custom jvm tuning
-    --     '/home/iocanel/.local/share/nvim/mason/bin/jdtls',
-    --     '-javaagent:' .. lombok_jar,
-    --
+  -- Build command dynamically to handle optional Lombok
+  cmd = vim.tbl_flatten({
     'java',
     -- 💀
     '--enable-preview',
     -- 💀
+
+    -- Memory optimization (set min=max for better allocation)
+    '-Xms2G',
+    '-Xmx2G',
+
+    -- Modern Garbage Collection for better latency
+    '-XX:+UseG1GC',
+    '-XX:MaxGCPauseMillis=200',
+    '-XX:G1HeapRegionSize=16m',
+
+    -- Class Data Sharing for faster startup (CDS enabled by default in Java 21+)
+    '-XX:SharedArchiveFile=' .. xdg_cache_home .. '/nvim/jdtls/classes.jsa',
+    '-Xshare:auto',
+
+    -- String and memory optimizations
+    '-XX:+UseStringDeduplication',
+    '-XX:+UseCompressedOops',
+
+    -- JIT Compilation optimizations
+    '-XX:+TieredCompilation',
+    '-XX:TieredStopAtLevel=4',
+
+    -- I/O and system optimizations
+    '-Djava.awt.headless=true',
+    '-Djava.net.preferIPv4Stack=true',
+
+    -- Eclipse JDT LS specific settings
     '-Declipse.application=org.eclipse.jdt.ls.core.id1',
     '-Dosgi.bundles.defaultStartLevel=4',
     '-Declipse.product=org.eclipse.jdt.ls.core.product',
     '-Djava.import.generatesMetadataFilesAtProjectRoot=false',
     '-DDetectVMInstallationsJob.disabled=true',
     '-Dfile.encoding=utf8',
-    '-XX:+UseParallelGC',
-    '-XX:GCTimeRatio=4',
-    '-XX:AdaptiveSizePolicyWeight=90',
     '-Dsun.zip.disableMemoryMapping=true',
-    '-Xmx1G',
-    '-Xms100m',
     '-Xlog:disable',
-    '-javaagent:' .. lombok_jar,
+
+    -- Lombok agent (conditional)
+    lombok_jar and ('-javaagent:' .. lombok_jar) or {},
+
+    -- Java module system
     '--add-modules=ALL-SYSTEM',
     '--add-opens', 'java.base/java.util=ALL-UNNAMED',
     '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
     '--add-opens', 'java.base/sun.nio.fs=ALL-UNNAMED',
-    -- 💀
-    --
-    -- JFR
+
+    -- JFR (Java Flight Recorder) for profiling
     '-XX:+FlightRecorder',
     '-XX:FlightRecorderOptions=stackdepth=128',
     -- 💀
     '-jar', launcher_jar,
     -- 💀
-    '-configuration', '/home/iocanel/.local/share/nvim/mason/packages/jdtls/config_linux',
+    '-configuration', mason_data .. '/packages/jdtls/config_linux',
     -- See `data directory configuration` section in the README
     '-data', workspace_dir,
-  },
+  }),
 
   -- 💀
   -- This is the default if not provided, you can remove it. Or adjust as needed.
@@ -204,7 +305,7 @@ local config = {
   -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
   init_options = {
     bundles = {
-      vim.fn.glob("/home/iocanel/.local/share/nvim/mason/share/java-debug-adapter/com.microsoft.java.debug.plugin-*.jar", 1);
+      vim.fn.glob(mason_data .. "/share/java-debug-adapter/com.microsoft.java.debug.plugin-*.jar", 1);
     };
   },
 }
