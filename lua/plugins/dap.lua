@@ -132,8 +132,6 @@ return {
       end
     end
   },
-    cwd = "${workspaceFolder}",
-    console = "integratedTerminal",
   -- dap-virtual-text
   {
     "theHamsta/nvim-dap-virtual-text",
@@ -198,17 +196,9 @@ return {
         log_file_level = vim.log.levels.DEBUG,
       })
 
-      -- now define your Jest launch configuration
+      -- Keep only the Attach configuration - file launch handled by dedicated config files
       for _, lang in ipairs({ "javascript", "typescript" }) do
         dap.configurations[lang] = {
-          -- Regular Launch configuration
-          {
-            type = "pwa-node",
-            request = "launch",
-            name = "Launch file",
-            program = "${file}",
-            cwd = "${workspaceFolder}",
-          },
           -- Attach
           {
             type = "pwa-node",
@@ -216,43 +206,6 @@ return {
             name = "Attach",
             processId = require'dap.utils'.pick_process,
             cwd = "${workspaceFolder}",
-          },
-          -- Lauch Typescript
-          {
-            name               = "Launch TS (ts-node)",
-            type               = "pwa-node",
-            request            = "launch",
-            runtimeExecutable  = "node",
-            runtimeArgs        = {
-              "-r", "ts-node/register",   -- hook ts-node
-              "--inspect-brk",            -- pause on entry
-              "${file}",                  -- your current .ts
-            },
-            cwd                    = "${workspaceFolder}",
-            console                = "integratedTerminal",
-            internalConsoleOptions = "neverOpen",
-            sourceMaps             = true,
-            skipFiles = {
-              "<node_internals>/**/*.js",
-              "${workspaceFolder}/node_modules/**/*.js",   -- skip all node_modules
-            },
-          },
-          {
-            name               = "Debug Jest Tests",
-            type               = "pwa-node",
-            request            = "launch",
-            runtimeExecutable  = "node",
-            runtimeArgs        = {
-              "./node_modules/jest/bin/jest.js",
-              "--runInBand",
-              "--inspect-brk",              -- pause before tests run
-              "${file}",                    -- only this test file
-            },
-            cwd                    = "${workspaceFolder}",
-            console                = "integratedTerminal",
-            internalConsoleOptions = "neverOpen",
-            sourceMaps             = true,
-            skipFiles              = { "<node_internals>/**/*.js" },
           },
         }
       end
