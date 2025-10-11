@@ -333,7 +333,6 @@ local config = {
         end
         return {}
       else
-        vim.notify("Java debug adapter found: " .. debug_jar, vim.log.levels.DEBUG)
         return { debug_jar }
       end
     end)();
