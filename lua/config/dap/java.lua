@@ -48,7 +48,6 @@ end
 function M:debug_main()
   local dap = require("dap")
   local jdtls = require("jdtls") -- Ensure jdtls is loaded
-  local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
   -- Ensure jdtls is initialized
   if not jdtls or not jdtls.setup_dap then
@@ -59,16 +58,34 @@ function M:debug_main()
   -- Setup DAP
   jdtls.setup_dap({ hotcodereplace = "auto" })
 
-  -- Get class name from current file
-  local class = get_current_class()
-  local package = vim.fn.expand("%:p:h"):gsub("[/\\]", "."):gsub("^.",""):gsub("^.*src.main.java.", ""):gsub("^.*src.test.java.","")
-  local fqcn = package .. "." .. class
-  if package == "" then
-    fqcn = class
+  -- Get current file class and package info
+  local bufname = vim.api.nvim_buf_get_name(0)
+  local class_name = bufname:match("([^/]+)%.java$")
+  if not class_name then
+    vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
+    return
   end
 
-  print ("Debugging " .. fqcn)
-  dap.continue()
+  -- Determine package from file path
+  local package = vim.fn.expand("%:p:h"):gsub("[/\\]", "."):gsub("^.*src[./\\]main[./\\]java[./\\]", ""):gsub("^.*src[./\\]test[./\\]java[./\\]", "")
+  local fqcn = package ~= "" and (package .. "." .. class_name) or class_name
+
+  -- Get project name using the proper module detection
+  local project = require('config.project')
+  local module_name = project.get_module_name()
+
+  print("Debugging " .. fqcn .. " in module " .. module_name)
+
+  -- Create and run a specific launch configuration without user interaction
+  local launch_config = {
+    type = 'java',
+    request = 'launch',
+    name = "Launch " .. fqcn,
+    mainClass = fqcn,
+    projectName = module_name,
+  }
+
+  dap.run(launch_config)
 end
 
 vim.cmd("command! JavaDebugMain lua require('config.dap.java').debug_main()")
