@@ -68,21 +68,55 @@ function M:debug_main()
   end
 
   print ("Debugging " .. fqcn)
-
-  -- Configure and start debugger
-  dap.configurations.java = {
-    {
-      type = "java",
-      request = "launch",
-      name = "Launch " .. fqcn,
-      mainClass = fqcn,
-      projectName = project_name,
-      javaExec = "java",
-    }
-  }
   dap.continue()
 end
 
 vim.cmd("command! JavaDebugMain lua require('config.dap.java').debug_main()")
 vim.cmd('command! JavaDebugAttachRemote lua require("config.dap.java").attach_to_remote()')
+
+local dap_ok, dap = pcall(require, "dap")
+if dap_ok then
+  dap.configurations.java = {
+    {
+      type = 'java',
+      request = 'attach',
+      name = "Attach to Remote Java Process (port 5005)",
+      hostName = 'localhost',
+      port = 5005,
+    },
+    {
+      type = 'java',
+      request = 'attach',
+      name = "Attach to Remote Java Process (custom port)",
+      hostName = 'localhost',
+      port = function()
+        return tonumber(vim.fn.input('Debug port: ', '5005'))
+      end,
+    },
+    {
+      type = 'java',
+      request = 'launch',
+      name = "Launch Current Java Class",
+      mainClass = function()
+        -- Get current file class name
+        local bufname = vim.api.nvim_buf_get_name(0)
+        local class_name = bufname:match("([^/]+)%.java$")
+        if class_name then
+          -- Try to determine package from file path
+          local package = vim.fn.expand("%:p:h"):gsub("[/\\]", "."):gsub("^.*src[./\\]main[./\\]java[./\\]", ""):gsub("^.*src[./\\]test[./\\]java[./\\]", "")
+          if package and package ~= "" then
+            return package .. "." .. class_name
+          else
+            return class_name
+          end
+        end
+        return vim.fn.input('Main class: ', '')
+      end,
+      projectName = function()
+        local project = require('config.project')
+        return project.get_module_name()
+      end,
+    }
+  }
+end
 return M;
