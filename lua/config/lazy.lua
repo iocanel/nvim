@@ -25,15 +25,39 @@ require("lazy").setup({
     -- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
     -- If you know what you're doing, you can set this to `true` to have all your custom plugins lazy-loaded by default.
     lazy = false,
-    -- It's recommended to leave version=false for now, since a lot the plugin that support versioning,
-    -- have outdated releases, which may break your Neovim install.
-    version = false, -- always use the latest git commit
-    -- version = "*", -- try installing the latest stable version for plugins that support semver
+    -- Pin to specific commits/tags for predictable behavior
+    version = false, -- disable automatic version resolution for manual control
   },
-  install = { colorscheme = { "cattpuccin-latte" } },
-  checker = { enabled = false }, -- automatically check for plugin updates
+  install = { 
+    colorscheme = { "cattpuccin-latte" },
+    -- Don't automatically install missing plugins
+    missing = false,
+  },
+  -- Keep automatic updates disabled for predictable environment
+  checker = { 
+    enabled = false, -- disable automatic update checks
+    notify = false,  -- disable update notifications
+  },
+  change_detection = {
+    enabled = false, -- disable automatic config reload for stability
+    notify = false,  -- disable change notifications
+  },
+  -- Git configuration for reproducible builds
+  git = {
+    log = { "-8" }, -- show last 8 commits when viewing git log
+    timeout = 120,   -- git timeout in seconds
+    url_format = "https://github.com/%s.git", -- use https for reproducibility
+    filter = true,   -- use git clone --filter=blob:none for faster clones
+  },
   performance = {
+    cache = {
+      enabled = true,
+      path = vim.fn.stdpath("cache") .. "/lazy/cache",
+      ttl = 3600 * 24 * 5, -- 5 days cache
+    },
+    reset_packpath = true, -- reset the package path to improve startup time
     rtp = {
+      reset = true, -- reset the runtime path to $VIMRUNTIME and your config directory
       -- disable some rtp plugins
       disabled_plugins = {
         "transparent",
@@ -46,6 +70,19 @@ require("lazy").setup({
         "tutor",
         "zipPlugin",
       },
+    },
+  },
+  -- UI customization with git commit info
+  ui = {
+    border = "none",
+    size = {
+      width = 0.8,
+      height = 0.8,
+    },
+    custom_keys = {
+      ["<localleader>d"] = function(plugin)
+        vim.cmd("!git -C " .. plugin.dir .. " log --oneline -10")
+      end,
     },
   },
 })
