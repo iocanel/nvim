@@ -304,9 +304,39 @@ local config = {
   --
   -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
   init_options = {
-    bundles = {
-      vim.fn.glob(mason_data .. "/share/java-debug-adapter/com.microsoft.java.debug.plugin-*.jar", 1);
-    };
+    bundles = (function()
+      local debug_jar = vim.fn.glob(mason_data .. "/share/java-debug-adapter/com.microsoft.java.debug.plugin-*.jar", 1)
+
+      if debug_jar == "" then
+        -- Try to install java-debug-adapter silently via Mason
+        local mason_registry_ok, mason_registry = pcall(require, "mason-registry")
+        if mason_registry_ok then
+          local java_debug_pkg = mason_registry.get_package("java-debug-adapter")
+          if java_debug_pkg and not java_debug_pkg:is_installed() then
+            vim.notify("Installing java-debug-adapter automatically...", vim.log.levels.INFO)
+            java_debug_pkg:install():once("closed", function()
+              -- Re-check for the JAR after installation
+              local new_debug_jar = vim.fn.glob(mason_data .. "/share/java-debug-adapter/com.microsoft.java.debug.plugin-*.jar", 1)
+              if new_debug_jar ~= "" then
+                vim.notify("java-debug-adapter installed successfully", vim.log.levels.INFO)
+                -- Restart JDTLS to pick up the new debug adapter
+                vim.defer_fn(function()
+                  pcall(vim.cmd, "LspRestart jdtls")
+                end, 1000)
+              else
+                vim.notify("java-debug-adapter installation may have failed", vim.log.levels.WARN)
+              end
+            end)
+          end
+        else
+          vim.notify("Mason not available. Install java-debug-adapter manually with: :MasonInstall java-debug-adapter", vim.log.levels.WARN)
+        end
+        return {}
+      else
+        vim.notify("Java debug adapter found: " .. debug_jar, vim.log.levels.DEBUG)
+        return { debug_jar }
+      end
+    end)();
   },
 }
 
