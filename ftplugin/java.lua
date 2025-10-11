@@ -29,7 +29,7 @@ local function download_file_http(url, destination)
   if vim.v.shell_error == 0 and vim.fn.filereadable(destination) == 1 then
     return true, result
   end
-  
+
   -- Try with wget if curl fails
   cmd = string.format("wget -O '%s' '%s'", destination, url)
   result = vim.fn.system(cmd)
@@ -40,13 +40,13 @@ end
 local function ensure_maven_artifact(group_id, artifact_id, version, glob_pattern, central_url)
   local jar_list = vim.fn.split(vim.fn.glob(glob_pattern, 1), "\n")
   table.sort(jar_list)
-  
+
   if #jar_list > 0 then
     return jar_list[#jar_list]
   end
-  
+
   vim.notify(string.format("Downloading %s:%s:%s...", group_id, artifact_id, version), vim.log.levels.INFO)
-  
+
   -- Try Maven first
   local success, result = download_maven_artifact(group_id, artifact_id, version)
   if success then
@@ -57,21 +57,21 @@ local function ensure_maven_artifact(group_id, artifact_id, version, glob_patter
       return jar_list[#jar_list]
     end
   end
-  
+
   -- Try HTTP download if Maven fails and URL is provided
   if central_url then
     local destination_dir = string.format("%s/%s/%s/%s", 
       m2_repo, group_id:gsub("%.", "/"), artifact_id, version)
     vim.fn.mkdir(destination_dir, "p")
     local destination = string.format("%s/%s-%s.jar", destination_dir, artifact_id, version)
-    
+
     success, result = download_file_http(central_url, destination)
     if success then
       vim.notify(string.format("Successfully downloaded %s:%s:%s via HTTP", group_id, artifact_id, version), vim.log.levels.INFO)
       return destination
     end
   end
-  
+
   vim.notify(string.format("Failed to download %s:%s:%s", group_id, artifact_id, version), vim.log.levels.ERROR)
   return nil
 end
