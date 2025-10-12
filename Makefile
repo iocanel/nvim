@@ -2,12 +2,12 @@ all: test
 
 test: test_java test_go test_python test_javascript test_typescript test_rust test_c
 
-test_java: jdtls dap_java
+test_java: lsp_java dap_java
 
 test_go: go_lsp go_dap
 
-jdtls:
-	nvim --headless "+luafile tests/java/jdtls.lua"
+lsp_java:
+	nvim --headless "+luafile tests/java/lsp.lua"
 
 dap_java:
 	nvim --headless "+luafile tests/java/dap.lua"

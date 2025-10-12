@@ -44,16 +44,30 @@ if vim.bo.filetype ~= "java" then
   die("Buffer filetype is not 'java' (got: " .. tostring(vim.bo.filetype) .. ")")
 end
 
--- Wait for jdtls to attach & initialize
-local timeout = tonumber(vim.env.JDTLS_WAIT_MS) or 15000
+-- Wait for jdtls to attach & fully initialize
+local timeout = tonumber(vim.env.JDTLS_WAIT_MS) or 25000
 local ok = vim.wait(timeout, function()
   for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
     if client.name == "jdtls" and client.initialized then
-      return true
+      -- Wait for JDTLS to be in "ServiceReady" state
+      -- This happens after project analysis is complete
+      local caps = client.server_capabilities or {}
+      
+      -- More lenient check: just need some key capabilities
+      local has_basic_caps = caps.hoverProvider 
+                          or caps.definitionProvider 
+                          or caps.textDocumentSync ~= nil
+                          or caps.documentSymbolProvider
+      
+      if has_basic_caps then
+        -- Additional wait to ensure stability after ServiceReady
+        vim.wait(2000)
+        return true
+      end
     end
   end
   return false
-end, 200)
+end, 1000)
 
 -- Restore cwd regardless of outcome
 pcall(vim.fn.chdir, prev_cwd)
