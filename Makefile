@@ -58,21 +58,50 @@ c_lsp:
 c_dap:
 	nvim --headless "+luafile tests/c/dap.lua"
 
-# Container targets
+# Container targets (configurable backend)
+CONTAINER_BACKEND ?= ubuntu
+CONTAINER_IMAGE = iocanel/nvim
+
 container-build:
-	docker build -f Dockerfile.nixos -t neovim-dwim .
+	$(MAKE) container-$(CONTAINER_BACKEND)-build
 
 container-test: container-build
-	docker run --rm -v $(PWD):/workspace neovim-dwim
+	$(MAKE) container-$(CONTAINER_BACKEND)-test
 
 container-dev: container-build
-	docker run --rm -it -v $(PWD):/workspace neovim-dwim nix-shell
+	$(MAKE) container-$(CONTAINER_BACKEND)-dev
 
 container-shell: container-build
-	docker run --rm -it -v $(PWD):/workspace neovim-dwim bash
+	$(MAKE) container-$(CONTAINER_BACKEND)-shell
 
 container-clean:
-	docker rmi neovim-dwim 2>/dev/null || true
+	docker rmi $(CONTAINER_IMAGE)-ubuntu $(CONTAINER_IMAGE)-nixos 2>/dev/null || true
+
+# Ubuntu container targets
+container-ubuntu-build:
+	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE)-ubuntu .
+
+container-ubuntu-test: container-ubuntu-build
+	docker run --rm -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu
+
+container-ubuntu-dev: container-ubuntu-build
+	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu bash
+
+container-ubuntu-shell: container-ubuntu-build
+	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu bash
+
+# NixOS container targets
+container-nixos-build:
+	docker build -f Dockerfile.nixos -t $(CONTAINER_IMAGE)-nixos .
+
+container-nixos-test: container-nixos-build
+	docker run --rm -v $(PWD):/workspace $(CONTAINER_IMAGE)-nixos
+
+container-nixos-dev: container-nixos-build
+	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-nixos nix-shell
+
+container-nixos-shell: container-nixos-build
+	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-nixos bash
 
 # Help target
 help:
@@ -89,16 +118,29 @@ help:
 	@echo "  test_rust         - Test Rust DAP/LSP (rust_lsp + rust_dap)"
 	@echo "  test_c            - Test C DAP/LSP (c_lsp + c_dap)"
 	@echo ""
-	@echo "Container Testing (NixOS-based):"
-	@echo "  container-build   - Build NixOS container with all dependencies"
-	@echo "  container-test    - Run all tests in NixOS container"
-	@echo "  container-dev     - Interactive development environment in container"
+	@echo "Container Testing (Ubuntu by default, configurable):"
+	@echo "  container-build   - Build container (CONTAINER_BACKEND=ubuntu|nixos)"
+	@echo "  container-test    - Run all tests in container"
+	@echo "  container-dev     - Interactive development environment"
 	@echo "  container-shell   - Shell access to container"
-	@echo "  container-clean   - Remove container and images"
+	@echo "  container-clean   - Remove all container images"
+	@echo ""
+	@echo "Ubuntu Container (default):"
+	@echo "  container-ubuntu-build   - Build Ubuntu-based container"
+	@echo "  container-ubuntu-test    - Test in Ubuntu container"
+	@echo "  container-ubuntu-dev     - Ubuntu development environment"
+	@echo ""
+	@echo "NixOS Container:"
+	@echo "  container-nixos-build    - Build NixOS-based container"
+	@echo "  container-nixos-test     - Test in NixOS container"
+	@echo "  container-nixos-dev      - NixOS development environment"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make test                # Test locally"
-	@echo "  make container-test      # Test in NixOS container"
-	@echo "  make container-dev       # Interactive development"
+	@echo "  make test                           # Test locally"
+	@echo "  make container-test                 # Test in Ubuntu container (default)"
+	@echo "  make CONTAINER_BACKEND=nixos container-test  # Test in NixOS container"
+	@echo "  make container-ubuntu-test          # Test specifically in Ubuntu"
+	@echo "  make container-nixos-test           # Test specifically in NixOS"
+	@echo "  make container-dev                  # Interactive development"
 
 .PHONY: help container-build container-test container-dev container-shell container-clean

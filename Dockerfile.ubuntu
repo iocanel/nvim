@@ -1,0 +1,94 @@
+FROM ubuntu:22.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+# Install system dependencies  
+RUN apt-get update && apt-get install -y \
+    # Core utilities
+    curl \
+    wget \
+    git \
+    unzip \
+    make \
+    cmake \
+    build-essential \
+    pkg-config \
+    # Languages and tools
+    python3 \
+    python3-pip \
+    python3-venv \
+    # Java
+    openjdk-21-jdk \
+    # C/C++ debugging
+    gdb \
+    lldb \
+    # Additional utilities
+    ripgrep \
+    fd-find \
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Neovim 0.10.2 (stable version with modern APIs)
+RUN curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux64.tar.gz && \
+    tar -C /opt -xzf nvim-linux64.tar.gz && \
+    ln -s /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim && \
+    rm nvim-linux64.tar.gz
+
+# Install Node.js 22 (LTS) via NodeSource
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install tree-sitter-cli via npm (now with newer Node.js)
+RUN npm install -g tree-sitter-cli
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install Go 1.23.4 (latest stable version)
+RUN curl -LO https://go.dev/dl/go1.23.4.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz && \
+    rm go1.23.4.linux-amd64.tar.gz
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+# Install Python debugpy
+RUN python3 -m pip install debugpy
+
+# Set up environment
+WORKDIR /workspace
+ENV NVIM_APPNAME=nvim \
+    XDG_DATA_HOME=/opt/xdg/data \
+    XDG_STATE_HOME=/opt/xdg/state \
+    XDG_CACHE_HOME=/opt/xdg/cache \
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+
+# Copy Neovim configuration
+COPY ftplugin /root/.config/nvim/ftplugin/
+COPY lua /root/.config/nvim/lua/
+COPY templates /root/.config/nvim/templates/
+COPY init.lua /root/.config/nvim/
+COPY lazy-lock.json /root/.config/nvim/
+
+# Install Neovim plugins and LSP servers
+RUN nvim --headless "+Lazy! sync" "+qa"
+RUN nvim --headless "+MasonUpdate" "+qa"
+RUN nvim --headless "+MasonInstall jdtls java-debug-adapter java-test pyright typescript-language-server js-debug-adapter rust-analyzer gopls cpptools lua-language-server html-lsp css-lsp json-lsp" "+qa"
+RUN nvim --headless "+lua pcall(function() local ok, mti = pcall(require,'mason-tool-installer'); if ok then mti.install() end end)" "+qa"
+
+# Install TreeSitter parsers
+RUN nvim --headless "+TSUpdateSync lua vim vimdoc bash json yaml markdown markdown_inline javascript typescript html css java python go rust" "+qa"
+
+# Copy tests and Makefile
+COPY tests /workspace/tests/
+COPY Makefile /workspace/
+
+# Default command
+CMD ["make", "test"]
+
+LABEL maintainer="Ioannis Canellos" \
+      description="Ubuntu-based container for testing Neovim configuration" \
+      languages="Java,Go,Python,JavaScript,TypeScript,Rust,C" \
+      features="LSP,DAP,TreeSitter"
