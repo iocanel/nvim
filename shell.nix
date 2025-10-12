@@ -10,6 +10,9 @@ pkgs.mkShell {
     wget
     unzip
     
+    # Neovim editor
+    neovim
+    
     # Search and file utilities (from your home-manager config)
     fzf
     ripgrep
