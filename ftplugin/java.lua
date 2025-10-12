@@ -2,18 +2,18 @@
 
 -- Use XDG Base Directory specification with fallbacks
 local home = os.getenv("HOME")
-local xdg_cache_home = os.getenv("XDG_CACHE_HOME") or (home .. "/.cache")
-local xdg_data_home = os.getenv("XDG_DATA_HOME") or (home .. "/.local/share")
+local data_dir  = vim.fn.stdpath("data")  -- e.g. /opt/xdg/data/nvim
+local cache_dir = vim.fn.stdpath("cache") -- e.g. /opt/xdg/cache/nvim
 
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 -- JDTLS workspace uses cache directory (can be regenerated)
-local workspace_dir = xdg_cache_home .. '/nvim/jdtls/data/' .. project_name
+local workspace_dir = cache_dir .. '/jdtls/data/' .. project_name
 
 -- Maven repository location
 local m2_repo = os.getenv("MAVEN_REPOSITORY") or (home .. "/.m2/repository")
 
 -- Mason uses data directory (persistent tools/plugins)
-local mason_data = xdg_data_home .. '/nvim/mason'
+local mason_data = data_dir .. '/mason'
 
 -- Function to download Maven artifact using mvn dependency:get
 local function download_maven_artifact(group_id, artifact_id, version)
@@ -60,7 +60,7 @@ local function ensure_maven_artifact(group_id, artifact_id, version, glob_patter
 
   -- Try HTTP download if Maven fails and URL is provided
   if central_url then
-    local destination_dir = string.format("%s/%s/%s/%s", 
+    local destination_dir = string.format("%s/%s/%s/%s",
       m2_repo, group_id:gsub("%.", "/"), artifact_id, version)
     vim.fn.mkdir(destination_dir, "p")
     local destination = string.format("%s/%s-%s.jar", destination_dir, artifact_id, version)
@@ -106,32 +106,32 @@ local jdk23_path = find_temurin_jdk("23")
 local config = {
   -- The command that starts the language server
 --  -- See: https://github.com/eclipse/eclipse.jdt.ls#running-from-the-command-line
---  
---  /home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/jre/21.0.6-linux-x86_64/bin/java 
-  --  --add-modules=ALL-SYSTEM 
-  --  --add-opens java.base/java.util=ALL-UNNAMED 
-  --  --add-opens java.base/java.lang=ALL-UNNAMED 
-  --  --add-opens java.base/sun.nio.fs=ALL-UNNAMED 
-  --  -Declipse.application=org.eclipse.jdt.ls.core.id1 
-  --  -Dosgi.bundles.defaultStartLevel=4 
-  --  -Declipse.product=org.eclipse.jdt.ls.core.product 
-  --  -Djava.import.generatesMetadataFilesAtProjectRoot=false 
-  --  -DDetectVMInstallationsJob.disabled=true 
-  --  -Dfile.encoding=utf8 
-  --  -XX:+UseParallelGC 
-  --  -XX:GCTimeRatio=4 
-  --  -XX:AdaptiveSizePolicyWeight=90 
-  --  -Dsun.zip.disableMemoryMapping=true 
-  --  -Xmx1G 
-  --  -Xms100m 
-  --  -Xlog:disable 
-  --  -javaagent:/home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/lombok/lombok-1.18.36.jar 
-  --  -XX:+HeapDumpOnOutOfMemoryError 
-  --  -XX:HeapDumpPath=/home/iocanel/.config/Code/User/workspaceStorage/84e3648a41ba8f3364fb9bc34a2dfeaf/redhat.java 
-  --  -Daether.dependencyCollector.impl=bf 
-  --  -jar /home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/server/plugins/org.eclipse.equinox.launcher_1.6.1000.v20250131-0606.jar 
-  --  -configuration /home/iocanel/.config/Code/User/globalStorage/redhat.java/1.40.0/config_linux 
-  --  -data /home/iocanel/.config/Code/User/workspaceStorage/84e3648a41ba8f3364fb9bc34a2dfeaf/redhat.java/jdt_ws 
+--
+--  /home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/jre/21.0.6-linux-x86_64/bin/java
+  --  --add-modules=ALL-SYSTEM
+  --  --add-opens java.base/java.util=ALL-UNNAMED
+  --  --add-opens java.base/java.lang=ALL-UNNAMED
+  --  --add-opens java.base/sun.nio.fs=ALL-UNNAMED
+  --  -Declipse.application=org.eclipse.jdt.ls.core.id1
+  --  -Dosgi.bundles.defaultStartLevel=4
+  --  -Declipse.product=org.eclipse.jdt.ls.core.product
+  --  -Djava.import.generatesMetadataFilesAtProjectRoot=false
+  --  -DDetectVMInstallationsJob.disabled=true
+  --  -Dfile.encoding=utf8
+  --  -XX:+UseParallelGC
+  --  -XX:GCTimeRatio=4
+  --  -XX:AdaptiveSizePolicyWeight=90
+  --  -Dsun.zip.disableMemoryMapping=true
+  --  -Xmx1G
+  --  -Xms100m
+  --  -Xlog:disable
+  --  -javaagent:/home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/lombok/lombok-1.18.36.jar
+  --  -XX:+HeapDumpOnOutOfMemoryError
+  --  -XX:HeapDumpPath=/home/iocanel/.config/Code/User/workspaceStorage/84e3648a41ba8f3364fb9bc34a2dfeaf/redhat.java
+  --  -Daether.dependencyCollector.impl=bf
+  --  -jar /home/iocanel/.vscode/extensions/redhat.java-1.40.0-linux-x64/server/plugins/org.eclipse.equinox.launcher_1.6.1000.v20250131-0606.jar
+  --  -configuration /home/iocanel/.config/Code/User/globalStorage/redhat.java/1.40.0/config_linux
+  --  -data /home/iocanel/.config/Code/User/workspaceStorage/84e3648a41ba8f3364fb9bc34a2dfeaf/redhat.java/jdt_ws
   --  --pipe=/run/user/1000/lsp-20381af389549d3e8cff28c4e40f57c9.sock
   -- Build command dynamically to handle optional Lombok
   cmd = vim.tbl_flatten({
@@ -150,7 +150,7 @@ local config = {
     '-XX:G1HeapRegionSize=16m',
 
     -- Class Data Sharing for faster startup (CDS enabled by default in Java 21+)
-    '-XX:SharedArchiveFile=' .. xdg_cache_home .. '/nvim/jdtls/classes.jsa',
+    '-XX:SharedArchiveFile=' .. cache_dir .. '/jdtls/classes.jsa',
     '-Xshare:auto',
 
     -- String and memory optimizations
@@ -448,7 +448,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 
 -- Function to dump JDTLS config to file
 local function dump_jdtls_config()
-  local config_dir = xdg_data_home .. '/nvim/jdtls'
+  local config_dir = data_dir .. '/jdtls'
   local config_file = config_dir .. '/current.config'
 
   -- Ensure directory exists
