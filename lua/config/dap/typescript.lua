@@ -132,4 +132,50 @@ end
 vim.cmd("command! TypescriptDebug lua require('config.dap.typescript'):debug()")
 vim.cmd("command! TypescriptDebugTest lua require('config.dap.typescript'):debug_test()")
 
+-- DAP Interface Implementation
+function M.is_filetype_supported(filetype, filename)
+  return filetype == "typescript" or (filename and filename:match("%.ts$"))
+end
+
+function M.is_test_file(filename)
+  if not filename then return false end
+  -- TS test patterns: *.test.ts, *.spec.ts, *_test.ts, or in __tests__/ directory
+  return filename:match("%.test%.ts$") or filename:match("%.spec%.ts$") or filename:match("_test%.ts$") or filename:find("__tests__/")
+end
+
+function M.is_in_test_function(filename, line_no)
+  if not M.is_test_file(filename) then
+    return false, nil
+  end
+  
+  -- Search upward from current line to find test function
+  for i = line_no, math.max(1, line_no - 50), -1 do
+    local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1] or ""
+    
+    -- TS test functions: it(, test(, describe(
+    local test_name = line:match("it%s*%([\"']([^\"']+)[\"']") or 
+                      line:match("test%s*%([\"']([^\"']+)[\"']") or
+                      line:match("describe%s*%([\"']([^\"']+)[\"']")
+    
+    if test_name then
+      return true, test_name
+    end
+  end
+  
+  return false, nil
+end
+
+function M.get_debug_command()
+  return "TypescriptDebug"
+end
+
+function M.get_debug_test_command()
+  return "TypescriptDebugTest"
+end
+
+-- TypeScript doesn't currently support specific test function debugging
+function M.get_debug_test_function_command()
+  return nil
+end
+
 return M

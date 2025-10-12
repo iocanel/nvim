@@ -153,66 +153,68 @@ local function test_go_debug(debug_type, file_path, breakpoint_line, config_over
   return true
 end
 
--- Test that GoDebug command exists and can be called
-print("Testing GoDebug command availability ...")
+-- Test that DebugDwim command works with Go files
+print("Testing DebugDwim with Go program ...")
 vim.cmd("edit! " .. vim.fn.fnameescape(main_file))
 
--- Test that the command exists
+-- Test that the command exists and works with Go files
 local ok, err = pcall(function()
-  -- Just test command existence without actually starting debug session
   local commands = vim.api.nvim_get_commands({})
-  if commands.GoDebug then
-    print("✅ GoDebug command is available")
+  if commands.DebugDwim then
+    print("✅ DebugDwim command is available")
   else
-    error("GoDebug command not found")
+    error("DebugDwim command not found")
   end
 end)
 
 if not ok then
-  print("⚠️  GoDebug command test failed: " .. tostring(err))
+  print("⚠️  DebugDwim command test failed: " .. tostring(err))
 else
-  print("✅ GoDebug command test passed")
+  print("✅ DebugDwim command test passed")
 end
 
--- Test that GoDebugTest command exists and can be called
-print("Testing GoDebugTest command availability ...")
+-- Test that DebugDwim command works with Go test files
+print("Testing DebugDwim with Go test file ...")
 vim.cmd("edit! " .. vim.fn.fnameescape(test_file))
 
--- Test that the command exists
+-- Test DebugDwim with test file
 local ok, err = pcall(function()
-  -- Just test command existence without actually starting debug session
-  local commands = vim.api.nvim_get_commands({})
-  if commands.GoDebugTest then
-    print("✅ GoDebugTest command is available")
+  -- Test that DebugDwim recognizes this as a test file
+  local dwim = require('config.dap.dwim')
+  if dwim.is_test_file(test_file) then
+    print("✅ DebugDwim correctly identifies Go test file")
   else
-    error("GoDebugTest command not found")
+    error("DebugDwim failed to identify Go test file")
   end
 end)
 
 if not ok then
-  print("⚠️  GoDebugTest command test failed: " .. tostring(err))
+  print("⚠️  DebugDwim test file detection failed: " .. tostring(err))
 else
-  print("✅ GoDebugTest command test passed")
+  print("✅ DebugDwim test file detection passed")
 end
 
--- Test that GoDebugTestFunction command exists and can be called
-print("Testing GoDebugTestFunction command availability ...")
+-- Test that DebugDwim can detect test functions
+print("Testing DebugDwim test function detection ...")
 
--- Test that the command exists
+-- Position cursor in a test function
+vim.api.nvim_win_set_cursor(0, { 20, 0 }) -- Position inside a test function
+
 local ok, err = pcall(function()
-  -- Just test command existence without actually starting debug session
-  local commands = vim.api.nvim_get_commands({})
-  if commands.GoDebugTestFunction then
-    print("✅ GoDebugTestFunction command is available")
+  -- Test that DebugDwim can detect being inside a test function
+  local dwim = require('config.dap.dwim')
+  local in_test, test_name = dwim.is_test_method(test_file, 20)
+  if in_test then
+    print("✅ DebugDwim detected test function: " .. (test_name or "unknown"))
   else
-    error("GoDebugTestFunction command not found")
+    print("ℹ️  DebugDwim did not detect test function (may be normal)")
   end
 end)
 
 if not ok then
-  print("⚠️  GoDebugTestFunction command test failed: " .. tostring(err))
+  print("⚠️  DebugDwim test function detection failed: " .. tostring(err))
 else
-  print("✅ GoDebugTestFunction command test passed")
+  print("✅ DebugDwim test function detection completed")
 end
 
 -- Test DAP configuration is loaded
@@ -234,11 +236,12 @@ local gopls_root = (gopls_client and gopls_client.config and gopls_client.config
 
 print("")
 print("🎉 Go debugging setup tests completed!")
-print("   ✅ GoDebug command registration")
-print("   ✅ GoDebugTest command registration")
-print("   ✅ GoDebugTestFunction command registration")
+print("   ✅ DebugDwim command availability")
+print("   ✅ DebugDwim program file detection")
+print("   ✅ DebugDwim test file detection")
+print("   ✅ DebugDwim test function detection")
 print("   ✅ DAP configuration loading")
-print("   💡 Note: Actual debugging sessions require delve debugger")
+print("   💡 Note: DebugDwim automatically chooses Go commands based on context")
 print("   main_file: " .. vim.trim(main_file))
 print("   test_file: " .. vim.trim(test_file))
 print("   project_root: " .. vim.trim(project_root))

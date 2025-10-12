@@ -110,6 +110,8 @@ vim.keymap.set('n', '<leader>ef', editor.focus_toggle, { desc = 'focus mode togg
 --
 local dap_java = require("config.dap.java")
 local dapui = require("dapui")
+vim.keymap.set('n', '<leader>dd', "<cmd>DebugDwim<cr>", {desc = "debug dwim"})
+vim.keymap.set('n', '<leader>dq', "<cmd>DapCloseAll<cr>", {desc = "debug close all"})
 vim.keymap.set('n', '<leader>da', dap_java.attach_to_remote, {desc = "debug remote"})
 vim.keymap.set('n', '<leader>di', "<cmd>DapStepIn<cr>", {desc = "dap step in"})
 vim.keymap.set('n', '<leader>do', "<cmd>DapStepOver<cr>", {desc = "dap step over"})

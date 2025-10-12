@@ -68,7 +68,7 @@ if not ok_jdtls then
   die("require('jdtls') failed — nvim-jdtls not available.")
 end
 
--- In CI/headless, compile first so JavaDebug has something to run
+-- In CI/headless, compile first so DebugDwim has something to run
 pcall(function() jdtls.compile("full") end)
 
 -- Prepare breakpoint on line 9 (cursor-based API)
@@ -160,16 +160,16 @@ local function test_debug_command(command_name, file_path, breakpoint_line)
   return true
 end
 
--- Test JavaDebug
-test_debug_command("JavaDebug", main_file, 9)
+-- Test DebugDwim
+test_debug_command("DebugDwim", main_file, 9)
 
--- Test JavaDebugTestClass
-test_debug_command("JavaDebugTestClass", test_file, 11)
+-- Test DebugDwim
+test_debug_command("DebugDwim", test_file, 11)
 
--- Test JavaDebugTestMethod (cursor should be on the test method)
+-- Test DebugDwim (cursor should be on the test method)
 vim.cmd("edit! " .. vim.fn.fnameescape(test_file))
 vim.api.nvim_win_set_cursor(0, { 10, 0 }) -- Position cursor on @Test annotation
-test_debug_command("JavaDebugTestMethod", test_file, 11)
+test_debug_command("DebugDwim", test_file, 11)
 
 -- Print final success
 pcall(vim.fn.chdir, prev_cwd)
@@ -177,7 +177,7 @@ pcall(vim.fn.chdir, prev_cwd)
 local jdtls_root = (jdtls_client.config and jdtls_client.config.root_dir) or "(unknown)"
 
 print("🎉 All debug commands tested successfully!")
-print("   Commands tested: JavaDebug, JavaDebugTestClass, JavaDebugTestMethod")
+print("   Command tested: DebugDwim (auto-detects context)")
 print("   main_file: " .. vim.trim(main_file))
 print("   test_file: " .. vim.trim(test_file))
 print("   project_root: " .. vim.trim(project_root))

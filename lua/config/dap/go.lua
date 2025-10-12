@@ -214,4 +214,47 @@ vim.cmd("command! GoDebug lua require('config.dap.go').debug_program()")
 vim.cmd("command! GoDebugTest lua require('config.dap.go').debug_test()")
 vim.cmd("command! GoDebugTestFunction lua require('config.dap.go').debug_test_function()")
 
+-- DAP Interface Implementation
+function M.is_filetype_supported(filetype, filename)
+  return filetype == "go" or (filename and filename:match("%.go$"))
+end
+
+function M.is_test_file(filename)
+  if not filename then return false end
+  -- Go test patterns: *_test.go
+  return filename:match("_test%.go$")
+end
+
+function M.is_in_test_function(filename, line_no)
+  if not M.is_test_file(filename) then
+    return false, nil
+  end
+  
+  -- Search upward from current line to find test function
+  for i = line_no, math.max(1, line_no - 50), -1 do
+    local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1] or ""
+    
+    -- Go test functions: func Test*(t *testing.T)
+    local test_func = line:match("func%s+(Test%w+)%(")
+    if test_func then
+      return true, test_func
+    end
+  end
+  
+  return false, nil
+end
+
+function M.get_debug_command()
+  return "GoDebug"
+end
+
+function M.get_debug_test_command()
+  return "GoDebugTest"
+end
+
+-- Go supports specific test function debugging
+function M.get_debug_test_function_command()
+  return "GoDebugTestFunction"
+end
+
 return M

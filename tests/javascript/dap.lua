@@ -113,9 +113,9 @@ local function test_javascript_debug(debug_type, file_path, breakpoint_line)
 
   -- Use the appropriate debug command instead of hardcoded config
   if debug_type == "program" then
-    vim.cmd("JavascriptDebug")
+    vim.cmd("DebugDwim")
   else
-    vim.cmd("JavascriptDebugTest")
+    vim.cmd("DebugDwim")
   end
 
   -- Wait for session to start
@@ -168,8 +168,8 @@ vim.cmd("edit! " .. vim.fn.fnameescape(test_file))
 vim.api.nvim_win_set_cursor(0, { 9, 0 }) -- Position on expect statement
 dap.set_breakpoint()
 
--- Use JavascriptDebugTest command
-vim.cmd("JavascriptDebugTest")
+-- Use DebugDwim command
+vim.cmd("DebugDwim")
 
 -- Wait for session to start
 local dap_timeout = tonumber(vim.env.DAP_WAIT_MS) or 20000
@@ -209,8 +209,8 @@ local ts_root = (ts_client and ts_client.config and ts_client.config.root_dir) o
 
 print("")
 print("🎉 JavaScript debugging tests completed!")
-print("   ✅ Program debugging: successful (using JavascriptDebug)")
-print("   ✅ Test file debugging: successful (using JavascriptDebugTest)")
+print("   ✅ Program debugging: successful (using DebugDwim)")
+print("   ✅ Test file debugging: successful (using DebugDwim)")
 print("   main_file: " .. vim.trim(main_file))
 print("   test_file: " .. vim.trim(test_file))
 print("   project_root: " .. vim.trim(project_root))

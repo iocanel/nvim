@@ -74,7 +74,6 @@ function M:debug()
   local project = require('config.project')
   local module_name = project.get_module_name()
 
-  print("Debugging " .. fqcn .. " in module " .. module_name)
 
   -- Create and run a specific launch configuration without user interaction
   local launch_config = {
@@ -89,13 +88,40 @@ function M:debug()
 end
 
 function M:debug_test()
-  -- For now, just call the main debug function
-  -- In the future, this could be enhanced to handle test-specific logic
-  self:debug()
+  local jdtls = require("jdtls")
+  -- Ensure jdtls is available
+  if not jdtls or not jdtls.test_class then
+    vim.notify("jdtls is not available or test_class function not found. Ensure jdtls is properly configured with test bundles.", vim.log.levels.ERROR)
+    return
+  end
+  -- Get current file info to verify it's a Java file
+  local bufname = vim.api.nvim_buf_get_name(0)
+  if not bufname:match("%.java$") then
+    vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
+    return
+  end
+  jdtls.test_class()
+end
+
+function M:debug_test_method()
+  local jdtls = require("jdtls")
+  -- Ensure jdtls is available
+  if not jdtls or not jdtls.test_nearest_method then
+    vim.notify("jdtls is not available or test_nearest_method function not found. Ensure jdtls is properly configured with test bundles.", vim.log.levels.ERROR)
+    return
+  end
+  -- Get current file info to verify it's a Java file
+  local bufname = vim.api.nvim_buf_get_name(0)
+  if not bufname:match("%.java$") then
+    vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
+    return
+  end
+  jdtls.test_nearest_method()
 end
 
 vim.cmd("command! JavaDebug lua require('config.dap.java'):debug()")
 vim.cmd("command! JavaDebugTest lua require('config.dap.java'):debug_test()")
+vim.cmd("command! JavaDebugTestMethod lua require('config.dap.java'):debug_test_method()")
 vim.cmd('command! JavaDebugAttachRemote lua require("config.dap.java").attach_to_remote()')
 
 local dap_ok, dap = pcall(require, "dap")
@@ -143,4 +169,60 @@ if dap_ok then
     }
   }
 end
+-- DAP Interface Implementation
+function M.is_filetype_supported(filetype, filename)
+  return filetype == "java" or (filename and filename:match("%.java$"))
+end
+
+function M.is_test_file(filename)
+  if not filename then return false end
+  -- Java test patterns: *Test.java, *Tests.java, or in test/ directory
+  return filename:match("Test%.java$") or filename:match("Tests%.java$") or filename:find("/test/")
+end
+
+function M.is_in_test_function(filename, line_no)
+  if not M.is_test_file(filename) then
+    return false, nil
+  end
+  
+  -- Search upward from current line to find test method
+  for i = line_no, math.max(1, line_no - 50), -1 do
+    local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1] or ""
+    
+    -- Java test methods: @Test annotation or method names starting with "test"
+    if line:match("@Test") then
+      -- Look for method definition in next few lines
+      for j = i, math.min(vim.api.nvim_buf_line_count(0), i + 5) do
+        local method_line = vim.api.nvim_buf_get_lines(0, j - 1, j, false)[1] or ""
+        local method_name = method_line:match("void%s+(%w+)%s*%(") or method_line:match("public%s+void%s+(%w+)%s*%(")
+        if method_name then
+          return true, method_name
+        end
+      end
+      return true, nil
+    end
+    
+    -- Direct test method pattern
+    local method_name = line:match("void%s+(test%w*)%s*%(") or line:match("public%s+void%s+(test%w*)%s*%(")
+    if method_name then
+      return true, method_name
+    end
+  end
+  
+  return false, nil
+end
+
+function M.get_debug_command()
+  return "JavaDebug"
+end
+
+function M.get_debug_test_command()
+  return "JavaDebugTest"
+end
+
+-- Java supports specific test method debugging
+function M.get_debug_test_function_command()
+  return "JavaDebugTestMethod"
+end
+
 return M;

@@ -194,6 +194,47 @@ local function test_python_debug(debug_type, file_path, breakpoint_line, config_
   return true
 end
 
+-- Test that DebugDwim command works with Python files
+print("Testing DebugDwim with Python program ...")
+vim.cmd("edit! " .. vim.fn.fnameescape(main_file))
+
+-- Test that the command exists and works with Python files
+local ok, err = pcall(function()
+  local commands = vim.api.nvim_get_commands({})
+  if commands.DebugDwim then
+    print("✅ DebugDwim command is available")
+  else
+    error("DebugDwim command not found")
+  end
+end)
+
+if not ok then
+  print("⚠️  DebugDwim command test failed: " .. tostring(err))
+else
+  print("✅ DebugDwim command test passed")
+end
+
+-- Test that DebugDwim command works with Python test files
+print("Testing DebugDwim with Python test file ...")
+vim.cmd("edit! " .. vim.fn.fnameescape(test_file))
+
+-- Test DebugDwim with test file
+local ok, err = pcall(function()
+  -- Test that DebugDwim recognizes this as a test file
+  local dwim = require('config.dap.dwim')
+  if dwim.is_test_file(test_file) then
+    print("✅ DebugDwim correctly identifies Python test file")
+  else
+    error("DebugDwim failed to identify Python test file")
+  end
+end)
+
+if not ok then
+  print("⚠️  DebugDwim test file detection failed: " .. tostring(err))
+else
+  print("✅ DebugDwim test file detection passed")
+end
+
 -- Test debugging Python main program
 -- Breakpoint on line 73: result1 = calc.add(10, 5)
 test_python_debug("program", main_file, 73)
@@ -339,7 +380,10 @@ local pyright_root = (pyright_client and pyright_client.config and pyright_clien
 
 print("")
 print("🎉 Python debugging tests completed!")
+print("   ✅ DebugDwim command availability")
+print("   ✅ DebugDwim test file detection")  
 print("   ✅ Program debugging: successful")
+print("   💡 Note: DebugDwim automatically chooses Python commands based on context")
 print("   main_file: " .. vim.trim(main_file))
 print("   test_file: " .. vim.trim(test_file))
 print("   project_root: " .. vim.trim(project_root))

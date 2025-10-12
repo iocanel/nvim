@@ -253,49 +253,8 @@ local function generate_dto(selected_entity)
     end
 end
 
-local function debug_test_class()
-  local jdtls = require("jdtls")
-
-  -- Ensure jdtls is available
-  if not jdtls or not jdtls.test_class then
-    vim.notify("jdtls is not available or test_class function not found. Ensure jdtls is properly configured with test bundles.", vim.log.levels.ERROR)
-    return
-  end
-
-  -- Get current file info to verify it's a Java file
-  local bufname = vim.api.nvim_buf_get_name(0)
-  if not bufname:match("%.java$") then
-    vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
-    return
-  end
-
-  print("Debugging test class...")
-  jdtls.test_class()
-end
-
-local function debug_test_method()
-  local jdtls = require("jdtls")
-
-  -- Ensure jdtls is available
-  if not jdtls or not jdtls.test_nearest_method then
-    vim.notify("jdtls is not available or test_nearest_method function not found. Ensure jdtls is properly configured with test bundles.", vim.log.levels.ERROR)
-    return
-  end
-
-  -- Get current file info to verify it's a Java file
-  local bufname = vim.api.nvim_buf_get_name(0)
-  if not bufname:match("%.java$") then
-    vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
-    return
-  end
-
-  print("Debugging nearest test method...")
-  jdtls.test_nearest_method()
-end
 
 -- 📌 Create Neovim commands
 vim.api.nvim_create_user_command("JdtStandalone", jdtls_setup_standalone_project, {})
 vim.api.nvim_create_user_command("JpaOpenEntity", function() do_with_jpa_entity(open_jpa_entity) end, {})
 vim.api.nvim_create_user_command("JpaGenerateDto", function() do_with_jpa_entity(generate_dto) end, {})
-vim.api.nvim_create_user_command("JavaDebugTestClass", debug_test_class, {})
-vim.api.nvim_create_user_command("JavaDebugTestMethod", debug_test_method, {})
