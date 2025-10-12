@@ -13,12 +13,17 @@ return {
       enable = true,
     },
     indent = { enable = true },
-    auto_install = true, -- automatically install syntax support when entering new file type buffer
+    auto_install = false, -- automatically install syntax support when entering new file type buffer
     ensure_installed = {
-      'lua',
-      'html',
+      'java',
       'javascript',
       'typescript',
+      'python',
+      'go',
+      'rust',
+      'lua',
+      'html',
+      'css',
     },
   },
   config = function (_, opts)
