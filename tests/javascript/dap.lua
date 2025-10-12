@@ -79,10 +79,14 @@ if not ok_dap then
 end
 
 -- Check if JavaScript/Node DAP adapter is configured
-if not dap.adapters["pwa-node"] then
+if not dap.adapters["pwa-node"] and not dap.adapters["node2"] then
   pcall(vim.fn.chdir, prev_cwd)
-  die("DAP adapter 'pwa-node' not configured. Install and configure nvim-dap-vscode-js.")
+  die("DAP adapter 'pwa-node' or 'node2' not configured. Install and configure nvim-dap-vscode-js or node-debug2.")
 end
+
+-- Use pwa-node if available, otherwise fall back to node2
+local adapter_name = dap.adapters["pwa-node"] and "pwa-node" or "node2"
+
 
 -- Observe debug lifecycle
 local seen = { initialized = false, stopped = false, terminated = false }
@@ -112,7 +116,7 @@ local function test_javascript_debug(debug_type, file_path, breakpoint_line)
   dap.set_breakpoint()
 
   -- Use the appropriate debug command instead of hardcoded config
-  if debug_type == "program" then
+  if debug_type == "program" or debug_type == "function" then
     vim.cmd("DebugDwim")
   else
     vim.cmd("DebugDwim")
@@ -142,65 +146,31 @@ local function test_javascript_debug(debug_type, file_path, breakpoint_line)
     pcall(vim.fn.chdir, prev_cwd)
     die("JavaScript " .. debug_type .. " stopped for unexpected reason: " .. tostring(reason))
   end
-  
+
   -- Terminate the session
   pcall(dap.terminate)
   vim.wait(2000, function() return seen.terminated end, 100)
-  
+
   print("✅ JavaScript " .. debug_type .. " debugging successful (breakpoint hit)")
   return true
 end
 
 -- Test debugging JavaScript main program
--- Breakpoint on line 34: console.log(greet());
-test_javascript_debug("program", main_file, 34)
+-- Breakpoint on line 16: console.log(greet());
+test_javascript_debug("program", main_file, 16)
 
 -- Wait a bit between tests to allow cleanup
 vim.wait(1000, function() return false end, 100)
 
--- Test debugging JavaScript using test file with proper test command
-print("Testing JavaScript test file debug ...")
-dap.clear_breakpoints()
-seen = { initialized = false, stopped = false, terminated = false }
-reason = nil
+-- Test debugging JavaScript function using command
+test_javascript_debug("function", main_file, 8)
 
-vim.cmd("edit! " .. vim.fn.fnameescape(test_file))
-vim.api.nvim_win_set_cursor(0, { 9, 0 }) -- Position on expect statement
-dap.set_breakpoint()
+-- Wait a bit between tests to allow cleanup
+vim.wait(1000, function() return false end, 100)
 
--- Use DebugDwim command
-vim.cmd("DebugDwim")
+-- Test debugging JavaScript test file using command
+test_javascript_debug("test", test_file, 7)
 
--- Wait for session to start
-local dap_timeout = tonumber(vim.env.DAP_WAIT_MS) or 20000
-local ok_session = vim.wait(dap_timeout, function() return dap.session() ~= nil end, 100)
-if not ok_session then
-  pcall(vim.fn.chdir, prev_cwd)
-  die("JavaScript test file DAP session did not start")
-end
-
--- Wait for initialization
-vim.wait(2000, function() return seen.initialized end, 100)
-
--- Continue and wait for breakpoint
-pcall(dap.continue)
-if not vim.wait(dap_timeout, function() return seen.stopped end, 200) then
-  pcall(dap.terminate)
-  pcall(vim.fn.chdir, prev_cwd)
-  die("JavaScript test file debugger did not stop (breakpoint not hit)")
-end
-
-if reason and reason ~= "breakpoint" and reason ~= "step" then
-  pcall(dap.terminate)
-  pcall(vim.fn.chdir, prev_cwd)
-  die("JavaScript test file stopped for unexpected reason: " .. tostring(reason))
-end
-
--- Terminate the session
-pcall(dap.terminate)
-vim.wait(2000, function() return seen.terminated end, 100)
-
-print("✅ JavaScript test file debugging successful (breakpoint hit)")
 
 -- Print final success
 pcall(vim.fn.chdir, prev_cwd)
@@ -210,11 +180,13 @@ local ts_root = (ts_client and ts_client.config and ts_client.config.root_dir) o
 print("")
 print("🎉 JavaScript debugging tests completed!")
 print("   ✅ Program debugging: successful (using DebugDwim)")
+print("   ✅ Function debugging: successful (using DebugDwim)")
 print("   ✅ Test file debugging: successful (using DebugDwim)")
 print("   main_file: " .. vim.trim(main_file))
 print("   test_file: " .. vim.trim(test_file))
 print("   project_root: " .. vim.trim(project_root))
 print("   ts_ls_root: " .. vim.trim(ts_root))
+print("   adapter_used: " .. adapter_name)
 print("")
 
 -- Restore original notify function

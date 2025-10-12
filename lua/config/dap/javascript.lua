@@ -44,6 +44,13 @@ function M:debug()
     showAsyncStacks = true,
     -- Enable trace logging for debugging issues (can be disabled in production)
     trace = false,
+    -- Enhanced container debugging settings
+    timeout = 30000,
+    killBehavior = "forceful",
+    env = {
+      NODE_ENV = "development",
+      CI = vim.env.CI or "false",
+    },
   }
   
   dap.run(launch_config)
@@ -73,7 +80,7 @@ function M:debug_test()
   -- Check if Jest is available in the project
   local jest_path = project_root .. "/node_modules/jest/bin/jest.js"
   if vim.fn.filereadable(jest_path) == 1 then
-    -- Use Jest configuration (same as the working "Debug Jest Tests" config)
+    -- Use Jest configuration with enhanced container support
     local launch_config = {
       type = "pwa-node",
       request = "launch",
@@ -93,21 +100,24 @@ function M:debug_test()
     }
     dap.run(launch_config)
   else
-    -- Fallback to direct Node execution with enhanced debugging
+    -- Fallback to direct Node execution
     local launch_config = {
       type = "pwa-node",
       request = "launch",
       name = "Debug JavaScript Test File",
       runtimeExecutable = "node",
       runtimeArgs = {
-        "--inspect-brk",
+        "--inspect-brk",            -- pause on entry
         bufname,
       },
       cwd = project_root,
       console = "integratedTerminal",
       internalConsoleOptions = "neverOpen",
       sourceMaps = true,
-      skipFiles = { "<node_internals>/**/*.js" },
+      skipFiles = {
+        "<node_internals>/**/*.js",
+        project_root .. "/node_modules/**/*.js",   -- skip all node_modules
+      },
       -- Better handling of anonymous functions
       showAsyncStacks = true,
     }
@@ -134,21 +144,21 @@ function M.is_in_test_function(filename, line_no)
   if not M.is_test_file(filename) then
     return false, nil
   end
-  
+
   -- Search upward from current line to find test function
   for i = line_no, math.max(1, line_no - 50), -1 do
     local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1] or ""
-    
+
     -- JS test functions: it(, test(, describe(
-    local test_name = line:match("it%s*%([\"']([^\"']+)[\"']") or 
+    local test_name = line:match("it%s*%([\"']([^\"']+)[\"']") or
                       line:match("test%s*%([\"']([^\"']+)[\"']") or
                       line:match("describe%s*%([\"']([^\"']+)[\"']")
-    
+
     if test_name then
       return true, test_name
     end
   end
-  
+
   return false, nil
 end
 

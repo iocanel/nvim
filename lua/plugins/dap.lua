@@ -193,7 +193,8 @@ return {
       require("dap-vscode-js").setup({
         debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
         adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "pwa-extensionHost", "node-terminal" },
-        log_file_level = vim.log.levels.DEBUG,
+        log_file_level = false, -- disable debug logging in containers
+        log_console_level = vim.log.levels.ERROR, -- only show errors
       })
 
       -- Keep only the Attach configuration - file launch handled by dedicated config files

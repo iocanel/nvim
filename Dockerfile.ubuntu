@@ -63,7 +63,9 @@ ENV NVIM_APPNAME=nvim \
     XDG_DATA_HOME=/opt/xdg/data \
     XDG_STATE_HOME=/opt/xdg/state \
     XDG_CACHE_HOME=/opt/xdg/cache \
-    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
+    CI=true \
+    DEBIAN_FRONTEND=noninteractive
 
 # Copy Neovim configuration
 COPY ftplugin /root/.config/nvim/ftplugin/
