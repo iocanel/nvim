@@ -1,6 +1,6 @@
 all: test
 
-test: test_java test_go test_python test_javascript test_typescript
+test: test_java test_go test_python test_javascript test_typescript test_rust
 
 test_java: jdtls dap_java
 
@@ -41,3 +41,11 @@ typescript_lsp:
 
 typescript_dap:
 	nvim --headless "+luafile tests/typescript/dap.lua"
+
+test_rust: rust_lsp rust_dap
+
+rust_lsp:
+	nvim --headless "+luafile tests/rust/lsp.lua"
+
+rust_dap:
+	nvim --headless "+luafile tests/rust/dap.lua"
