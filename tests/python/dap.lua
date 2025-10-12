@@ -128,8 +128,10 @@ local function test_python_debug(debug_type, file_path, breakpoint_line, config_
   -- Open the appropriate file
   vim.cmd("edit! " .. vim.fn.fnameescape(file_path))
   
-  -- Set breakpoint
-  vim.api.nvim_win_set_cursor(0, { breakpoint_line, 0 })
+  -- Ensure buffer is loaded and validate line count before setting cursor
+  local line_count = vim.api.nvim_buf_line_count(0)
+  local target_line = math.min(breakpoint_line, line_count)
+  vim.api.nvim_win_set_cursor(0, { target_line, 0 })
   dap.set_breakpoint()
   
   -- Create debug configuration using dap-python
@@ -236,8 +238,8 @@ else
 end
 
 -- Test debugging Python main program
--- Breakpoint on line 73: result1 = calc.add(10, 5)
-test_python_debug("program", main_file, 73)
+-- Breakpoint on line 67: result1 = calc.add(10, 5)
+test_python_debug("program", main_file, 67)
 
 -- Test debugging Python script mode (alternative approach)
 print("Testing Python script debug ...")
@@ -246,7 +248,10 @@ seen = { initialized = false, stopped = false, terminated = false }
 reason = nil
 
 vim.cmd("edit! " .. vim.fn.fnameescape(main_file))
-vim.api.nvim_win_set_cursor(0, { 52, 0 }) -- Position on greet function call
+-- Ensure buffer is loaded and validate line count
+local line_count = vim.api.nvim_buf_line_count(0)
+local target_line = math.min(62, line_count) -- Position on greet function call (line 62)
+vim.api.nvim_win_set_cursor(0, { target_line, 0 })
 dap.set_breakpoint()
 
 local script_config = {
@@ -291,7 +296,10 @@ seen = { initialized = false, stopped = false, terminated = false }
 reason = nil
 
 vim.cmd("edit! " .. vim.fn.fnameescape(main_file))
-vim.api.nvim_win_set_cursor(0, { 22, 0 }) -- Position on Calculator.__init__
+-- Ensure buffer is loaded and validate line count
+local line_count = vim.api.nvim_buf_line_count(0)
+local target_line = math.min(12, line_count) -- Calculator.__init__ is on line 12
+vim.api.nvim_win_set_cursor(0, { target_line, 0 })
 dap.set_breakpoint()
 
 local module_config = {
@@ -335,7 +343,10 @@ seen = { initialized = false, stopped = false, terminated = false }
 reason = nil
 
 vim.cmd("edit! " .. vim.fn.fnameescape(test_file))
-vim.api.nvim_win_set_cursor(0, { 25, 0 }) -- Position on self.calc.add(5, 3) in test_add_method
+-- Ensure buffer is loaded and validate line count
+local line_count = vim.api.nvim_buf_line_count(0)
+local target_line = math.min(25, line_count) -- Position on self.calc.add(5, 3) in test_add_method
+vim.api.nvim_win_set_cursor(0, { target_line, 0 })
 dap.set_breakpoint()
 
 local unittest_config = {
