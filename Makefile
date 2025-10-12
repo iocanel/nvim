@@ -57,3 +57,48 @@ c_lsp:
 
 c_dap:
 	nvim --headless "+luafile tests/c/dap.lua"
+
+# Container targets
+container-build:
+	docker build -f Dockerfile.nixos -t neovim-dwim .
+
+container-test: container-build
+	docker run --rm -v $(PWD):/workspace neovim-dwim
+
+container-dev: container-build
+	docker run --rm -it -v $(PWD):/workspace neovim-dwim nix-shell
+
+container-shell: container-build
+	docker run --rm -it -v $(PWD):/workspace neovim-dwim bash
+
+container-clean:
+	docker rmi neovim-dwim 2>/dev/null || true
+
+# Help target
+help:
+	@echo "Neovim DWIM Debugging System - Available Targets"
+	@echo "=================================================="
+	@echo ""
+	@echo "Language Tests:"
+	@echo "  test              - Run all language tests"
+	@echo "  test_java         - Test Java DAP/LSP (jdtls + dap_java)"
+	@echo "  test_go           - Test Go DAP/LSP (go_lsp + go_dap)"
+	@echo "  test_python       - Test Python DAP/LSP (python_lsp + python_dap)"
+	@echo "  test_javascript   - Test JavaScript DAP/LSP"
+	@echo "  test_typescript   - Test TypeScript DAP/LSP"
+	@echo "  test_rust         - Test Rust DAP/LSP (rust_lsp + rust_dap)"
+	@echo "  test_c            - Test C DAP/LSP (c_lsp + c_dap)"
+	@echo ""
+	@echo "Container Testing (NixOS-based):"
+	@echo "  container-build   - Build NixOS container with all dependencies"
+	@echo "  container-test    - Run all tests in NixOS container"
+	@echo "  container-dev     - Interactive development environment in container"
+	@echo "  container-shell   - Shell access to container"
+	@echo "  container-clean   - Remove container and images"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make test                # Test locally"
+	@echo "  make container-test      # Test in NixOS container"
+	@echo "  make container-dev       # Interactive development"
+
+.PHONY: help container-build container-test container-dev container-shell container-clean

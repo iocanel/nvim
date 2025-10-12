@@ -1,0 +1,58 @@
+# syntax=docker/dockerfile:1.7-labs
+FROM nixos/nix:latest
+
+# 0) Bootstrap a shell (exec-form RUN avoids /bin/sh)
+RUN ["nix-env", "-iA", "nixpkgs.bashInteractive", "nixpkgs.coreutils"]
+SHELL ["/root/.nix-profile/bin/bash", "-lc"]
+
+# 1) Tools needed for headless installs (add a JDK for JDTLS)
+RUN nix-env -iA \
+  nixpkgs.neovim nixpkgs.gitMinimal \
+  nixpkgs.gcc nixpkgs.gnumake nixpkgs.cmake \
+  nixpkgs.nodejs nixpkgs.tree-sitter \
+  nixpkgs.unzip \
+  nixpkgs.temurin-bin-21
+
+# 2) Dev env closure (cacheable)
+WORKDIR /workspace
+COPY shell.nix /workspace/
+
+COPY ftplugin /root/.config/nvim/ftplugin/
+COPY lua /root/.config/nvim/lua/
+COPY templates /root/.config/nvim/templates/
+COPY init.lua /root/.config/nvim/
+COPY lazy-lock.json /root/.config/nvim/
+
+RUN --mount=type=cache,target=/root/.cache/nix nix-shell --pure --run 'true'
+
+# 3) XDG roots + app name (match your Lua expectations)
+ENV NVIM_APPNAME=nvim \
+    XDG_DATA_HOME=/opt/xdg/data \
+    XDG_STATE_HOME=/opt/xdg/state \
+    XDG_CACHE_HOME=/opt/xdg/cache
+
+# 4) Set JAVA_HOME to the installed Temurin path
+RUN JAVA_HOME=$(readlink -f "$(dirname "$(dirname "$(command -v java)")")") && \
+    echo "export JAVA_HOME=$JAVA_HOME" >> /root/.bashrc
+ENV JAVA_HOME=/nix/store
+SHELL ["/root/.nix-profile/bin/bash", "-lc"]
+
+# 5) Prewarm Lazy, Mason, JDTLS and Treesitter
+RUN nvim --headless "+Lazy! sync" "+qa"
+RUN nvim --headless "+MasonUpdate" "+qa"
+RUN nvim --headless "+MasonInstall jdtls java-debug-adapter java-test" "+qa"
+RUN nvim --headless "+lua pcall(function() local ok, mti = pcall(require,'mason-tool-installer'); if ok then mti.install() end end)" "+qa"
+# Prefer explicit parsers over `all` for reproducible layers; adjust list to your needs:
+RUN nvim --headless "+TSUpdateSync lua vim vimdoc bash json yaml markdown markdown_inline javascript typescript html css java python go rust" "+qa"
+
+# Now copy the tests
+COPY tests /workspace/tests/
+COPY Makefile /workspace/
+
+# Default command (uses your mkShell env)
+CMD ["nix-shell", "--run", "make test"]
+
+LABEL maintainer="Ioannis Canellos" \
+      description="NixOS-based container for testing my Neovim configuration" \
+      languages="Java,Go,Python,JavaScript,TypeScript,Rust,C" \
+      features="LSP,DAP,TreeSitter"
