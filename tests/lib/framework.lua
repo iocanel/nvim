@@ -14,15 +14,6 @@ function M.die(msg)
   vim.cmd.cq() -- exit non-zero
 end
 
----Ensure test only runs once by checking/setting guard variable
----@param guard_name string Name of global guard variable
-function M.ensure_single_run(guard_name)
-  if vim.g[guard_name] then
-    return false
-  end
-  vim.g[guard_name] = true
-  return true
-end
 
 ---Get absolute path to current test script directory
 ---@return string Absolute path to test script directory
@@ -83,10 +74,8 @@ end
 ---Validate file has expected filetype
 ---@param expected_filetype string Expected filetype
 ---@param file_type_description string Description for error message
----@param restore_cwd function Function to restore working directory
-function M.validate_filetype(expected_filetype, file_type_description, restore_cwd)
+function M.validate_filetype(expected_filetype, file_type_description)
   if vim.bo.filetype ~= expected_filetype then
-    if restore_cwd then restore_cwd() end
     M.die("Expected filetype=" .. expected_filetype .. " for " .. file_type_description ..
           ", got " .. tostring(vim.bo.filetype))
   end

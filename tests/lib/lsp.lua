@@ -8,9 +8,8 @@ local M = {}
 ---@param server_name string Name of LSP server to wait for
 ---@param timeout number Timeout in milliseconds
 ---@param file_type_description string Description for error messages
----@param restore_cwd function Function to restore working directory on error
 ---@return table|nil LSP client if attached, nil otherwise
-function M.wait_for_client_attachment(server_name, timeout, file_type_description, restore_cwd)
+function M.wait_for_client_attachment(server_name, timeout, file_type_description)
   local client
   local attached = vim.wait(timeout, function()
     for _, c in ipairs(vim.lsp.get_clients({ name = server_name })) do
@@ -24,7 +23,6 @@ function M.wait_for_client_attachment(server_name, timeout, file_type_descriptio
   end, 200)
   
   if not attached then
-    if restore_cwd then restore_cwd() end
     local names = {}
     for _, c in ipairs(vim.lsp.get_clients()) do 
       table.insert(names, c.name) 
@@ -176,10 +174,10 @@ function M.test_file_lsp(config)
   }
 end
 
----Verify that multiple files share the same LSP client
+---Test that multiple files share the same LSP client
 ---@param files table List of {file_path, description} pairs
 ---@param server_name string Name of the LSP server
-function M.verify_shared_client(files, server_name)
+function M.test_shared_client(files, server_name)
   local clients = {}
   
   for i, file_info in ipairs(files) do
