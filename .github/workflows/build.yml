@@ -17,8 +17,15 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
-    - name: Build container
-      run: make container-build
+    - name: Build container with cache
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.ubuntu
+        tags: iocanel/nvim-ubuntu
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
       
     - name: Save container image
       run: docker save iocanel/nvim-ubuntu > nvim-container.tar
