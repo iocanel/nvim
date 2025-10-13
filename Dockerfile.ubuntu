@@ -30,11 +30,11 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Neovim 0.10.2 (stable version with modern APIs)
-RUN curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux64.tar.gz && \
-    tar -C /opt -xzf nvim-linux64.tar.gz && \
-    ln -s /opt/nvim-linux64/bin/nvim /usr/local/bin/nvim && \
-    rm nvim-linux64.tar.gz
+# Install Neovim 0.11.3 (stable version with modern APIs)
+RUN curl -LO https://github.com/neovim/neovim/releases/download/v0.11.3/nvim-linux-x86_64.tar.gz && \
+    tar -C /opt -xzf nvim-linux-x86_64.tar.gz && \
+    ln -s /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim && \
+    rm nvim-linux-x86_64.tar.gz
 
 # Install Node.js 22 (LTS) via NodeSource
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
