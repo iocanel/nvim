@@ -1,12 +1,12 @@
-FROM ubuntu:22.04
+# Ultra-slim multi-stage build to minimize final image size
+FROM ubuntu:22.04 AS builder
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
-# Install system dependencies in optimized layers
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Core utilities
     curl \
     wget \
     git \
@@ -15,82 +15,115 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     build-essential \
     pkg-config \
-    # Languages and tools
     python3 \
     python3-pip \
     python3-venv \
-    # Java
     openjdk-21-jdk \
-    # C/C++ debugging
-    gdb \
-    lldb \
-    # Additional utilities
-    ripgrep \
-    fd-find \
     software-properties-common \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/* \
-    && rm -rf /var/tmp/*
-
-# Install Neovim 0.11.3 (stable version with modern APIs)
-RUN curl -LO https://github.com/neovim/neovim/releases/download/v0.11.3/nvim-linux-x86_64.tar.gz && \
-    tar -C /opt -xzf nvim-linux-x86_64.tar.gz && \
-    ln -s /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim && \
-    rm nvim-linux-x86_64.tar.gz
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 22 (LTS) via NodeSource
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /tmp/* && \
-    rm -rf /var/tmp/*
+    rm -rf /var/lib/apt/lists/*
 
-# Install tree-sitter-cli via npm (now with newer Node.js)
-RUN npm install -g tree-sitter-cli && \
-    npm cache clean --force
+# Install tree-sitter-cli via npm
+RUN npm install -g tree-sitter-cli
 
-# Install Rust and clean up
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    rm -rf /tmp/*
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Install Go 1.23.4 and clean up
+# Install Go 1.23.4
 RUN curl -LO https://go.dev/dl/go1.23.4.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go1.23.4.linux-amd64.tar.gz && \
     rm go1.23.4.linux-amd64.tar.gz
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-# Install Python debugpy and clean pip cache
-RUN python3 -m pip install --no-cache-dir debugpy
+# Install Neovim 0.11.3
+RUN curl -LO https://github.com/neovim/neovim/releases/download/v0.11.3/nvim-linux-x86_64.tar.gz && \
+    tar -C /opt -xzf nvim-linux-x86_64.tar.gz && \
+    rm nvim-linux-x86_64.tar.gz
 
-# Set up environment
-WORKDIR /workspace
+# Set up environment for building
 ENV NVIM_APPNAME=nvim \
-    XDG_DATA_HOME=/opt/xdg/data \
-    XDG_STATE_HOME=/opt/xdg/state \
-    XDG_CACHE_HOME=/opt/xdg/cache \
-    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
-    CI=true \
-    DEBIAN_FRONTEND=noninteractive
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 
 # Copy Neovim configuration
-COPY ftplugin /root/.config/nvim/ftplugin/
 COPY lua /root/.config/nvim/lua/
+COPY ftplugin /root/.config/nvim/ftplugin/
 COPY templates /root/.config/nvim/templates/
 COPY init.lua /root/.config/nvim/
 COPY lazy-lock.json /root/.config/nvim/
 
-# Install Neovim plugins and LSP servers in single layer to reduce image size
-RUN nvim --headless "+Lazy! sync" "+qa" && \
-    nvim --headless "+MasonUpdate" "+qa" && \
-    nvim --headless "+MasonInstall jdtls java-debug-adapter java-test pyright typescript-language-server js-debug-adapter rust-analyzer gopls cpptools lua-language-server html-lsp css-lsp json-lsp" "+qa" && \
-    nvim --headless "+lua pcall(function() local ok, mti = pcall(require,'mason-tool-installer'); if ok then mti.install() end end)" "+qa" && \
-    nvim --headless "+TSUpdateSync lua vim vimdoc bash json yaml markdown markdown_inline javascript typescript html css java python go rust" "+qa" && \
-    rm -rf /tmp/* && \
-    rm -rf /root/.cache/* && \
-    rm -rf /root/.npm/_cacache
+# Install plugins and LSP servers in build stage
+RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright  gopls rust-analyzer cpptools lua-language-server" "+qa" && \
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+TSUpdateSync java javascript typescript python go rust c" "+qa"
+
+# Create final ultra-slim runtime image
+FROM ubuntu:22.04 AS runtime
+
+# Install ONLY absolutely essential runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Essential utilities for testing
+    curl \
+    git \
+    make \
+    unzip \
+    # Python (minimal) - for pyright and debugpy
+    python3-minimal \
+    python3-pip \
+    # Java runtime (headless, minimal)
+    openjdk-21-jre-headless \
+    # Only essential debugging
+    gdb \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* \
+    && rm -rf /var/tmp/* \
+    && rm -rf /usr/share/doc/* \
+    && rm -rf /usr/share/man/* \
+    && rm -rf /usr/share/locale/*
+
+# Install minimal Node.js runtime only (no npm, no build tools)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy ONLY essential binaries (not full toolchains)
+COPY --from=builder /opt/nvim-linux-x86_64 /opt/nvim-linux-x86_64
+
+# Copy only Go binary (not entire toolchain)
+COPY --from=builder /usr/local/go/bin/go /usr/local/bin/go
+
+# Copy only Rust binaries needed for rust-analyzer (not full toolchain)  
+COPY --from=builder /root/.cargo/bin/rustc /usr/local/bin/rustc
+COPY --from=builder /root/.cargo/bin/cargo /usr/local/bin/cargo
+
+# Copy built Neovim configuration and installed plugins/LSPs
+COPY --from=builder /root/.config/nvim /root/.config/nvim
+COPY --from=builder /root/.local/share/nvim /root/.local/share/nvim
+
+# Install minimal Python debugging support only
+RUN python3 -m pip install --no-cache-dir --no-deps debugpy
+
+# Create nvim symlink
+RUN ln -s /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+
+# Set up minimal runtime environment
+WORKDIR /workspace
+ENV NVIM_APPNAME=nvim \
+    XDG_DATA_HOME=/root/.local/share \
+    XDG_STATE_HOME=/tmp \
+    XDG_CACHE_HOME=/tmp \
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
+    PATH="/usr/local/bin:${PATH}" \
+    CI=true \
+    DEBIAN_FRONTEND=noninteractive
 
 # Copy tests and Makefile
 COPY tests /workspace/tests/
@@ -100,6 +133,5 @@ COPY Makefile /workspace/
 CMD ["make", "test"]
 
 LABEL maintainer="Ioannis Canellos" \
-      description="Ubuntu-based container for testing Neovim configuration" \
-      languages="Java,Go,Python,JavaScript,TypeScript,Rust,C" \
-      features="LSP,DAP,TreeSitter"
+      description="Ultra-slim Ubuntu container for Neovim testing" \
+      size="target:<1.5GB"
