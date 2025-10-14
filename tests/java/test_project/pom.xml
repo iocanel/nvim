@@ -2,12 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.iocanel</groupId>
-  <artifactId>java-maven-template</artifactId>
+  <artifactId>hello-world</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>java-maven-template</name>
+  <name>Hello World App</name>
 
-  <description>A java manve template with github actions and release setup</description>
+  <description>A simple Hello World Java Application</description>
   <url>https://github.com/iotemplates/java-maven-template</url>
   <inceptionYear>2022</inceptionYear>
 
@@ -39,18 +39,18 @@
     <url>http://github.com/iotemplates/java-maven-template</url>
     <tag>${project.version}</tag>
   </scm>
-  
+
   <properties>
 
     <format.skip>false</format.skip>
     <java.version>21</java.version>
 
-    <!-- 
-      Dependency versions 
+    <!--
+      Dependency versions
     -->
     <junit.version>5.13.4</junit.version>
 
-    <!-- 
+    <!--
       Plugin versions
     -->
     <compiler-plugin.version>3.14.0</compiler-plugin.version>
@@ -178,7 +178,7 @@
             <configuration>
               <!--
                   Prevent gpg from using pinentry programs
-                  
+
                   Solves:
 
                   Unable to decrypt gpg passphrase:
@@ -265,5 +265,5 @@
       </build>
     </profile>
  </profiles>
- 
+
 </project>
