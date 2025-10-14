@@ -143,10 +143,8 @@ end
 function M.is_test_file(filename)
   if not filename then return false end
   
-  -- In Rust, tests can be in the same file as the code, but we'll check for:
-  -- 1. Files with "test" in the name
-  -- 2. Files in tests/ directory (but not if it's just in any tests path)
-  -- 3. Files in src/ that we'll check content for test modules
+  -- For Rust, only consider dedicated test files as "test files"
+  -- Inline tests in main.rs etc. will be handled by is_in_test_function()
   
   -- Get just the filename part for test pattern matching
   local basename = vim.fn.fnamemodify(filename, ":t")
@@ -155,12 +153,98 @@ function M.is_test_file(filename)
   end
   
   -- Check if it's specifically in a Cargo project's tests/ directory
-  -- (not just any tests directory in the path)
   local relative_to_cargo = filename:match("/tests/[^/]*%.rs$")
   return relative_to_cargo ~= nil
 end
 
 function M.is_in_test_function(filename, line_no)
+  -- Use tree-sitter to find if cursor is in a test function
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr, "rust")
+  if not ok then
+    -- Fallback to pattern matching if tree-sitter fails
+    return M.is_in_test_function_fallback(filename, line_no)
+  end
+  
+  local tree = parser:parse()[1]
+  local root = tree:root()
+  
+  -- Convert line_no (1-indexed) to 0-indexed for tree-sitter
+  local row = line_no - 1
+  local col = 0
+  
+  -- Find the node at the cursor position
+  local node = root:descendant_for_range(row, col, row, col)
+  
+  -- Walk up the tree to find a function item
+  while node do
+    if node:type() == "function_item" then
+      -- Check if this function has a #[test] attribute
+      local function_node = node
+      local prev_sibling = function_node:prev_sibling()
+      
+      -- Look for attribute_item nodes before the function
+      while prev_sibling do
+        if prev_sibling:type() == "attribute_item" then
+          local attr_text = vim.treesitter.get_node_text(prev_sibling, bufnr)
+          if attr_text:match("#%[test%]") then
+            -- Extract function name
+            local fn_name = nil
+            for child in function_node:iter_children() do
+              if child:type() == "identifier" then
+                fn_name = vim.treesitter.get_node_text(child, bufnr)
+                break
+              end
+            end
+            return true, fn_name
+          end
+        elseif prev_sibling:type() ~= "line_comment" then
+          -- Stop if we hit something that's not an attribute or comment
+          break
+        end
+        prev_sibling = prev_sibling:prev_sibling()
+      end
+      
+      -- Also check if we're in a test module
+      local parent = function_node:parent()
+      while parent do
+        if parent:type() == "mod_item" then
+          -- Check if this module has #[cfg(test)] attribute
+          local mod_prev = parent:prev_sibling()
+          while mod_prev do
+            if mod_prev:type() == "attribute_item" then
+              local attr_text = vim.treesitter.get_node_text(mod_prev, bufnr)
+              if attr_text:match("#%[cfg%(test%)%]") then
+                -- We're in a test module, extract function name
+                local fn_name = nil
+                for child in function_node:iter_children() do
+                  if child:type() == "identifier" then
+                    fn_name = vim.treesitter.get_node_text(child, bufnr)
+                    break
+                  end
+                end
+                return true, fn_name
+              end
+            elseif mod_prev:type() ~= "line_comment" then
+              break
+            end
+            mod_prev = mod_prev:prev_sibling()
+          end
+        end
+        parent = parent:parent()
+      end
+      
+      -- Found a function but it's not a test
+      return false, nil
+    end
+    node = node:parent()
+  end
+  
+  return false, nil
+end
+
+-- Fallback function using pattern matching
+function M.is_in_test_function_fallback(filename, line_no)
   -- Search upward from current line to find test function
   for i = line_no, math.max(1, line_no - 50), -1 do
     local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1] or ""
@@ -218,21 +302,28 @@ end
 
 -- Check available debuggers
 local function get_available_debugger()
+  -- First check Mason bin directory
+  local mason_bin = vim.fn.stdpath("data") .. "/mason/bin/codelldb"
+  if vim.fn.executable(mason_bin) == 1 then
+    return 'codelldb', mason_bin
+  end
+  
+  -- Then check system PATH
   if vim.fn.executable('codelldb') == 1 then
-    return 'codelldb'
+    return 'codelldb', 'codelldb'
   elseif vim.fn.executable('rust-gdb') == 1 then
-    return 'rust-gdb'
+    return 'rust-gdb', 'rust-gdb'
   elseif vim.fn.executable('gdb') == 1 then
-    return 'gdb'
+    return 'gdb', 'gdb'
   else
-    return nil
+    return nil, nil
   end
 end
 
 -- Setup DAP configurations
 local function setup_dap_configurations()
   local dap = require("dap")
-  local debugger = get_available_debugger()
+  local debugger, debugger_path = get_available_debugger()
   
   if not debugger then
     -- Create minimal config to satisfy tests but warn about missing debugger
@@ -257,7 +348,7 @@ local function setup_dap_configurations()
       type = 'server',
       port = "${port}",
       executable = {
-        command = 'codelldb',
+        command = debugger_path,
         args = {"--port", "${port}"},
       }
     }
@@ -327,7 +418,7 @@ local function setup_dap_configurations()
     -- GDB-based debugging (rust-gdb or gdb)
     dap.adapters["rust-gdb"] = {
       type = "executable",
-      command = debugger,
+      command = debugger_path,
       args = {"-i", "dap"}
     }
     

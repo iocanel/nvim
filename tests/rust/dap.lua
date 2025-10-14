@@ -1,112 +1,59 @@
 -- Run with:
 --   nvim --headless "+luafile tests/rust/dap.lua"
+-- Env overrides (optional):
+--   RUST_ANALYZER_WAIT_MS=20000
+--   DAP_WAIT_MS=20000
 
-if vim.g.__rust_dap_e2e_running then return end
-vim.g.__rust_dap_e2e_running = true
+-- Load utilities
+local luaunit = dofile("tests/lib/luaunit.lua")
+local framework = dofile("tests/lib/framework.lua")
+local lsp_utils = dofile("tests/lib/lsp.lua")
+local dap_utils = dofile("tests/lib/dap.lua")
+local config = dofile("tests/rust/config.lua")
 
-local function die(msg)
-  print(msg)
-  vim.cmd.cq() -- exit non-zero
+-- Setup test environment
+local this_dir = framework.get_script_dir()
+local required_files = {
+  main_file = "src/main.rs",
+  cargo_file = "Cargo.toml",
+}
+local paths = framework.setup_project_paths(this_dir, "test_project", required_files)
+framework.enter_project_dir(paths.project_root)
+
+function test_dap_available()
+  -- Should not throw an error
+  local dap = dap_utils.ensure_dap_available(config.dap.adapter_name)
+  luaunit.assertNotNil(dap, "DAP should be available")
 end
 
-local uv = vim.uv or vim.loop
-
--- Paths
-local this_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h")
-local project_root = vim.fn.fnamemodify(this_dir .. "/test_project", ":p"):gsub("/$", "")
-local main_file = project_root .. "/src/main.rs"
-local lib_file = project_root .. "/src/lib.rs"
-local cargo_file = project_root .. "/Cargo.toml"
-
-if vim.fn.isdirectory(project_root) == 0 then die("Project root not found: " .. project_root) end
-if vim.fn.filereadable(main_file) == 0 then die("Main file not found: " .. main_file) end
-if vim.fn.filereadable(lib_file) == 0 then die("Lib file not found: " .. lib_file) end
-if vim.fn.filereadable(cargo_file) == 0 then die("Cargo.toml not found: " .. cargo_file) end
-
--- Enter project root for consistent behavior
-local prev_cwd = uv.cwd()
-pcall(vim.fn.chdir, project_root)
-
--- Test that DebugDwim command exists
-print("Testing DebugDwim command availability ...")
-local ok, err = pcall(function()
-  local commands = vim.api.nvim_get_commands({})
-  if commands.DebugDwim then
-    print("✅ DebugDwim command is available")
-  else
-    error("DebugDwim command not found")
-  end
-end)
-
-if not ok then
-  pcall(vim.fn.chdir, prev_cwd)
-  die("DebugDwim command test failed: " .. tostring(err))
+function test_dap_configurations()
+  local config_info = dap_utils.test_dap_configurations("rust")
+  luaunit.assertNotNil(config_info, "Should return configuration info")
+  luaunit.assertTrue(config_info.count > 0, "Should have at least one DAP configuration")
 end
 
--- Test Rust filetype detection
-print("Testing Rust filetype detection ...")
-vim.cmd("edit! " .. vim.fn.fnameescape(main_file))
-if vim.bo.filetype ~= "rust" then
-  pcall(vim.fn.chdir, prev_cwd)
-  die("Expected filetype=rust for main.rs, got " .. tostring(vim.bo.filetype))
-end
-print("✅ Rust filetype detected correctly")
+function test_debug_dwim_command()
+  local debug_files = {
+    {
+      name = "main_file",
+      path = paths.main_file,
+      description = "Rust program",
+      breakpoint_line = 8,
+      is_test = false,
+    },
+    {
+      name = "main_file",
+      path = paths.main_file,
+      description = "Rust inline test",
+      breakpoint_line = 18,
+      is_test = true,
+    },
+  }
 
--- Test that DebugDwim can work with Rust files  
-print("Testing DebugDwim with Rust files ...")
-local ok, err = pcall(function()
-  require('config.dap.dwim')
-  local rust_dap = require('config.dap.rust')
-  
-  -- Test that Rust DAP module is loaded and has required interface
-  if type(rust_dap.is_filetype_supported) == "function" and
-     type(rust_dap.is_test_file) == "function" and
-     type(rust_dap.get_debug_command) == "function" then
-    print("✅ Rust DAP module has required interface")
-  else
-    error("Rust DAP module missing required interface functions")
-  end
-end)
-
-if not ok then
-  pcall(vim.fn.chdir, prev_cwd)
-  die("DebugDwim Rust integration test failed: " .. tostring(err))
+  local dwim_results = dap_utils.test_debug_dwim(debug_files)
+  luaunit.assertNotNil(dwim_results, "Should return DebugDwim test results")
+  luaunit.assertTrue(dwim_results.command_available, "DebugDwim command should be available")
 end
 
--- Ensure DAP pieces are present
-local ok_dap, dap = pcall(require, "dap")
-if not ok_dap then
-  pcall(vim.fn.chdir, prev_cwd)
-  die("require('dap') failed — nvim-dap not available.")
-end
-
--- Test DAP configuration is loaded
-print("Testing Rust DAP configuration ...")
-local dap_configs = dap.configurations.rust or {}
-if #dap_configs > 0 then
-  print("✅ Rust DAP configurations loaded (" .. #dap_configs .. " configs)")
-  for i, config in ipairs(dap_configs) do
-    print("   " .. i .. ". " .. (config.name or "unnamed"))
-  end
-else
-  pcall(vim.fn.chdir, prev_cwd)
-  die("No Rust DAP configurations found - DAP setup failed")
-end
-
--- Print final success
-pcall(vim.fn.chdir, prev_cwd)
-
-print("")
-print("🎉 Rust DAP setup tests completed!")
-print("   ✅ DebugDwim command availability")
-print("   ✅ Rust filetype detection")
-print("   ✅ DebugDwim Rust integration")
-print("   ✅ DAP configuration loading")
-print("   💡 Note: DebugDwim automatically chooses Rust commands based on context")
-print("   main_file: " .. vim.trim(main_file))
-print("   lib_file: " .. vim.trim(lib_file))
-print("   project_root: " .. vim.trim(project_root))
-print("")
-
--- Force exit with OS signal
-os.exit(0)
+-- Run the tests
+os.exit(luaunit.LuaUnit.run())

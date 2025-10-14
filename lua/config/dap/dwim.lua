@@ -139,32 +139,30 @@ function M.debug_dwim()
   local command = nil
   local context = module_name or "unknown"
 
-  if is_test then
-    -- Check if module supports specific test function debugging
-    if in_test_function and test_function_name and module.get_debug_test_function_command then
-      local ok, cmd = pcall(module.get_debug_test_function_command)
-      if ok and cmd then
-        command = cmd
-        context = context .. " test function (" .. test_function_name .. ")"
-      end
+  -- First check if we're in a test function (regardless of file type)
+  if in_test_function and test_function_name and module.get_debug_test_function_command then
+    local ok, cmd = pcall(module.get_debug_test_function_command)
+    if ok and cmd then
+      command = cmd
+      context = context .. " test function (" .. test_function_name .. ")"
     end
+  end
 
-    -- Fallback to general test debugging if no specific function command
-    if not command and module.get_debug_test_command then
-      local ok, cmd = pcall(module.get_debug_test_command)
-      if ok and cmd then
-        command = cmd
-        context = context .. " test"
-      end
+  -- If no specific test function command, check if it's a test file or we're in a test function
+  if not command and (is_test or in_test_function) and module.get_debug_test_command then
+    local ok, cmd = pcall(module.get_debug_test_command)
+    if ok and cmd then
+      command = cmd
+      context = context .. " test"
     end
-  else
-    -- Use regular debugging
-    if module.get_debug_command then
-      local ok, cmd = pcall(module.get_debug_command)
-      if ok and cmd then
-        command = cmd
-        context = context .. " program"
-      end
+  end
+
+  -- Fallback to regular debugging
+  if not command and module.get_debug_command then
+    local ok, cmd = pcall(module.get_debug_command)
+    if ok and cmd then
+      command = cmd
+      context = context .. " program"
     end
   end
 

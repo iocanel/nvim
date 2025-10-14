@@ -8,7 +8,7 @@ return {
     'williamboman/mason-lspconfig.nvim',
     dependencies = { 'williamboman/mason.nvim' },
     opts = {
-      ensure_installed = { 'html', 'cssls', 'jsonls', 'ts_ls', 'vue-langage-server', 'js-debug-adapter', 'lua_ls', 'rust_analyzer', 'gopls', 'ts_ls', 'pyright', 'solidity', 'intelephense', 'ltex', 'clangd' },
+      ensure_installed = { 'html', 'cssls', 'jsonls', 'ts_ls', 'vue-langage-server', 'js-debug-adapter', 'lua_ls', 'rust_analyzer', 'gopls', 'ts_ls', 'pyright', 'solidity', 'intelephense', 'ltex', 'clangd', 'codelldb' },
       automatic_installation = true,
     },
     config = function()
