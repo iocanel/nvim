@@ -107,7 +107,7 @@ function M:debug()
   local executable_path = find_executable()
 
   local launch_config = {
-    type = "c-debug",
+    type = "lldb",
     request = "launch",
     name = "Debug C Program",
     program = executable_path,
@@ -153,7 +153,7 @@ function M:debug_test()
   end
 
   local launch_config = {
-    type = "c-debug",
+    type = "lldb",
     request = "launch",
     name = "Debug C Tests",
     program = test_executable,
@@ -232,7 +232,7 @@ local function setup_dap_configurations()
 
   if not debugger then
     -- Create minimal adapter and config to satisfy tests but warn about missing debugger
-    dap.adapters["c-debug"] = {
+    dap.adapters["lldb"] = {
       type = "executable",
       command = "echo", -- Use a safe command that exists
       args = {"No C debugger available"}
@@ -241,7 +241,7 @@ local function setup_dap_configurations()
     dap.configurations.c = {
       {
         name = "C Debug (no debugger available)",
-        type = "c-debug",
+        type = "lldb",
         request = "launch",
         program = function()
           vim.notify("No C debugger found. Install gdb or lldb", vim.log.levels.WARN)
@@ -255,13 +255,13 @@ local function setup_dap_configurations()
 
   -- Setup adapter based on available debugger
   if debugger == 'gdb' then
-    dap.adapters["c-debug"] = {
+    dap.adapters["lldb"] = {
       type = "executable",
       command = "gdb",
       args = {"-i", "dap"}
     }
   else -- lldb
-    dap.adapters["c-debug"] = {
+    dap.adapters["lldb"] = {
       type = "executable",
       command = "lldb-vscode",
       args = {}
@@ -272,7 +272,7 @@ local function setup_dap_configurations()
   dap.configurations.c = {
     {
       name = "Launch C Program (" .. debugger .. ")",
-      type = "c-debug",
+      type = "lldb",
       request = "launch",
       program = function()
         build_project()
@@ -284,7 +284,7 @@ local function setup_dap_configurations()
     },
     {
       name = "Debug C Tests (" .. debugger .. ")",
-      type = "c-debug",
+      type = "lldb",
       request = "launch",
       program = function()
         build_project()
