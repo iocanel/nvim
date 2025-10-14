@@ -13,4 +13,3 @@ public class GreetingServiceTest {
     assertEquals("Hello, World!", result);
   }
 }
-

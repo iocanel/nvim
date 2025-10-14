@@ -8,7 +8,7 @@
   <name>Hello World App</name>
 
   <description>A simple Hello World Java Application</description>
-  <url>https://github.com/iotemplates/java-maven-template</url>
+  <url>https://github.com/iocanel/hello-world</url>
   <inceptionYear>2022</inceptionYear>
 
   <organization>
@@ -34,9 +34,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:iotemplates/java-maven-template.git</connection>
-    <developerConnection>scm:git:git@github.com:iotemplates/java-maven-template.git</developerConnection>
-    <url>http://github.com/iotemplates/java-maven-template</url>
+    <connection>scm:git:git@github.com:iocanel/hello-world.git</connection>
+    <developerConnection>scm:git:git@github.com:iocanel/hello-world.git</developerConnection>
+    <url>http://github.com/iocanel/hello-world</url>
     <tag>${project.version}</tag>
   </scm>
 
