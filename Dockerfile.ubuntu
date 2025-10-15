@@ -31,9 +31,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
 # Install tree-sitter-cli via npm
 RUN npm install -g tree-sitter-cli
 
-# Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# Install Rust with default toolchain
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 ENV PATH="/root/.cargo/bin:${PATH}"
+RUN /root/.cargo/bin/rustup default stable
 
 # Install Go 1.23.4
 RUN curl -LO https://go.dev/dl/go1.23.4.linux-amd64.tar.gz && \
@@ -60,7 +61,7 @@ COPY lazy-lock.json /root/.config/nvim/
 # Install plugins and LSP servers in build stage
 RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
-    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright  gopls rust-analyzer cpptools lua-language-server" "+qa" && \
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+TSUpdateSync java javascript typescript python go rust c" "+qa"
 
 # Create final ultra-slim runtime image
@@ -78,6 +79,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     # Java runtime (headless, minimal)
     openjdk-21-jre-headless \
+    # Build tools for Rust compilation
+    build-essential \
     # Only essential debugging
     gdb \
     && apt-get clean \
@@ -97,12 +100,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
 # Copy ONLY essential binaries (not full toolchains)
 COPY --from=builder /opt/nvim-linux-x86_64 /opt/nvim-linux-x86_64
 
-# Copy only Go binary (not entire toolchain)
-COPY --from=builder /usr/local/go/bin/go /usr/local/bin/go
+# Copy minimal Go installation (needed for GOROOT)
+COPY --from=builder /usr/local/go /usr/local/go
 
-# Copy only Rust binaries needed for rust-analyzer (not full toolchain)  
-COPY --from=builder /root/.cargo/bin/rustc /usr/local/bin/rustc
-COPY --from=builder /root/.cargo/bin/cargo /usr/local/bin/cargo
+# Copy Rust toolchain (needed for building and debugging)
+COPY --from=builder /root/.cargo /root/.cargo
+COPY --from=builder /root/.rustup /root/.rustup
 
 # Copy built Neovim configuration and installed plugins/LSPs
 COPY --from=builder /root/.config/nvim /root/.config/nvim
@@ -121,7 +124,10 @@ ENV NVIM_APPNAME=nvim \
     XDG_STATE_HOME=/tmp \
     XDG_CACHE_HOME=/tmp \
     JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
-    PATH="/usr/local/bin:${PATH}" \
+    GOROOT=/usr/local/go \
+    CARGO_HOME=/root/.cargo \
+    RUSTUP_HOME=/root/.rustup \
+    PATH="/root/.cargo/bin:/usr/local/go/bin:/usr/local/bin:${PATH}" \
     CI=true \
     DEBIAN_FRONTEND=noninteractive
 
