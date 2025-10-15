@@ -21,6 +21,48 @@ local required_files = {
 local paths = framework.setup_project_paths(this_dir, "test_project", required_files)
 framework.enter_project_dir(paths.project_root)
 
+-- Build the project if Makefile exists
+if vim.fn.filereadable("Makefile") == 1 then
+  print("Cleaning and building C project...")
+  -- Clean first to remove any pre-existing executables
+  local clean_output = vim.fn.system("make clean")
+  local make_output = vim.fn.system("make")
+  if vim.v.shell_error == 0 then
+    print("✅ Make compilation completed successfully")
+    -- Debug: Check what executables were created
+    local ls_exec = vim.fn.system("ls -la hello_world test_helloworld 2>/dev/null")
+    if ls_exec ~= "" then
+      print("Built executables found:")
+      print(ls_exec)
+    end
+  else
+    framework.die("Make compilation failed: " .. make_output)
+  end
+end
+
+-- Debug: Print current working directory and check if executables exist
+print("Current working directory: " .. vim.fn.getcwd())
+print("hello_world exists: " .. (vim.fn.filereadable("hello_world") == 1 and "yes" or "no"))
+print("Absolute path would be: " .. vim.fn.getcwd() .. "/hello_world")
+
+-- Test if executable can actually run
+print("Testing if executable can run...")
+local run_test = vim.fn.system("./hello_world 2>&1")
+print("Run test output:")
+print(run_test)
+print("Exit code: " .. vim.v.shell_error)
+
+-- Check what libraries the executable needs
+print("Checking library dependencies...")
+local ldd_output = vim.fn.system("ldd hello_world 2>&1")
+print("Library dependencies:")
+print(ldd_output)
+
+-- Check file type
+local file_output = vim.fn.system("file hello_world 2>&1")
+print("File type:")
+print(file_output)
+
 function test_dap_available()
   -- Should not throw an error
   local dap = dap_utils.ensure_dap_available(config.dap.adapter_name)

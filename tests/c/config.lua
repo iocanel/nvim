@@ -24,7 +24,7 @@ M.lsp = {
 
 -- C DAP Configuration
 M.dap = {
-  adapter_name = "lldb",
+  adapter_name = "codelldb",
   timeout_env_var = "DAP_WAIT_MS",
   default_timeout = 15000,
 }
