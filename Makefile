@@ -2,6 +2,38 @@ all: test
 
 test: test_java test_go test_python test_javascript test_typescript test_rust test_c
 
+# Clean all build artifacts from test projects
+clean:
+	@echo "Cleaning all test project build artifacts..."
+	# Java test projects
+	@find tests/java -name "target" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/java -name "*.class" -type f -delete 2>/dev/null || true
+	# Go test projects  
+	@find tests/go -name "go.sum" -type f -delete 2>/dev/null || true
+	@find tests/go -name "__debug_bin*" -type f -delete 2>/dev/null || true
+	# Rust test projects
+	@find tests/rust -name "target" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/rust -name "Cargo.lock" -type f -delete 2>/dev/null || true
+	# C test projects
+	@find tests/c -name "*.o" -type f -delete 2>/dev/null || true
+	@find tests/c -name "hello_world" -type f -delete 2>/dev/null || true
+	@find tests/c -name "test_helloworld" -type f -delete 2>/dev/null || true
+	@find tests/c -name "test_main" -type f -delete 2>/dev/null || true
+	# JavaScript/TypeScript test projects
+	@find tests/javascript -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/javascript -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/javascript -name "*.js.map" -type f -delete 2>/dev/null || true
+	@find tests/typescript -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/typescript -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/typescript -name "*.js" -type f -delete 2>/dev/null || true
+	@find tests/typescript -name "*.js.map" -type f -delete 2>/dev/null || true
+	# Python test projects
+	@find tests/python -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/python -name "*.pyc" -type f -delete 2>/dev/null || true
+	@find tests/python -name "*.pyo" -type f -delete 2>/dev/null || true
+	@find tests/python -name ".pytest_cache" -type d -exec rm -rf {} + 2>/dev/null || true
+	@echo "✅ All test project build artifacts cleaned"
+
 test_java: lsp_java dap_java
 
 test_go: go_lsp go_dap
@@ -81,6 +113,7 @@ help:
 	@echo ""
 	@echo "Language Tests:"
 	@echo "  test              - Run all language tests"
+	@echo "  clean             - Clean all test project build artifacts"
 	@echo "  test_java         - Test Java DAP/LSP (jdtls + dap_java)"
 	@echo "  test_go           - Test Go DAP/LSP (go_lsp + go_dap)"
 	@echo "  test_python       - Test Python DAP/LSP (python_lsp + python_dap)"
@@ -101,4 +134,4 @@ help:
 	@echo "  make container-test                 # Test in Ubuntu container (default)"
 	@echo "  make container-dev                  # Interactive development"
 
-.PHONY: help container-build container-test container-dev container-shell container-clean
+.PHONY: help clean container-build container-test container-dev container-shell container-clean
