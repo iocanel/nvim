@@ -22,9 +22,11 @@ clean:
 	# JavaScript/TypeScript test projects
 	@find tests/javascript -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
 	@find tests/javascript -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/javascript -name "package-lock.json" -type f -delete 2>/dev/null || true
 	@find tests/javascript -name "*.js.map" -type f -delete 2>/dev/null || true
 	@find tests/typescript -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
 	@find tests/typescript -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/typescript -name "package-lock.json" -type f -delete 2>/dev/null || true
 	@find tests/typescript -name "*.js" -type f -delete 2>/dev/null || true
 	@find tests/typescript -name "*.js.map" -type f -delete 2>/dev/null || true
 	# Python test projects
