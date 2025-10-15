@@ -8,7 +8,7 @@ clean:
 	# Java test projects
 	@find tests/java -name "target" -type d -exec rm -rf {} + 2>/dev/null || true
 	@find tests/java -name "*.class" -type f -delete 2>/dev/null || true
-	# Go test projects  
+	# Go test projects
 	@find tests/go -name "go.sum" -type f -delete 2>/dev/null || true
 	@find tests/go -name "__debug_bin*" -type f -delete 2>/dev/null || true
 	# Rust test projects
@@ -95,16 +95,16 @@ CONTAINER_IMAGE = iocanel/nvim
 
 # Ubuntu container targets
 container-build:
-	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE)-ubuntu .
+	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE) .
 
 container-test: container-build
-	docker run --rm $(CONTAINER_IMAGE)-ubuntu
+	docker run --rm $(CONTAINER_IMAGE)
 
 container-dev: container-build
-	docker run --rm -it $(CONTAINER_IMAGE)-ubuntu bash
+	docker run --rm -it $(CONTAINER_IMAGE) bash
 
 container-shell: container-build
-	docker run --rm -it $(CONTAINER_IMAGE)-ubuntu bash
+	docker run --rm -it $(CONTAINER_IMAGE) bash
 
 # Help target
 help:
