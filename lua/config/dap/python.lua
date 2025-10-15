@@ -1,84 +1,13 @@
 local M = {}
 
 function M:debug()
-  local dap = require("dap")
-
-  -- Get current file path
-  local bufname = vim.api.nvim_buf_get_name(0)
-  if not bufname or bufname == "" then
-    vim.notify("No file open", vim.log.levels.ERROR)
-    return
-  end
-
-  -- Verify it's a Python file
-  if not bufname:match("%.py$") then
-    vim.notify("Current buffer is not a Python file", vim.log.levels.ERROR)
-    return
-  end
-
-  -- Get project root
-  local project_root = vim.fn.getcwd()
-
-  local launch_config = {
-    type = "python",
-    request = "launch",
-    name = "Debug Python File",
-    program = bufname,
-    console = "integratedTerminal",
-    cwd = project_root,
-  }
-
-  dap.run(launch_config)
+  local dap_python = require("dap-python")
+  dap_python.test_class()
 end
 
 function M:debug_test()
-  local dap = require("dap")
-
-  -- Get current file path
-  local bufname = vim.api.nvim_buf_get_name(0)
-  if not bufname or bufname == "" then
-    vim.notify("No file open", vim.log.levels.ERROR)
-    return
-  end
-
-  -- Verify it's a Python test file
-  if not bufname:match("%.py$") then
-    vim.notify("Current buffer is not a Python file", vim.log.levels.ERROR)
-    return
-  end
-
-  -- Get project root
-  local project_root = vim.fn.getcwd()
-
-  -- Check for pytest
-  local pytest_path = project_root .. "/pytest.ini"
-  local has_pytest = vim.fn.filereadable(pytest_path) == 1 or vim.fn.executable("pytest") == 1
-
-  local launch_config
-  if has_pytest then
-    launch_config = {
-      type = "python",
-      request = "launch",
-      name = "Debug Python Test with pytest",
-      module = "pytest",
-      args = {bufname, "-v"},
-      console = "integratedTerminal",
-      cwd = project_root,
-    }
-  else
-    -- Fallback to unittest
-    launch_config = {
-      type = "python",
-      request = "launch",
-      name = "Debug Python Test",
-      program = bufname,
-      console = "integratedTerminal",
-      cwd = project_root,
-      args = {"-m", "unittest", "-v"},
-    }
-  end
-
-  dap.run(launch_config)
+  local dap_python = require("dap-python")
+  dap_python.test_class()
 end
 
 -- DAP Interface Implementation

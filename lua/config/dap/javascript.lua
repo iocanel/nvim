@@ -21,6 +21,9 @@ function M:debug()
   
   print("Debugging JavaScript file: " .. bufname)
   
+  -- NOTE: For projects with build steps, ensure dependencies are installed
+  -- and project is built before debugging (e.g., npm install && npm run build)
+  
   -- Enhanced configuration for better lambda/anonymous function debugging
   local launch_config = {
     type = "pwa-node",

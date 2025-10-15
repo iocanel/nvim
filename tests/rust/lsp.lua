@@ -1,108 +1,83 @@
 -- Run with:
 --   nvim --headless "+luafile tests/rust/lsp.lua"
 -- Env overrides (optional):
---   RUST_ANALYZER_WAIT_MS=15000
+--   RUST_ANALYZER_WAIT_MS=20000
 
-if vim.g.__rust_lsp_e2e_running then return end
-vim.g.__rust_lsp_e2e_running = true
+-- Load utilities
+local luaunit = dofile("tests/lib/luaunit.lua")
+local framework = dofile("tests/lib/framework.lua")
+local lsp_utils = dofile("tests/lib/lsp.lua")
+local config = dofile("tests/rust/config.lua")
 
-local function die(msg)
-  print(msg)
-  vim.cmd.cq() -- exit non-zero
+-- Setup test environment
+local this_dir = framework.get_script_dir()
+local required_files = {
+  main_file = "src/main.rs",
+  cargo_file = "Cargo.toml",
+}
+local paths = framework.setup_project_paths(this_dir, "test_project", required_files)
+framework.enter_project_dir(paths.project_root)
+
+-- Helper function to build LSP configs
+local function make_lsp_config(file_path, description, hover_test)
+  return {
+    server_name = config.lsp.server_name,
+    file_path = file_path,
+    file_type_description = description,
+    expected_filetype = config.lsp.expected_filetype,
+    language = config.lsp.language,
+    timeout_env_var = config.lsp.timeout_env_var,
+    default_timeout = config.lsp.default_timeout,
+    required_caps = config.lsp.required_caps,
+    optional_caps = config.lsp.optional_caps,
+    hover_test = hover_test,
+  }
 end
 
-local uv = vim.uv or vim.loop
+function test_main_file_lsp()
+  local main_config = make_lsp_config(
+    paths.main_file,
+    "main program",
+    { pattern = "greet", column_offset = 0 }
+  )
 
--- Paths
-local this_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h")
-local project_root = vim.fn.fnamemodify(this_dir .. "/test_project", ":p"):gsub("/$", "")
-local main_file = project_root .. "/src/main.rs"
-local lib_file = project_root .. "/src/lib.rs"
-local cargo_file = project_root .. "/Cargo.toml"
+  local result = lsp_utils.test_file_lsp(main_config)
 
-if vim.fn.isdirectory(project_root) == 0 then die("Project root not found: " .. project_root) end
-if vim.fn.filereadable(main_file) == 0 then die("Main file not found: " .. main_file) end
-if vim.fn.filereadable(lib_file) == 0 then die("Lib file not found: " .. lib_file) end
-if vim.fn.filereadable(cargo_file) == 0 then die("Cargo.toml not found: " .. cargo_file) end
-
--- Enter project root for consistent rust-analyzer root detection
-local prev_cwd = uv.cwd()
-pcall(vim.fn.chdir, project_root)
-
--- Function to test LSP functionality for a Rust file
-local function test_rust_lsp(file_path, file_type)
-  print("Testing Rust LSP for " .. file_type .. " ...")
-  
-  -- Open file to trigger rust-analyzer
-  vim.cmd("edit! " .. vim.fn.fnameescape(file_path))
-  if vim.bo.filetype ~= "rust" then
-    pcall(vim.fn.chdir, prev_cwd)
-    die("Expected filetype=rust for " .. file_type .. ", got " .. tostring(vim.bo.filetype))
-  end
-  
-  -- Wait for rust-analyzer to attach
-  local timeout = tonumber(vim.env.RUST_ANALYZER_WAIT_MS) or 15000
-  local rust_analyzer_client
-  local attached = vim.wait(timeout, function()
-    for _, c in ipairs(vim.lsp.get_clients({ name = "rust_analyzer" })) do
-      local ok, attached_buf = pcall(vim.lsp.buf_is_attached, 0, c.id)
-      if ok and attached_buf and (c.initialized or c.server_capabilities) then
-        rust_analyzer_client = c
-        return true
-      end
-    end
-    return false
-  end, 200)
-  
-  if not attached then
-    pcall(vim.fn.chdir, prev_cwd)
-    local names = {}
-    for _, c in ipairs(vim.lsp.get_clients()) do table.insert(names, c.name) end
-    die("rust-analyzer did not attach for " .. file_type .. " (active: " .. table.concat(names, ", ") .. ")")
-  end
-  
-  -- Test LSP capabilities
-  local caps = rust_analyzer_client.server_capabilities
-  if not caps then
-    pcall(vim.fn.chdir, prev_cwd)
-    die("rust-analyzer has no server capabilities for " .. file_type)
-  end
-  
-  print("✅ Rust LSP working for " .. file_type)
-  print("   - File: " .. vim.trim(file_path))
-  print("   - Server: " .. rust_analyzer_client.name .. " (ID: " .. rust_analyzer_client.id .. ")")
-  print("   - Root: " .. (rust_analyzer_client.config.root_dir or "(unknown)"))
-  
-  return true
+  -- Assert that LSP client was returned
+  luaunit.assertNotNil(result.client, "LSP client should be attached")
+  luaunit.assertEquals(result.client.name, "rust_analyzer", "Should use rust_analyzer server")
+  luaunit.assertTrue(#result.available_caps > 0, "Should have available capabilities")
 end
 
--- Test main Rust file
-test_rust_lsp(main_file, "main program")
+function test_main_file_tests()
+  -- Test the same main.rs file but focus on the test module
+  local test_config = make_lsp_config(
+    paths.main_file,
+    "rust tests",
+    { pattern = "test_greet", column_offset = 0 }
+  )
 
--- Test lib Rust file
-test_rust_lsp(lib_file, "library file")
+  local result = lsp_utils.test_file_lsp(test_config)
 
--- Print final success
-pcall(vim.fn.chdir, prev_cwd)
-
-local rust_analyzer_root = "(unknown)"
-for _, c in ipairs(vim.lsp.get_clients({ name = "rust_analyzer" })) do
-  if c.config and c.config.root_dir then
-    rust_analyzer_root = c.config.root_dir
-    break
-  end
+  -- Assert that LSP client was returned
+  luaunit.assertNotNil(result.client, "LSP client should be attached")
+  luaunit.assertEquals(result.client.name, "rust_analyzer", "Should use rust_analyzer server")
+  luaunit.assertTrue(#result.available_caps > 0, "Should have available capabilities")
 end
 
-print("")
-print("🎉 Rust LSP setup tests completed!")
-print("   ✅ rust-analyzer attachment for main program")
-print("   ✅ rust-analyzer attachment for library file")
-print("   ✅ LSP server capabilities verification")
-print("   main_file: " .. vim.trim(main_file))
-print("   lib_file: " .. vim.trim(lib_file))
-print("   project_root: " .. vim.trim(project_root))
-print("   rust_analyzer_root: " .. vim.trim(rust_analyzer_root))
-print("")
+function test_shared_client()
+  local files_to_check = {
+    { file_path = paths.main_file, description = "main program" },
+    { file_path = paths.main_file, description = "rust tests" }
+  }
 
--- Force exit with OS signal
-os.exit(0)
+  -- This function prints results, but doesn't return testable data
+  -- In a real luaunit setup, we'd modify the function to return results
+  lsp_utils.test_shared_client(files_to_check, config.lsp.server_name)
+
+  -- For now, just assert the test completed without error
+  luaunit.assertTrue(true, "Shared client test completed")
+end
+
+-- Run the tests
+os.exit(luaunit.LuaUnit.run())

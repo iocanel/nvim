@@ -107,7 +107,7 @@ function M:debug()
   local executable_path = find_executable()
 
   local launch_config = {
-    type = "c-debug",
+    type = "codelldb",
     request = "launch",
     name = "Debug C Program",
     program = executable_path,
@@ -153,7 +153,7 @@ function M:debug_test()
   end
 
   local launch_config = {
-    type = "c-debug",
+    type = "codelldb",
     request = "launch",
     name = "Debug C Tests",
     program = test_executable,
@@ -214,81 +214,45 @@ function M.get_debug_test_function_command()
   return nil
 end
 
--- Check available debuggers
-local function get_available_debugger()
-  if vim.fn.executable('gdb') == 1 then
-    return 'gdb'
-  elseif vim.fn.executable('lldb') == 1 then
-    return 'lldb'
-  else
-    return nil
-  end
-end
 
 -- Setup DAP configurations
 local function setup_dap_configurations()
   local dap = require("dap")
-  local debugger = get_available_debugger()
 
-  if not debugger then
-    -- Create minimal adapter and config to satisfy tests but warn about missing debugger
-    dap.adapters["c-debug"] = {
-      type = "executable",
-      command = "echo", -- Use a safe command that exists
-      args = {"No C debugger available"}
-    }
-    
-    dap.configurations.c = {
-      {
-        name = "C Debug (no debugger available)",
-        type = "c-debug",
-        request = "launch",
-        program = function()
-          vim.notify("No C debugger found. Install gdb or lldb", vim.log.levels.WARN)
-          return vim.fn.executable("true") == 1 and "true" or "/bin/true" -- Use a safe executable
-        end,
-        cwd = "${workspaceFolder}",
-      }
-    }
-    return
-  end
-
-  -- Setup adapter based on available debugger
-  if debugger == 'gdb' then
-    dap.adapters["c-debug"] = {
-      type = "executable",
-      command = "gdb",
-      args = {"-i", "dap"}
-    }
-  else -- lldb
-    dap.adapters["c-debug"] = {
-      type = "executable",
-      command = "lldb-vscode",
-      args = {}
-    }
-  end
-
-  -- C debug configurations
+  -- Use codelldb adapter (same as Rust) - it works for C/C++ too
+  -- The adapter should already be set up by rust configuration or Mason
+  
+  -- C debug configurations using codelldb
   dap.configurations.c = {
     {
-      name = "Launch C Program (" .. debugger .. ")",
-      type = "c-debug",
+      name = "Launch C Program (codelldb)",
+      type = "codelldb",
       request = "launch",
       program = function()
         build_project()
-        return find_executable()
+        local executable = find_executable()
+        -- Ensure absolute path
+        if not executable:match("^/") then
+          executable = vim.fn.getcwd() .. "/" .. executable
+        end
+        return executable
       end,
       cwd = "${workspaceFolder}",
       stopOnEntry = false,
       args = {},
     },
     {
-      name = "Debug C Tests (" .. debugger .. ")",
-      type = "c-debug",
+      name = "Debug C Tests (codelldb)",
+      type = "codelldb",
       request = "launch",
       program = function()
         build_project()
-        return find_executable()
+        local executable = find_executable()
+        -- Ensure absolute path
+        if not executable:match("^/") then
+          executable = vim.fn.getcwd() .. "/" .. executable
+        end
+        return executable
       end,
       cwd = "${workspaceFolder}",
       stopOnEntry = false,

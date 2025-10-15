@@ -4,12 +4,12 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g -std=c99
 
 # Main target
-TARGET = helloworld
-TEST_TARGET = test_math
+TARGET = hello_world
+TEST_TARGET = test_helloworld
 
 # Source files
-MAIN_SRC = main.c
-TEST_SRC = test_math.c
+MAIN_SRC = hello_world.c
+TEST_SRC = test_helloworld.c
 
 # Default target
 all: $(TARGET) $(TEST_TARGET)
@@ -18,9 +18,9 @@ all: $(TARGET) $(TEST_TARGET)
 $(TARGET): $(MAIN_SRC)
 	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN_SRC)
 
-# Build test program  
-$(TEST_TARGET): $(TEST_SRC)
-	$(CC) $(CFLAGS) -o $(TEST_TARGET) $(TEST_SRC)
+# Build test program (needs to link with main source)
+$(TEST_TARGET): $(TEST_SRC) $(MAIN_SRC)
+	$(CC) $(CFLAGS) -o $(TEST_TARGET) $(TEST_SRC) $(MAIN_SRC) -DTEST_BUILD
 
 # Build main with test mode
 test_main: $(MAIN_SRC)

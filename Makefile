@@ -2,6 +2,40 @@ all: test
 
 test: test_java test_go test_python test_javascript test_typescript test_rust test_c
 
+# Clean all build artifacts from test projects
+clean:
+	@echo "Cleaning all test project build artifacts..."
+	# Java test projects
+	@find tests/java -name "target" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/java -name "*.class" -type f -delete 2>/dev/null || true
+	# Go test projects
+	@find tests/go -name "go.sum" -type f -delete 2>/dev/null || true
+	@find tests/go -name "__debug_bin*" -type f -delete 2>/dev/null || true
+	# Rust test projects
+	@find tests/rust -name "target" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/rust -name "Cargo.lock" -type f -delete 2>/dev/null || true
+	# C test projects
+	@find tests/c -name "*.o" -type f -delete 2>/dev/null || true
+	@find tests/c -name "hello_world" -type f -delete 2>/dev/null || true
+	@find tests/c -name "test_helloworld" -type f -delete 2>/dev/null || true
+	@find tests/c -name "test_main" -type f -delete 2>/dev/null || true
+	# JavaScript/TypeScript test projects
+	@find tests/javascript -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/javascript -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/javascript -name "package-lock.json" -type f -delete 2>/dev/null || true
+	@find tests/javascript -name "*.js.map" -type f -delete 2>/dev/null || true
+	@find tests/typescript -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/typescript -name "dist" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/typescript -name "package-lock.json" -type f -delete 2>/dev/null || true
+	@find tests/typescript -name "*.js" -type f -delete 2>/dev/null || true
+	@find tests/typescript -name "*.js.map" -type f -delete 2>/dev/null || true
+	# Python test projects
+	@find tests/python -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find tests/python -name "*.pyc" -type f -delete 2>/dev/null || true
+	@find tests/python -name "*.pyo" -type f -delete 2>/dev/null || true
+	@find tests/python -name ".pytest_cache" -type d -exec rm -rf {} + 2>/dev/null || true
+	@echo "✅ All test project build artifacts cleaned"
+
 test_java: lsp_java dap_java
 
 test_go: go_lsp go_dap
@@ -59,49 +93,20 @@ c_dap:
 	nvim --headless "+luafile tests/c/dap.lua"
 
 # Container targets (configurable backend)
-CONTAINER_BACKEND ?= ubuntu
 CONTAINER_IMAGE = iocanel/nvim
 
+# Ubuntu container targets
 container-build:
-	$(MAKE) container-$(CONTAINER_BACKEND)-build
+	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE) .
 
 container-test: container-build
-	$(MAKE) container-$(CONTAINER_BACKEND)-test
+	docker run --rm $(CONTAINER_IMAGE)
 
 container-dev: container-build
-	$(MAKE) container-$(CONTAINER_BACKEND)-dev
+	docker run --rm -it $(CONTAINER_IMAGE) bash
 
 container-shell: container-build
-	$(MAKE) container-$(CONTAINER_BACKEND)-shell
-
-container-clean:
-	docker rmi $(CONTAINER_IMAGE)-ubuntu $(CONTAINER_IMAGE)-nixos 2>/dev/null || true
-
-# Ubuntu container targets
-container-ubuntu-build:
-	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE)-ubuntu .
-
-container-ubuntu-test: container-ubuntu-build
-	docker run --rm -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu
-
-container-ubuntu-dev: container-ubuntu-build
-	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu bash
-
-container-ubuntu-shell: container-ubuntu-build
-	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu bash
-
-# NixOS container targets
-container-nixos-build:
-	docker build -f Dockerfile.nixos -t $(CONTAINER_IMAGE)-nixos .
-
-container-nixos-test: container-nixos-build
-	docker run --rm -v $(PWD):/workspace $(CONTAINER_IMAGE)-nixos
-
-container-nixos-dev: container-nixos-build
-	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-nixos nix-shell
-
-container-nixos-shell: container-nixos-build
-	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-nixos bash
+	docker run --rm -it $(CONTAINER_IMAGE) bash
 
 # Help target
 help:
@@ -110,6 +115,7 @@ help:
 	@echo ""
 	@echo "Language Tests:"
 	@echo "  test              - Run all language tests"
+	@echo "  clean             - Clean all test project build artifacts"
 	@echo "  test_java         - Test Java DAP/LSP (jdtls + dap_java)"
 	@echo "  test_go           - Test Go DAP/LSP (go_lsp + go_dap)"
 	@echo "  test_python       - Test Python DAP/LSP (python_lsp + python_dap)"
@@ -125,22 +131,9 @@ help:
 	@echo "  container-shell   - Shell access to container"
 	@echo "  container-clean   - Remove all container images"
 	@echo ""
-	@echo "Ubuntu Container (default):"
-	@echo "  container-ubuntu-build   - Build Ubuntu-based container"
-	@echo "  container-ubuntu-test    - Test in Ubuntu container"
-	@echo "  container-ubuntu-dev     - Ubuntu development environment"
-	@echo ""
-	@echo "NixOS Container:"
-	@echo "  container-nixos-build    - Build NixOS-based container"
-	@echo "  container-nixos-test     - Test in NixOS container"
-	@echo "  container-nixos-dev      - NixOS development environment"
-	@echo ""
 	@echo "Examples:"
 	@echo "  make test                           # Test locally"
 	@echo "  make container-test                 # Test in Ubuntu container (default)"
-	@echo "  make CONTAINER_BACKEND=nixos container-test  # Test in NixOS container"
-	@echo "  make container-ubuntu-test          # Test specifically in Ubuntu"
-	@echo "  make container-nixos-test           # Test specifically in NixOS"
 	@echo "  make container-dev                  # Interactive development"
 
-.PHONY: help container-build container-test container-dev container-shell container-clean
+.PHONY: help clean container-build container-test container-dev container-shell container-clean

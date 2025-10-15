@@ -49,10 +49,10 @@ class TestCalculator(unittest.TestCase):
         """Test history tracking and clearing."""
         self.calc.add(1, 2)
         self.calc.multiply(3, 4)
-        
+
         history = self.calc.get_history()
         self.assertEqual(len(history), 2)
-        
+
         self.calc.clear_history()
         self.assertEqual(len(self.calc.history), 0)
 
@@ -89,7 +89,7 @@ class TestEnvironmentInfo(unittest.TestCase):
         info = get_environment_info()
         expected_keys = {
             "python_version",
-            "current_directory", 
+            "current_directory",
             "home_directory",
             "platform"
         }
@@ -117,15 +117,15 @@ class TestIntegration(unittest.TestCase):
     def test_calculator_with_multiple_operations(self):
         """Test calculator with multiple operations."""
         calc = Calculator("Integration Test")
-        
+
         # Perform multiple operations
         calc.add(10, 20)
         calc.multiply(5, 6)
         calc.power(3, 2)
-        
+
         history = calc.get_history()
         self.assertEqual(len(history), 3)
-        
+
         # Check that all operations are recorded
         self.assertTrue(any("10 + 20" in entry for entry in history))
         self.assertTrue(any("5 * 6" in entry for entry in history))
