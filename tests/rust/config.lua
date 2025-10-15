@@ -26,7 +26,7 @@ M.lsp = {
 M.dap = {
   adapter_name = "codelldb",
   timeout_env_var = "DAP_WAIT_MS",
-  default_timeout = 20000,
+  default_timeout = 60000,
 }
 
 return M
