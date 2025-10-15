@@ -82,7 +82,7 @@ container-ubuntu-build:
 	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE)-ubuntu .
 
 container-ubuntu-test: container-ubuntu-build
-	docker run --rm -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu
+	docker run --rm $(CONTAINER_IMAGE)-ubuntu
 
 container-ubuntu-dev: container-ubuntu-build
 	docker run --rm -it -v $(PWD):/workspace $(CONTAINER_IMAGE)-ubuntu bash

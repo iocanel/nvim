@@ -20,6 +20,24 @@ local required_files = {
 local paths = framework.setup_project_paths(this_dir, "test_project", required_files)
 framework.enter_project_dir(paths.project_root)
 
+-- Build the project using Cargo (required for debugging)
+print("Building Rust project...")
+local build_output = vim.fn.system("cargo build")
+if vim.v.shell_error == 0 then
+  print("✅ Cargo build completed successfully")
+else
+  framework.die("Cargo build failed: " .. build_output)
+end
+
+-- Build test executables (required for test debugging)
+print("Building Rust test executables...")
+local test_build_output = vim.fn.system("cargo test --no-run")
+if vim.v.shell_error == 0 then
+  print("✅ Cargo test build completed successfully")
+else
+  framework.die("Cargo test build failed: " .. test_build_output)
+end
+
 function test_dap_available()
   -- Should not throw an error
   local dap = dap_utils.ensure_dap_available(config.dap.adapter_name)
