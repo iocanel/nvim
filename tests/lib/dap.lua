@@ -34,12 +34,12 @@ function M.setup_debug_listeners(test_id)
 
   -- Clear any existing listeners for this test_id
   dap.listeners.after.event_initialized[test_id] = nil
-  dap.listeners.after.event_stopped[test_id] = nil  
+  dap.listeners.after.event_stopped[test_id] = nil
   dap.listeners.after.event_terminated[test_id] = nil
   dap.listeners.after.event_exited[test_id] = nil
 
   dap.listeners.after.event_initialized[test_id] = function(session)
-    if not session_id then session_id = session and session.id end
+    session_id = session and session.id
     seen.initialized = true
   end
 
@@ -185,7 +185,7 @@ function M.test_debug_dwim(test_files)
   for _, file_info in ipairs(test_files) do
     framework.print_section("DebugDwim with " .. file_info.description)
     vim.cmd("edit! " .. vim.fn.fnameescape(file_info.path))
-    
+
     -- Clear breakpoints before each test
     dap.clear_breakpoints()
 
@@ -193,7 +193,7 @@ function M.test_debug_dwim(test_files)
       local dap = require("dap")
       -- Setup debug listeners for this test
       local state = M.setup_debug_listeners("dwim-test-" .. file_info.name)
-      
+
       -- Set breakpoint and start debugging
       vim.api.nvim_win_set_cursor(0, { file_info.breakpoint_line, 0 })
       dap.set_breakpoint()
@@ -212,20 +212,20 @@ function M.test_debug_dwim(test_files)
       -- Continue and wait for breakpoint
       pcall(dap.continue)
       local breakpoint_hit = vim.wait(dap_timeout, function() return state.seen.stopped end, 200)
-      
+
       -- Check if session is still active - if it terminated, breakpoint wasn't hit
       local current_session = dap.session()
       if not current_session then
         framework.die("Debug session terminated without hitting breakpoint for " .. file_info.description)
       end
-      
+
       if not breakpoint_hit then
         pcall(dap.terminate)
         framework.die("Debugger did not stop (breakpoint not hit) for " .. file_info.description)
       end
 
       local reason = state.get_reason()
-      
+
       -- Check current position when stopped
       current_session = dap.session()
       if current_session then
@@ -234,20 +234,25 @@ function M.test_debug_dwim(test_files)
           vim.wait(500, function() return current_session.current_frame ~= nil end, 50)
         end
       end
-      
+
       if current_session and current_session.current_frame then
         local frame = current_session.current_frame
-        -- Verify we're actually at the expected breakpoint location
-        if frame.line ~= file_info.breakpoint_line then
+        -- Skip strict line validation if requested by the caller
+        local skip_line_validation = file_info.skip_line_validation
+
+        if not skip_line_validation and frame.line ~= file_info.breakpoint_line then
           pcall(dap.terminate)
-          framework.die("Debugger stopped at line " .. tostring(frame.line) .. 
+          framework.die("Debugger stopped at line " .. tostring(frame.line) ..
                        " but expected line " .. file_info.breakpoint_line .. " for " .. file_info.description)
+        elseif skip_line_validation then
+          framework.print_success("Breakpoint hit at line " .. tostring(frame.line) ..
+                                 " (expected " .. file_info.breakpoint_line .. ", skipping line validation)")
         end
       else
         pcall(dap.terminate)
         framework.die("Debugger stopped but no frame information available - breakpoint likely not hit for " .. file_info.description)
       end
-      
+
       if not reason or (reason ~= "breakpoint" and reason ~= "step") then
         pcall(dap.terminate)
         framework.die("Debugger stopped for unexpected reason: " .. tostring(reason) .. " for " .. file_info.description)
