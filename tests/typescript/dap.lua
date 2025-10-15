@@ -22,6 +22,23 @@ local required_files = {
 local paths = framework.setup_project_paths(this_dir, "test_project", required_files)
 framework.enter_project_dir(paths.project_root)
 
+-- Build the project using npm (required for debugging)
+print("Installing dependencies and building TypeScript project...")
+local install_output = vim.fn.system("npm install")
+if vim.v.shell_error == 0 then
+  print("✅ npm install completed successfully")
+  
+  -- Build TypeScript to JavaScript
+  local build_output = vim.fn.system("npm run build")
+  if vim.v.shell_error == 0 then
+    print("✅ TypeScript build completed successfully")
+  else
+    framework.die("TypeScript build failed: " .. build_output)
+  end
+else
+  framework.die("npm install failed: " .. install_output)
+end
+
 function test_dap_available()
   -- Should not throw an error
   local dap = dap_utils.ensure_dap_available(config.dap.adapter_name)
