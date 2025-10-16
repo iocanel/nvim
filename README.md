@@ -19,6 +19,19 @@ A comprehensive Neovim configuration using Lua and the lazy.nvim plugin manager,
 | PHP | ✅ | ➖ | ➖ | ➖ | N/A |
 | Solidity | ✅ | ➖ | ➖ | ➖ | N/A |
 
+## Quick Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/iocanel/nvim/main/setup.sh | bash
+```
+
+Then use the editor with `invim`:
+```bash
+invim .              # Open current directory
+invim myfile.txt     # Edit a specific file
+```
+
+
 ## 🏗️ Core Building Blocks
 
 ### Plugin Manager
