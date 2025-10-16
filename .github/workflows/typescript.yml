@@ -19,7 +19,9 @@ jobs:
       run: docker load < nvim-container.tar
 
     - name: Test TypeScript
-      run: docker run --rm --cap-add=SYS_PTRACE iocanel/nvim make test_typescript
+      run: |
+        set -e
+        make typescript-container-test
 
     - name: Upload test artifacts on failure
       if: failure()

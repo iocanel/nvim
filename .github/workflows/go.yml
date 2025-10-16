@@ -19,7 +19,9 @@ jobs:
       run: docker load < nvim-container.tar
 
     - name: Test Go
-      run: docker run --rm --cap-add=SYS_PTRACE iocanel/nvim make test_go
+      run: |
+        set -e
+        make go-container-test
 
     - name: Upload test artifacts on failure
       if: failure()

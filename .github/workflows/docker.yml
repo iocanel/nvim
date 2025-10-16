@@ -22,11 +22,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build container for testing
-        run: make container-build
-
-      - name: Run container tests
-        run: make container-test
+      - name: Build and test container
+        run: |
+          set -e
+          make container-build
+          make container-test
 
   build:
     needs: test
