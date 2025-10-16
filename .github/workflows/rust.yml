@@ -19,7 +19,9 @@ jobs:
       run: docker load < nvim-container.tar
 
     - name: Test Rust
-      run: docker run --rm --cap-add=SYS_PTRACE iocanel/nvim make test_rust
+      run: |
+        set -e
+        make rust-container-test
 
     - name: Upload test artifacts on failure
       if: failure()

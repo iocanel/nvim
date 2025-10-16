@@ -19,7 +19,9 @@ jobs:
       run: docker load < nvim-container.tar
 
     - name: Test Java
-      run: docker run --rm --cap-add=SYS_PTRACE iocanel/nvim make test_java
+      run: |
+        set -e
+        make java-container-test
 
     - name: Upload test artifacts on failure
       if: failure()

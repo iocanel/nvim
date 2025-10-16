@@ -1,6 +1,12 @@
+CONTAINER_IMAGE = iocanel/nvim
+UID := $(shell id -u)
+GID := $(shell id -g)
+HOME_DIR := $(HOME)
+DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) --tmpfs /tmp/nvim-state -e XDG_STATE_HOME=/tmp/nvim-state $(CONTAINER_IMAGE)
+
 all: test
 
-test: test_java test_go test_python test_javascript test_typescript test_rust test_c
+test: c-test go-test java-test javascript-test python-test rust-test typescript-test
 
 # Clean all build artifacts from test projects
 clean:
@@ -36,77 +42,131 @@ clean:
 	@find tests/python -name ".pytest_cache" -type d -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ All test project build artifacts cleaned"
 
-test_java: lsp_java dap_java
-
-test_go: go_lsp go_dap
-
-lsp_java:
-	nvim --headless "+luafile tests/java/lsp.lua"
-
-dap_java:
-	nvim --headless "+luafile tests/java/dap.lua"
-
-go_lsp:
-	nvim --headless "+luafile tests/go/lsp.lua"
-
-go_dap:
-	nvim --headless "+luafile tests/go/dap.lua"
-
-test_python: python_lsp python_dap
-
-python_lsp:
-	nvim --headless "+luafile tests/python/lsp.lua"
-
-python_dap:
-	nvim --headless "+luafile tests/python/dap.lua"
-
-test_javascript: javascript_lsp javascript_dap
-
-javascript_lsp:
-	nvim --headless "+luafile tests/javascript/lsp.lua"
-
-javascript_dap:
-	nvim --headless "+luafile tests/javascript/dap.lua"
-
-test_typescript: typescript_lsp typescript_dap
-
-typescript_lsp:
-	nvim --headless "+luafile tests/typescript/lsp.lua"
-
-typescript_dap:
-	nvim --headless "+luafile tests/typescript/dap.lua"
-
-test_rust: rust_lsp rust_dap
-
-rust_lsp:
-	nvim --headless "+luafile tests/rust/lsp.lua"
-
-rust_dap:
-	nvim --headless "+luafile tests/rust/dap.lua"
-
-test_c: c_lsp c_dap
-
-c_lsp:
+#
+# C
+#
+c-lsp:
 	nvim --headless "+luafile tests/c/lsp.lua"
 
-c_dap:
+c-dap:
 	nvim --headless "+luafile tests/c/dap.lua"
 
-# Container targets (configurable backend)
-CONTAINER_IMAGE = iocanel/nvim
+c-test: c-lsp c-dap
 
-# Ubuntu container targets
+c-container-test:
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/c/lsp.lua"
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/c/dap.lua"
+
+
+#
+# Go
+#
+go-lsp:
+	nvim --headless "+luafile tests/go/lsp.lua"
+
+go-dap:
+	nvim --headless "+luafile tests/go/dap.lua"
+
+go-test: go-lsp go-dap
+
+go-container-test:
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/go/lsp.lua"
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/go/dap.lua"
+
+#
+# Java
+#
+java-lsp:
+	nvim --headless "+luafile tests/java/lsp.lua"
+
+java-dap:
+	nvim --headless "+luafile tests/java/dap.lua"
+
+java-test: java-lsp java-dap
+
+java-container-test:
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/java/lsp.lua"
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/java/dap.lua"
+
+#
+# Javascript
+#
+javascript-lsp:
+	nvim --headless "+luafile tests/java/lsp.lua"
+
+javascript-dap:
+	nvim --headless "+luafile tests/java/dap.lua"
+
+javascript-test: javascript-lsp javascript-dap
+
+javascript-container-test:
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/javascript/lsp.lua"
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/javascript/dap.lua"
+
+#
+# Python
+#
+python-lsp:
+	nvim --headless "+luafile tests/python/lsp.lua"
+
+python-dap:
+	nvim --headless "+luafile tests/python/dap.lua"
+
+python-test: python-lsp python-dap
+
+python-container-test:
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/python/lsp.lua"
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/python/dap.lua"
+
+#
+# Rust
+#
+rust-lsp:
+	nvim --headless "+luafile tests/rust/lsp.lua"
+
+rust-dap:
+	nvim --headless "+luafile tests/rust/dap.lua"
+
+rust-test: rust-lsp rust-dap
+
+rust-container-test:
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/rust/lsp.lua"
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/rust/dap.lua"
+
+#
+# TypeScript
+#
+
+typescript-lsp:
+	nvim --headless "+luafile tests/typescript/lsp.lua"
+
+typescript-dap:
+	nvim --headless "+luafile tests/typescript/dap.lua"
+
+typescript-test: typescript-lsp typescript-dap
+
+typescript-container-test:
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/typescript/lsp.lua"
+	$(DOCKER_RUN) --headless "+luafile /workspace/tests/typescript/dap.lua"
+
+
+#
+#
+# Container Image
+# (Building, Testing, Development, Shell Access)
+#
+#
+
 container-build:
 	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE) .
 
-container-test: container-build
-	docker run --rm $(CONTAINER_IMAGE)
+container-test: container-build c-container-test go-container-test java-container-test javascript-container-test python-container-test rust-container-test typescript-container-test
 
 container-dev: container-build
 	docker run --rm -it $(CONTAINER_IMAGE) bash
 
 container-shell: container-build
-	docker run --rm -it $(CONTAINER_IMAGE) bash
+	$(DOCKER_RUN)
 
 # Help target
 help:
@@ -117,12 +177,12 @@ help:
 	@echo "  test              - Run all language tests"
 	@echo "  clean             - Clean all test project build artifacts"
 	@echo "  test_java         - Test Java DAP/LSP (jdtls + dap_java)"
-	@echo "  test_go           - Test Go DAP/LSP (go_lsp + go_dap)"
-	@echo "  test_python       - Test Python DAP/LSP (python_lsp + python_dap)"
+	@echo "  test_go           - Test Go DAP/LSP (go-lsp + go-dap)"
+	@echo "  test_python       - Test Python DAP/LSP (python-lsp + python-dap)"
 	@echo "  test_javascript   - Test JavaScript DAP/LSP"
 	@echo "  test_typescript   - Test TypeScript DAP/LSP"
-	@echo "  test_rust         - Test Rust DAP/LSP (rust_lsp + rust_dap)"
-	@echo "  test_c            - Test C DAP/LSP (c_lsp + c_dap)"
+	@echo "  test_rust         - Test Rust DAP/LSP (rust-lsp + rust-dap)"
+	@echo "  test_c            - Test C DAP/LSP (c-lsp + c-dap)"
 	@echo ""
 	@echo "Container Testing (Ubuntu by default, configurable):"
 	@echo "  container-build   - Build container (CONTAINER_BACKEND=ubuntu|nixos)"
