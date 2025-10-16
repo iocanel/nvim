@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Release Docker Image
 
 on:
   push:
@@ -16,20 +16,7 @@ env:
   IMAGE_NAME: iocanel/nvim
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build and test container
-        run: |
-          set -e
-          make container-build
-          make container-test
-
-  build:
-    needs: test
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
