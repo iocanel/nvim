@@ -105,10 +105,17 @@ function M.test_debug_session(config, breakpoint_info, timeout, state, restore_c
 
   -- Continue and wait for breakpoint
   pcall(dap.continue)
-  if not vim.wait(timeout, function() return state.seen.stopped end, 200) then
+  local start_time = vim.uv.hrtime()
+  local breakpoint_hit = vim.wait(timeout, function() return state.seen.stopped end, 200)
+  local actual_wait_time = (vim.uv.hrtime() - start_time) / 1000000 -- Convert to milliseconds
+  
+  if not breakpoint_hit then
     pcall(dap.terminate)
     if restore_cwd then restore_cwd() end
-    framework.die("Debugger did not stop (breakpoint not hit) for " .. (config.name or "debug config"))
+    framework.die("Debugger did not stop (breakpoint not hit) for " .. (config.name or "debug config") .. 
+                 " - waited " .. math.floor(actual_wait_time) .. "ms (timeout: " .. timeout .. "ms)")
+  else
+    print("⏱️  Breakpoint hit after " .. math.floor(actual_wait_time) .. "ms (timeout: " .. timeout .. "ms)")
   end
 
   local reason = state.get_reason()
@@ -211,7 +218,24 @@ function M.test_debug_dwim(test_files)
 
       -- Continue and wait for breakpoint
       pcall(dap.continue)
+      
+      -- Check if breakpoint was already hit before we start waiting
+      local already_stopped = state.seen.stopped
+      if already_stopped then
+        print("🚀 Breakpoint already hit before wait started for " .. file_info.description)
+      end
+      
+      local start_time = vim.uv.hrtime()
       local breakpoint_hit = vim.wait(dap_timeout, function() return state.seen.stopped end, 200)
+      local actual_wait_time = (vim.uv.hrtime() - start_time) / 1000000 -- Convert to milliseconds
+      
+      if breakpoint_hit then
+        if already_stopped then
+          print("⏱️  Breakpoint was already hit (0ms wait) for " .. file_info.description)
+        else
+          print("⏱️  Breakpoint hit after " .. math.floor(actual_wait_time) .. "ms for " .. file_info.description)
+        end
+      end
 
       -- Check if session is still active - if it terminated, breakpoint wasn't hit
       local current_session = dap.session()
@@ -221,7 +245,8 @@ function M.test_debug_dwim(test_files)
 
       if not breakpoint_hit then
         pcall(dap.terminate)
-        framework.die("Debugger did not stop (breakpoint not hit) for " .. file_info.description)
+        framework.die("Debugger did not stop (breakpoint not hit) for " .. file_info.description .. 
+                     " - waited " .. math.floor(actual_wait_time) .. "ms (timeout: " .. dap_timeout .. "ms)")
       end
 
       local reason = state.get_reason()
