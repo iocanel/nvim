@@ -93,9 +93,37 @@ vim.keymap.set('n', '<leader>ghv', "<cmd>Gitsigns preview_hunk<cr>", { desc = 'g
 vim.keymap.set('n', '<leader>gn', "<cmd>Neogit<cr>", { desc = 'neogit' })
 vim.keymap.set('n', '<leader>gg', "<cmd>Neogit<cr>", { desc = 'neogit' })
 vim.keymap.set('n', '<leader>gt', "<cmd>Tardis git<cr>", { desc = 'git timemachine' })
+vim.keymap.set('n', '<leader>gO', "<cmd>Octo<cr>", { desc = 'Octo' })
 
--- Octo list PR
+-- Octo PR commands
 vim.keymap.set('n', '<leader>gopl', "<cmd>Octo pr list<cr>", { desc = 'list pull requests' })
+vim.keymap.set('n', '<leader>gopc', "<cmd>Octo pr checkout<cr>", { desc = 'checkout pull request' })
+vim.keymap.set('n', '<leader>gopm', "<cmd>Octo pr merge<cr>", { desc = 'merge pull request' })
+vim.keymap.set('n', '<leader>gopd', "<cmd>Octo pr diff<cr>", { desc = 'show pr diff' })
+vim.keymap.set('n', '<leader>gopR', "<cmd>Octo pr reload<cr>", { desc = 'reload pull request' })
+vim.keymap.set('n', '<leader>gopb', "<cmd>Octo pr browser<cr>", { desc = 'open in browser' })
+
+-- Octo PR review commands
+vim.keymap.set('n', '<leader>goprs', "<cmd>OctoReviewStartOrSubmit<cr>", { desc = 'review start or submit' })
+vim.keymap.set('n', '<leader>goprc', "<cmd>Octo review close<cr>", { desc = 'close review' })
+vim.keymap.set('n', '<leader>goprd', "<cmd>Octo review discard<cr>", { desc = 'discard review' })
+
+-- Octo issue commands
+vim.keymap.set('n', '<leader>goil', "<cmd>Octo issues list<cr>", { desc = 'list issues' })
+vim.keymap.set('n', '<leader>goic', "<cmd>Octo issue close<cr>", { desc = 'close issue' })
+vim.keymap.set('n', '<leader>goiR', "<cmd>Octo issue reload<cr>", { desc = 'reload issue' })
+vim.keymap.set('n', '<leader>goib', "<cmd>Octo issue browser<cr>", { desc = 'issue browser' })
+
+-- Octo reaction commands
+vim.keymap.set('n', '<leader>goru', "<cmd>Octo reaction thumbs_up<cr>", { desc = 'reaction thumbs up' })
+vim.keymap.set('n', '<leader>gord', "<cmd>Octo reaction thumbs_down<cr>", { desc = 'reaction thumbs down' })
+vim.keymap.set('n', '<leader>gort', "<cmd>Octo reaction tada<cr>", { desc = 'reaction tada' })
+vim.keymap.set('n', '<leader>gorh', "<cmd>Octo reaction heart<cr>", { desc = 'reaction heart' })
+vim.keymap.set('n', '<leader>gorr', "<cmd>Octo reaction rocket<cr>", { desc = 'reaction rocket' })
+vim.keymap.set('n', '<leader>gorp', "<cmd>Octo reaction party<cr>", { desc = 'reaction party' })
+
+-- Octo general commands
+vim.keymap.set('n', '<leader>goa', "<cmd>Octo actions<cr>", { desc = 'octo actions' })
 
 --
 -- [[ Editor ]]

@@ -1,7 +1,6 @@
 return {
   {
     'pwntester/octo.nvim',
-    commit = '22328c578bc013fa4b0cef3d00af35efe0c0f256',
     dependencies = {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
@@ -157,7 +156,26 @@ return {
       }
     },
     config = function ()
-     require"octo".setup()
+     require"octo".setup({ enable_builtin = true })
+
+     -- Custom function to start or submit review
+     function OctoReviewStartOrSubmit()
+       local buf_name = vim.api.nvim_buf_get_name(0)
+       if string.match(buf_name, "octo://") then
+         -- Check if we're in a review context
+         local success, _ = pcall(function()
+           vim.cmd("Octo review submit")
+         end)
+         if not success then
+           vim.cmd("Octo review start")
+         end
+       else
+         vim.cmd("Octo review start")
+       end
+     end
+
+     -- Create user command
+     vim.api.nvim_create_user_command('OctoReviewStartOrSubmit', OctoReviewStartOrSubmit, {})
     end
   }
 }

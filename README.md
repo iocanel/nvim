@@ -128,6 +128,31 @@ invim myfile.txt     # Edit a specific file
 | `<leader>ghr` | Gitsigns reset_hunk | Reset current hunk |
 | `<leader>gg` | Neogit | Open Neogit interface |
 | `<leader>gt` | Tardis git | Git time machine |
+| `<leader>gO` | Octo | Open Octo GitHub interface |
+
+#### GitHub Operations (`<leader>go`)
+| Keymap | Action | Description |
+|--------|--------|-------------|
+| `<leader>gopl` | Octo pr list | List pull requests |
+| `<leader>gopc` | Octo pr checkout | Checkout pull request |
+| `<leader>gopm` | Octo pr merge | Merge pull request |
+| `<leader>gopd` | Octo pr diff | Show PR diff |
+| `<leader>gopR` | Octo pr reload | Reload pull request |
+| `<leader>gopb` | Octo pr browser | Open PR in browser |
+| `<leader>goprs` | OctoReviewStartOrSubmit | Start or submit review |
+| `<leader>goprc` | Octo review close | Close review |
+| `<leader>goprd` | Octo review discard | Discard review |
+| `<leader>goil` | Octo issues list | List issues |
+| `<leader>goic` | Octo issue close | Close issue |
+| `<leader>goiR` | Octo issue reload | Reload issue |
+| `<leader>goib` | Octo issue browser | Open issue in browser |
+| `<leader>goru` | Octo reaction thumbs_up | Add thumbs up reaction |
+| `<leader>gord` | Octo reaction thumbs_down | Add thumbs down reaction |
+| `<leader>gort` | Octo reaction tada | Add tada reaction |
+| `<leader>gorh` | Octo reaction heart | Add heart reaction |
+| `<leader>gorr` | Octo reaction rocket | Add rocket reaction |
+| `<leader>gorp` | Octo reaction party | Add party reaction |
+| `<leader>goa` | Octo actions | Show Octo actions |
 
 ### 🛠️ LSP Operations (`<leader>l`)
 | Keymap | Action | Description |
