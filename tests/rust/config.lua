@@ -7,7 +7,7 @@ local M = {}
 M.lsp = {
   server_name = "rust_analyzer",
   timeout_env_var = "RUST_ANALYZER_WAIT_MS",
-  default_timeout = 20000,
+  default_timeout = 60000,
   expected_filetype = "rust",
   language = "Rust",
   required_caps = {
@@ -15,7 +15,7 @@ M.lsp = {
   },
   optional_caps = {
     "hoverProvider",
-    "definitionProvider", 
+    "definitionProvider",
     "referencesProvider",
     "documentSymbolProvider",
     "workspaceSymbolProvider"
