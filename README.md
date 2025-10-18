@@ -6,13 +6,13 @@ A comprehensive Neovim configuration using Lua and the lazy.nvim plugin manager,
 
 | Language | LSP | DAP | Treesitter | Tests | Status |
 |----------|-----|-----|------------|-------|--------|
-| Java | ✅ | ✅ | ✅ | ✅ | [![Java](https://github.com/iocanel/nvim/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/build.yml) |
-| Go | ✅ | ✅ | ✅ | ✅ | [![Go](https://github.com/iocanel/nvim/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/build.yml) |
-| Python | ✅ | ✅ | ✅ | ✅ | [![Python](https://github.com/iocanel/nvim/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/build.yml) |
-| JavaScript | ✅ | ✅ | ✅ | ✅ | [![JavaScript](https://github.com/iocanel/nvim/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/build.yml) |
-| TypeScript | ✅ | ✅ | ✅ | ✅ | [![TypeScript](https://github.com/iocanel/nvim/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/build.yml) |
-| Rust | ✅ | ✅ | ✅ | ✅ | [![Rust](https://github.com/iocanel/nvim/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/build.yml) |
-| C/C++ | ✅ | ✅ | ✅ | ✅ | [![C](https://github.com/iocanel/nvim/actions/workflows/build.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/build.yml) |
+| Java | ✅ | ✅ | ✅ | ✅ | [![Java](https://github.com/iocanel/nvim/actions/workflows/java.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/java.yml) |
+| Go | ✅ | ✅ | ✅ | ✅ | [![Go](https://github.com/iocanel/nvim/actions/workflows/go.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/go.yml) |
+| Python | ✅ | ✅ | ✅ | ✅ | [![Python](https://github.com/iocanel/nvim/actions/workflows/python.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/python.yml) |
+| JavaScript | ✅ | ✅ | ✅ | ✅ | [![JavaScript](https://github.com/iocanel/nvim/actions/workflows/javascript.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/javascript.yml) |
+| TypeScript | ✅ | ✅ | ✅ | ✅ | [![TypeScript](https://github.com/iocanel/nvim/actions/workflows/typescript.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/typescript.yml) |
+| Rust | ✅ | ✅ | ✅ | ✅ | [![Rust](https://github.com/iocanel/nvim/actions/workflows/rust.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/rust.yml) |
+| C/C++ | ✅ | ✅ | ✅ | ✅ | [![C/C++](https://github.com/iocanel/nvim/actions/workflows/c.yml/badge.svg?event=push)](https://github.com/iocanel/nvim/actions/workflows/c.yml) |
 | Vue | ✅ | ✅ | ✅ | ➖ | N/A |
 | Lua | ✅ | ➖ | ✅ | ➖ | N/A |
 | HTML/CSS | ✅ | ➖ | ✅ | ➖ | N/A |
