@@ -1,6 +1,6 @@
 return {
-  { 
-    'folke/which-key.nvim', 
+  {
+    'folke/which-key.nvim',
     opts = {
       plugins = {
         marks = true, -- shows a list of your marks on ' and `
@@ -81,6 +81,11 @@ return {
           { "<leader>d", group = "debug" },
           { "<leader>D", group = "diagnostics" },
           { "<leader>g", group = "git" },
+          { "<leader>go", group = "octo" },
+          { "<leader>gop", group = "pull request" },
+          { "<leader>gopr", group = "pull request review" },
+          { "<leader>goi", group = "issues" },
+          { "<leader>gor", group = "reactions" },
           { "<leader>gh", group = "hunk" },
           { "<leader>h", group = "help" },
           { "<leader>l", group = "lsp" },
