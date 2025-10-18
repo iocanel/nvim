@@ -221,8 +221,8 @@ function M.test_debug_dwim(test_files)
       if dap.session() then
         local old_session = dap.session()
         print("🧹 Cleaning up existing session (ID: " .. (old_session.id or "unknown") .. ") before starting new test")
-        pcall(dap.terminate)
-        pcall(dap.disconnect)
+        local hydra = require('config.dap.hydra')
+        pcall(hydra.dap_close_all)  -- This closes DAP session, UI, and all related buffers
         vim.wait(1000, function() return dap.session() == nil end, 100)
         if dap.session() then
           print("⚠️  Warning: Previous session still active after cleanup attempt")
@@ -340,11 +340,13 @@ function M.test_debug_dwim(test_files)
       print("🛑 Terminating debug session (ID: " .. session_id .. ") for " .. file_info.description)
       local cleanup_start = vim.uv.hrtime()
       
-      pcall(dap.terminate)
-      local terminated = vim.wait(2000, function() return state.seen.terminated end, 100)
+      local hydra = require('config.dap.hydra')
+      pcall(hydra.dap_close_all)  -- This closes DAP session, UI, and all related buffers
+      local terminated = vim.wait(2000, function() return dap.session() == nil end, 100)
       
       if not terminated then
-        print("⚠️  Session did not terminate gracefully, forcing disconnect")
+        print("⚠️  Session did not terminate gracefully after dap_close_all")
+        pcall(dap.terminate)
         pcall(dap.disconnect)
         vim.wait(1000, function() return dap.session() == nil end, 100)
       end
@@ -368,8 +370,8 @@ function M.test_debug_dwim(test_files)
       if dap.session() then
         local failed_session = dap.session()
         print("🧹 Cleaning up failed session (ID: " .. (failed_session.id or "unknown") .. ")")
-        pcall(dap.terminate)
-        pcall(dap.disconnect)
+        local hydra = require('config.dap.hydra')
+        pcall(hydra.dap_close_all)  -- This closes DAP session, UI, and all related buffers
         vim.wait(1000, function() return dap.session() == nil end, 100)
       end
       framework.die("DebugDwim test failed for " .. file_info.description .. ": " .. tostring(err))
