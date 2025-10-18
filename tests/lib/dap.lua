@@ -198,20 +198,44 @@ function M.test_debug_dwim(test_files)
 
     local ok, err = pcall(function()
       local dap = require("dap")
+      
+      -- Clean up any existing session first
+      if dap.session() then
+        local old_session = dap.session()
+        print("🧹 Cleaning up existing session (ID: " .. (old_session.id or "unknown") .. ") before starting new test")
+        pcall(dap.terminate)
+        pcall(dap.disconnect)
+        vim.wait(1000, function() return dap.session() == nil end, 100)
+        if dap.session() then
+          print("⚠️  Warning: Previous session still active after cleanup attempt")
+        end
+      end
+      
       -- Setup debug listeners for this test
       local state = M.setup_debug_listeners("dwim-test-" .. file_info.name)
 
       -- Set breakpoint and start debugging
       vim.api.nvim_win_set_cursor(0, { file_info.breakpoint_line, 0 })
       dap.set_breakpoint()
+      
+      print("🚀 Starting debug session for " .. file_info.description .. " at line " .. file_info.breakpoint_line)
+      local session_start_time = vim.uv.hrtime()
       vim.cmd("DebugDwim")
 
       -- Wait for session to start
       local dap_timeout = tonumber(vim.env.DAP_WAIT_MS) or 20000
+      local session_wait_start = vim.uv.hrtime()
       local ok_session = vim.wait(dap_timeout, function() return dap.session() ~= nil end, 100)
+      local session_wait_time = (vim.uv.hrtime() - session_wait_start) / 1000000
+      
       if not ok_session then
+        print("❌ DAP session failed to start after " .. math.floor(session_wait_time) .. "ms (timeout: " .. dap_timeout .. "ms)")
         framework.die("DAP session did not start for " .. file_info.description)
       end
+      
+      local session = dap.session()
+      local session_id = session and session.id or "unknown"
+      print("✅ DAP session started (ID: " .. session_id .. ") after " .. math.floor(session_wait_time) .. "ms")
 
       -- Wait for initialization
       vim.wait(2000, function() return state.seen.initialized end, 100)
@@ -229,22 +253,33 @@ function M.test_debug_dwim(test_files)
       local breakpoint_hit = vim.wait(dap_timeout, function() return state.seen.stopped end, 200)
       local actual_wait_time = (vim.uv.hrtime() - start_time) / 1000000 -- Convert to milliseconds
       
+      -- Report detailed breakpoint status
       if breakpoint_hit then
         if already_stopped then
           print("⏱️  Breakpoint was already hit (0ms wait) for " .. file_info.description)
         else
           print("⏱️  Breakpoint hit after " .. math.floor(actual_wait_time) .. "ms for " .. file_info.description)
         end
+      else
+        print("⏰ Breakpoint NOT hit after " .. math.floor(actual_wait_time) .. "ms (timeout: " .. dap_timeout .. "ms)")
       end
 
       -- Check if session is still active - if it terminated, breakpoint wasn't hit
       local current_session = dap.session()
       if not current_session then
+        print("💀 Debug session terminated unexpectedly (session ID was: " .. session_id .. ")")
         framework.die("Debug session terminated without hitting breakpoint for " .. file_info.description)
       end
 
       if not breakpoint_hit then
+        -- Show current breakpoints and session state for debugging
+        local breakpoints = dap.list_breakpoints()
+        print("🔍 Debug info - Active breakpoints: " .. vim.inspect(breakpoints))
+        print("🔍 Debug info - Session state: " .. (current_session and "active" or "none"))
+        print("🔍 Debug info - Expected file: " .. file_info.path .. " line " .. file_info.breakpoint_line)
+        
         pcall(dap.terminate)
+        pcall(dap.disconnect)
         framework.die("Debugger did not stop (breakpoint not hit) for " .. file_info.description .. 
                      " - waited " .. math.floor(actual_wait_time) .. "ms (timeout: " .. dap_timeout .. "ms)")
       end
@@ -283,15 +318,42 @@ function M.test_debug_dwim(test_files)
         framework.die("Debugger stopped for unexpected reason: " .. tostring(reason) .. " for " .. file_info.description)
       end
 
-      -- Terminate the session
+      -- Proper session cleanup
+      print("🛑 Terminating debug session (ID: " .. session_id .. ") for " .. file_info.description)
+      local cleanup_start = vim.uv.hrtime()
+      
       pcall(dap.terminate)
-      vim.wait(2000, function() return state.seen.terminated end, 100)
+      local terminated = vim.wait(2000, function() return state.seen.terminated end, 100)
+      
+      if not terminated then
+        print("⚠️  Session did not terminate gracefully, forcing disconnect")
+        pcall(dap.disconnect)
+        vim.wait(1000, function() return dap.session() == nil end, 100)
+      end
+      
+      local cleanup_time = (vim.uv.hrtime() - cleanup_start) / 1000000
+      print("✅ Session cleanup completed in " .. math.floor(cleanup_time) .. "ms")
+      
+      -- Verify session is fully cleaned up
+      if dap.session() then
+        print("⚠️  Warning: Session still active after cleanup (ID: " .. (dap.session().id or "unknown") .. ")")
+      else
+        print("✅ Session fully terminated")
+      end
 
       framework.print_success("DebugDwim debugging successful (breakpoint hit) for " .. file_info.description)
       results[file_info.name .. "_debug_success"] = true
     end)
 
     if not ok then
+      -- Ensure cleanup even on failure
+      if dap.session() then
+        local failed_session = dap.session()
+        print("🧹 Cleaning up failed session (ID: " .. (failed_session.id or "unknown") .. ")")
+        pcall(dap.terminate)
+        pcall(dap.disconnect)
+        vim.wait(1000, function() return dap.session() == nil end, 100)
+      end
       framework.die("DebugDwim test failed for " .. file_info.description .. ": " .. tostring(err))
     else
       results[file_info.name .. "_success"] = true
