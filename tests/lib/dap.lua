@@ -191,7 +191,19 @@ function M.test_debug_dwim(test_files)
   -- Test DebugDwim functionality with different files
   for _, file_info in ipairs(test_files) do
     framework.print_section("DebugDwim with " .. file_info.description)
-    vim.cmd("edit! " .. vim.fn.fnameescape(file_info.path))
+    
+    -- Ensure clean buffer state before each test
+    vim.cmd("enew")  -- Create new empty buffer
+    vim.cmd("edit! " .. vim.fn.fnameescape(file_info.path))  -- Force reload file
+    vim.cmd("redraw!")  -- Force redraw to ensure buffer is ready
+    
+    -- Verify buffer is properly loaded
+    local line_count = vim.api.nvim_buf_line_count(0)
+    print("📄 Buffer loaded with " .. line_count .. " lines, targeting line " .. file_info.breakpoint_line)
+    
+    if file_info.breakpoint_line > line_count then
+      framework.die("Target breakpoint line " .. file_info.breakpoint_line .. " exceeds buffer length " .. line_count .. " for " .. file_info.description)
+    end
 
     -- Clear breakpoints before each test
     dap.clear_breakpoints()
