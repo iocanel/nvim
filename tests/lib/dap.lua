@@ -202,6 +202,12 @@ function M.test_debug_dwim(test_files)
     print("📄 Buffer loaded with " .. line_count .. " lines, targeting line " .. file_info.breakpoint_line)
     
     if file_info.breakpoint_line > line_count then
+      print("🔍 Breakpoint line " .. file_info.breakpoint_line .. " exceeds buffer length " .. line_count)
+      print("📄 Current buffer content:")
+      local buffer_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      for i, line in ipairs(buffer_lines) do
+        print(string.format("%3d: %s", i, line))
+      end
       framework.die("Target breakpoint line " .. file_info.breakpoint_line .. " exceeds buffer length " .. line_count .. " for " .. file_info.description)
     end
 
