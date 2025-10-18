@@ -13,6 +13,15 @@ return {
       enable = true,
     },
     indent = { enable = true },
+    incremental_selection = {
+      enable = true,
+      keymaps = {
+        init_selection = '<C-e>',
+        node_incremental = '<C-e>',
+        node_decremental = '<C-s>',
+      },
+    },
+
     auto_install = false, -- automatically install syntax support when entering new file type buffer
     ensure_installed = {
       'java',
