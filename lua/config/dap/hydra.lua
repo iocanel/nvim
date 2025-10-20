@@ -163,6 +163,11 @@ if is_hydra_installed then
         { 'ui', "<cmd>DapToggleUI<cr>", { desc = 'toggle ui', nowait = true, exit = false} },
         { 'ut', "<cmd>DapToggleTray<cr>", { desc = 'toggle tray', exit = false} },
         { 'us', "<cmd>DapToggleSidebar<cr>", { desc = 'toggle sidebar', exit = false} },
+        -- Arrow key mappings for debugging
+        { '<Down>', M.dap_step_into, { desc = 'step into', nowait = true, exit = true} },
+        { '<Up>', M.dap_step_over, { desc = 'step over', nowait = true, exit = true} },
+        { '<Left>', M.dap_step_out, { desc = 'step out', nowait = true, exit = true} },
+        { '<Right>', "<cmd>DapContinue<cr>", { desc = 'continue', nowait = true, exit = true} },
         { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
       }
     })

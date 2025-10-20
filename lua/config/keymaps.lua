@@ -147,6 +147,33 @@ vim.keymap.set('n', '<leader>dO', "<cmd>DapStepOut<cr>", {desc = "dap step out"}
 vim.keymap.set('n', '<leader>dc', "<cmd>DapContinue<cr>", {desc = "dap continue"})
 vim.keymap.set('n', '<leader>db', "<cmd>DapToggleBreakpoint<cr>", {desc = "dap toggle breakpoint"})
 vim.keymap.set('n', '<leader>dr', "<cmd>DapToggleRepl<cr>", {desc = "dap toggle repl"})
+
+-- Debug-specific arrow key mappings (only active during debug sessions)
+local debug_mappings_set = false
+
+local function set_debug_mappings()
+  if debug_mappings_set then return end
+  vim.keymap.set('n', '<Down>', "<cmd>DapStepInto<cr>", { desc = 'Debug: Step into' })
+  vim.keymap.set('n', '<Up>', "<cmd>DapStepOver<cr>", { desc = 'Debug: Step over' })
+  vim.keymap.set('n', '<Left>', "<cmd>DapStepOut<cr>", { desc = 'Debug: Step out' })
+  vim.keymap.set('n', '<Right>', "<cmd>DapContinue<cr>", { desc = 'Debug: Continue' })
+  debug_mappings_set = true
+end
+
+local function unset_debug_mappings()
+  if not debug_mappings_set then return end
+  pcall(vim.keymap.del, 'n', '<Down>')
+  pcall(vim.keymap.del, 'n', '<Up>')
+  pcall(vim.keymap.del, 'n', '<Left>')
+  pcall(vim.keymap.del, 'n', '<Right>')
+  debug_mappings_set = false
+end
+
+-- Set up DAP event listeners to enable/disable arrow keys during debug sessions
+local dap = require('dap')
+dap.listeners.after.event_initialized["debug_arrows"] = set_debug_mappings
+dap.listeners.before.event_terminated["debug_arrows"] = unset_debug_mappings
+dap.listeners.before.disconnect["debug_arrows"] = unset_debug_mappings
 vim.keymap.set('n', '<leader>dut', function()dapui.toggle('tray')end, {desc = "dap ui toggle"})
 vim.keymap.set('n', '<leader>dus', function()dapui.toggle('sidebar')end, {desc = "dap ui toggle"})
 vim.keymap.set('n', '<leader>dui', dapui.toggle, {desc = "dap ui toggle"})
