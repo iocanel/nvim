@@ -174,13 +174,6 @@ return {
   },
 
   -- Credits to: https://github.com/nikolovlazar/dotfiles/blob/92c91ed035348c74e387ccd85ca19a376ea2f35e/.config/nvim/lua/plugins/dap.lua
-  -- Install the vscode-js-debug adapter
-  {
-    "microsoft/vscode-js-debug",
-    -- After install, build it and rename the dist directory to out
-    build = "npm install --legacy-peer-deps --no-save && npx gulp vsDebugServerBundle && rm -rf out && mv dist out",
-    version = "1.*",
-  },
   -- nvim-dap-vscode-js
   {
     "mxsdev/nvim-dap-vscode-js",
@@ -191,7 +184,7 @@ return {
 
       -- let the plugin register all pwa-* adapters for you
       require("dap-vscode-js").setup({
-        debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
+        debugger_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter",
         adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "pwa-extensionHost", "node-terminal" },
         log_file_level = false, -- disable debug logging in containers
         log_console_level = vim.log.levels.ERROR, -- only show errors
