@@ -34,7 +34,7 @@ vim.o.termguicolors = true
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 
-vim.o.clipboard = 'unnamedplus'                  -- allows neovim to access the system clipboard
+vim.o.clipboard = 'unnamed,unnamedplus'          -- sync with both clipboard and primary
 vim.o.cursorline = true
 vim.o.relativenumber = true
 vim.o.laststatus = 0
