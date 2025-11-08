@@ -15,6 +15,12 @@ return {
           "/home/iocanel/Documents/org/roam/Inbox.org",
         },
         org_default_notes_file = '~/Documents/org/roam/Inbox.org',
+        mappings = {
+          global = {
+            org_agenda = '<leader>oa',
+            org_capture = '<leader>ox',  -- Changed from default <leader>oc
+          }
+        }
       })
     end,
   },
