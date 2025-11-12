@@ -7,7 +7,7 @@ local M = {}
 M.lsp = {
   server_name = "ts_ls",
   timeout_env_var = "TS_LS_WAIT_MS",
-  default_timeout = 20000,
+  default_timeout = 40000,
   expected_filetype = "javascript",
   language = "JavaScript",
   required_caps = {
@@ -26,7 +26,7 @@ M.lsp = {
 M.dap = {
   adapter_name = "pwa-node",
   timeout_env_var = "DAP_WAIT_MS",
-  default_timeout = 20000,
+  default_timeout = 40000,
 }
 
 return M
