@@ -172,9 +172,33 @@ end
 -- DAP Interface Implementation
 function M.setup_dap()
   local jdtls = require("jdtls")
-  if jdtls and jdtls.setup_dap then
-    jdtls.setup_dap({ hotcodereplace = "auto" })
+  if not jdtls or not jdtls.setup_dap then
+    return false
   end
+  
+  -- Wait for JDTLS to be fully initialized before setting up DAP
+  local jdtls_ready = false
+  for _, client in ipairs(vim.lsp.get_clients({ name = "jdtls" })) do
+    if client.initialized then
+      local caps = client.server_capabilities or {}
+      local has_basic_caps = caps.hoverProvider 
+                          or caps.definitionProvider 
+                          or caps.textDocumentSync ~= nil
+                          or caps.documentSymbolProvider
+      if has_basic_caps then
+        jdtls_ready = true
+        break
+      end
+    end
+  end
+  
+  if not jdtls_ready then
+    print("⚠️  JDTLS not fully ready for DAP setup")
+    return false
+  end
+  
+  jdtls.setup_dap({ hotcodereplace = "auto" })
+  return true
 end
 
 function M.is_filetype_supported(filetype, filename)
