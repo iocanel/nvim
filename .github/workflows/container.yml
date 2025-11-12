@@ -9,7 +9,7 @@ on:
     outputs:
       container-artifact:
         description: "Name of the container artifact"
-        value: ${{ jobs.build-container.outputs.artifact-name }}
+        value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
   build:
