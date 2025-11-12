@@ -236,6 +236,9 @@ function M.test_debug_dwim(test_files)
       vim.api.nvim_win_set_cursor(0, { file_info.breakpoint_line, 0 })
       dap.set_breakpoint()
       
+      -- Debug: Print intended breakpoint location
+      print("🎯 Setting breakpoint at: " .. file_info.path .. ":" .. file_info.breakpoint_line)
+      
       -- Wait for breakpoint to be registered
       local breakpoint_registered = vim.wait(5000, function()
         local breakpoints = dap.list_breakpoints()
@@ -249,8 +252,20 @@ function M.test_debug_dwim(test_files)
         return false
       end, 100)
       
+      -- Debug: Print all available breakpoints
+      local breakpoints = dap.list_breakpoints()
+      local bp_info = {}
+      for file_path, bp_list in pairs(breakpoints or {}) do
+        for _, bp in ipairs(bp_list or {}) do
+          table.insert(bp_info, file_path .. ":" .. bp.line)
+        end
+      end
+      print("🔍 All breakpoints: " .. (next(bp_info) and table.concat(bp_info, ", ") or "none"))
+      
       if not breakpoint_registered then
         print("⚠️  Warning: Breakpoint may not be registered at line " .. file_info.breakpoint_line)
+      else
+        print("✅ Breakpoint confirmed at line " .. file_info.breakpoint_line)
       end
       
       print("🚀 Starting debug session for " .. file_info.description .. " at line " .. file_info.breakpoint_line)
