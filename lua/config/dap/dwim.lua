@@ -96,6 +96,11 @@ function M.debug_dwim()
 
   local filename = vim.api.nvim_buf_get_name(0)
   
+  -- Setup DAP if module provides it (needed before setting breakpoints)
+  if module.setup_dap then
+    pcall(module.setup_dap)
+  end
+  
   -- Check if current file has any breakpoints, if not set one at current line
   local dap = require("dap")
   local breakpoints = dap.list_breakpoints() or {}

@@ -170,6 +170,13 @@ if dap_ok then
   }
 end
 -- DAP Interface Implementation
+function M.setup_dap()
+  local jdtls = require("jdtls")
+  if jdtls and jdtls.setup_dap then
+    jdtls.setup_dap({ hotcodereplace = "auto" })
+  end
+end
+
 function M.is_filetype_supported(filetype, filename)
   return filetype == "java" or (filename and filename:match("%.java$"))
 end
