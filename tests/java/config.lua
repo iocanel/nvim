@@ -7,7 +7,7 @@ local M = {}
 M.lsp = {
   server_name = "jdtls",
   timeout_env_var = "JDTLS_WAIT_MS",
-  default_timeout = 25000,
+  default_timeout = 50000,
   expected_filetype = "java",
   language = "Java",
   required_caps = {
@@ -26,7 +26,7 @@ M.lsp = {
 M.dap = {
   adapter_name = "java",
   timeout_env_var = "DAP_WAIT_MS",
-  default_timeout = 20000,
+  default_timeout = 40000,
 }
 
 return M
