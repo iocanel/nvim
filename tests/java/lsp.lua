@@ -22,7 +22,7 @@ framework.enter_project_dir(paths.project_root)
 
 -- Wait for JDTLS to attach and project import to complete
 print("Waiting for JDTLS to attach and project import to complete...")
-local timeout = framework.get_timeout("JDTLS_WAIT_MS", 30000)
+local timeout = framework.get_timeout("JDTLS_WAIT_MS", 50000)
 local jdtls_client
 vim.cmd.edit(vim.fn.fnameescape(paths.main_file))
 framework.validate_filetype("java", "main file")

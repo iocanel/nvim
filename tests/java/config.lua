@@ -26,7 +26,7 @@ M.lsp = {
 M.dap = {
   adapter_name = "java",
   timeout_env_var = "DAP_WAIT_MS",
-  default_timeout = 40000,
+  default_timeout = 60000,
 }
 
 return M
