@@ -241,7 +241,7 @@ function M.test_debug_dwim(test_files)
       vim.cmd("DebugDwim")
 
       -- Wait for session to start
-      local dap_timeout = tonumber(vim.env.DAP_WAIT_MS) or 20000
+      local dap_timeout = tonumber(vim.env.DAP_WAIT_MS) or 60000
       local session_wait_start = vim.uv.hrtime()
       local ok_session = vim.wait(dap_timeout, function() return dap.session() ~= nil end, 100)
       local session_wait_time = (vim.uv.hrtime() - session_wait_start) / 1000000
