@@ -88,19 +88,53 @@ function M:debug()
 end
 
 function M:debug_test()
+  local dap = require("dap")
   local jdtls = require("jdtls")
+  
   -- Ensure jdtls is available
-  if not jdtls or not jdtls.test_class then
-    vim.notify("jdtls is not available or test_class function not found. Ensure jdtls is properly configured with test bundles.", vim.log.levels.ERROR)
+  if not jdtls or not jdtls.setup_dap then
+    vim.notify("jdtls is not available. Ensure it is installed and running.", vim.log.levels.ERROR)
     return
   end
+
+  -- Setup DAP first
+  jdtls.setup_dap({ hotcodereplace = "auto" })
+
   -- Get current file info to verify it's a Java file
   local bufname = vim.api.nvim_buf_get_name(0)
   if not bufname:match("%.java$") then
     vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
     return
   end
-  jdtls.test_class()
+
+  -- Get test class name and package
+  local class_name = bufname:match("([^/]+)%.java$")
+  if not class_name then
+    vim.notify("Could not determine test class name", vim.log.levels.ERROR)
+    return
+  end
+
+  -- Determine package from file path  
+  local package = vim.fn.expand("%:p:h"):gsub("[/\\]", "."):gsub("^.*src[./\\]test[./\\]java[./\\]", "")
+  local test_fqcn = package ~= "" and (package .. "." .. class_name) or class_name
+
+  -- Get project name
+  local project = require('config.project')
+  local module_name = project.get_module_name()
+
+  -- Create test launch configuration that runs tests in debug mode
+  local test_config = {
+    type = 'java',
+    request = 'launch',
+    name = "Debug Test " .. test_fqcn,
+    mainClass = "org.junit.platform.console.ConsoleLauncher",
+    projectName = module_name,
+    args = "--select-class=" .. test_fqcn,
+    vmArgs = "-ea", -- Enable assertions for tests
+    console = "integratedTerminal",
+  }
+
+  dap.run(test_config)
 end
 
 function M:debug_test_method()
