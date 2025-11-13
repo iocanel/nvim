@@ -92,10 +92,10 @@ java-container-test:
 # Javascript
 #
 javascript-lsp:
-	nvim --headless "+luafile tests/java/lsp.lua"
+	nvim --headless "+luafile tests/javascript/lsp.lua"
 
 javascript-dap:
-	nvim --headless "+luafile tests/java/dap.lua"
+	nvim --headless "+luafile tests/javascript/dap.lua"
 
 javascript-test: javascript-lsp javascript-dap
 
