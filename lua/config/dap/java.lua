@@ -170,34 +170,51 @@ if dap_ok then
   }
 end
 -- DAP Interface Implementation
+local dap_setup_done = false
+
 function M.setup_dap()
   local jdtls = require("jdtls")
   if not jdtls or not jdtls.setup_dap then
     return false
   end
   
-  -- Wait for JDTLS to be fully initialized before setting up DAP
-  local jdtls_ready = false
-  for _, client in ipairs(vim.lsp.get_clients({ name = "jdtls" })) do
-    if client.initialized then
-      local caps = client.server_capabilities or {}
-      local has_basic_caps = caps.hoverProvider 
-                          or caps.definitionProvider 
-                          or caps.textDocumentSync ~= nil
-                          or caps.documentSymbolProvider
-      if has_basic_caps then
-        jdtls_ready = true
-        break
+  -- Skip if already done
+  if dap_setup_done then
+    print("✅ DAP already set up, skipping...")
+    return true
+  end
+  
+  -- Step 1: Wait for JDTLS to gain full capabilities
+  print("⏳ Step 1: Waiting for JDTLS to gain full capabilities...")
+  local jdtls_ready = vim.wait(30000, function()
+    for _, client in ipairs(vim.lsp.get_clients({ name = "jdtls" })) do
+      if client.initialized then
+        local caps = client.server_capabilities or {}
+        -- Wait for a rich set of capabilities indicating full initialization
+        local has_rich_caps = caps.documentSymbolProvider
+                           and caps.referencesProvider
+                           and caps.completionProvider
+                           and caps.workspaceSymbolProvider
+        if has_rich_caps then
+          return true
+        end
       end
     end
-  end
+    return false
+  end, 1000)
   
   if not jdtls_ready then
-    print("⚠️  JDTLS not fully ready for DAP setup")
-    return false
+    print("⚠️ JDTLS didn't gain full capabilities within 30s, proceeding anyway")
+  else
+    print("✅ Step 1 complete: JDTLS has rich capabilities")
   end
   
+  -- Step 2: Call DAP setup
+  print("🔧 Step 2: Setting up JDTLS DAP...")
   jdtls.setup_dap({ hotcodereplace = "auto" })
+  print("✅ Step 2 complete: DAP setup finished")
+  
+  dap_setup_done = true
   return true
 end
 

@@ -96,30 +96,64 @@ function M.debug_dwim()
 
   local filename = vim.api.nvim_buf_get_name(0)
   
-  -- Setup DAP if module provides it (needed before setting breakpoints)
+  -- Steps 1-2: Setup DAP if module provides it (needed before setting breakpoints)
   if module.setup_dap then
-    pcall(module.setup_dap)
-  end
-  
-  -- Check if current file has any breakpoints, if not set one at current line
-  local dap = require("dap")
-  local breakpoints = dap.list_breakpoints() or {}
-  local current_file_has_breakpoint = false
-  
-  for _, bp_list in pairs(breakpoints) do
-    if type(bp_list) == "table" then
-      for _, bp in ipairs(bp_list) do
-        if bp.file and bp.file == filename then
-          current_file_has_breakpoint = true
-          break
-        end
-      end
+    print("🔧 Steps 1-2: Setting up DAP...")
+    local success = pcall(module.setup_dap)
+    if not success then
+      vim.notify("DAP setup failed for " .. (module_name or "unknown"), vim.log.levels.ERROR)
+      return
     end
-    if current_file_has_breakpoint then break end
   end
+  
+  -- Step 3: Check if current file has any breakpoints, if not set one at current line
+  print("🎯 Step 3: Setting breakpoint if needed...")
+  local breakpoints_module = require('dap.breakpoints')
+  local current_bufnr = vim.api.nvim_get_current_buf()
+  local dap = require("dap")
+  
+  -- Check existing breakpoints using proper API
+  local existing_breakpoints = breakpoints_module.get()
+  local buf_breakpoints = existing_breakpoints[current_bufnr] or {}
+  local current_line = vim.api.nvim_win_get_cursor(0)[1]
+  local current_file_has_breakpoint = #buf_breakpoints > 0
   
   if not current_file_has_breakpoint then
+    print("🎯 Setting breakpoint at line " .. current_line)
     dap.set_breakpoint()
+    
+    -- Step 4: Wait for breakpoint to be visible
+    print("⏳ Step 4: Waiting for breakpoint to be visible...")
+    local breakpoint_registered = vim.wait(10000, function()
+      local breakpoints = breakpoints_module.get()
+      local buf_breakpoints = breakpoints[current_bufnr] or {}
+      for _, bp in ipairs(buf_breakpoints) do
+        if bp.line == current_line then
+          return true
+        end
+      end
+      return false
+    end, 500)
+    
+    -- Step 5: List breakpoints
+    print("📋 Step 5: Listing all breakpoints...")
+    local breakpoints = breakpoints_module.get()
+    local bp_info = {}
+    for bufnr, bp_list in pairs(breakpoints or {}) do
+      for _, bp in ipairs(bp_list or {}) do
+        local filename = vim.api.nvim_buf_get_name(bufnr)
+        table.insert(bp_info, vim.fn.fnamemodify(filename, ":t") .. ":" .. bp.line)
+      end
+    end
+    print("🔍 All breakpoints: " .. (next(bp_info) and table.concat(bp_info, ", ") or "none"))
+    
+    if not breakpoint_registered then
+      print("⚠️ Breakpoint not visible after 10s, proceeding anyway")
+    else
+      print("✅ Breakpoint confirmed at line " .. current_line)
+    end
+  else
+    print("✅ Existing breakpoint found, proceeding with debugging")
   end
   local is_test = false
   local in_test_function, test_function_name = false, nil
