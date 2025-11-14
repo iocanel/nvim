@@ -56,7 +56,7 @@ function M:debug()
   end
 
   -- Setup DAP
-  jdtls.setup_dap({ hotcodereplace = "auto" })
+  M.setup_dap()
 
   -- Get current file class and package info
   local bufname = vim.api.nvim_buf_get_name(0)
@@ -90,7 +90,7 @@ end
 function M:debug_test()
   local dap = require("dap")
   local jdtls = require("jdtls")
-  
+
   -- Ensure jdtls is available
   if not jdtls or not jdtls.setup_dap then
     vim.notify("jdtls is not available. Ensure it is installed and running.", vim.log.levels.ERROR)
@@ -98,7 +98,7 @@ function M:debug_test()
   end
 
   -- Setup DAP first
-  jdtls.setup_dap({ hotcodereplace = "auto" })
+  M.setup_dap()
 
   -- Get current file info to verify it's a Java file
   local bufname = vim.api.nvim_buf_get_name(0)
@@ -114,7 +114,7 @@ function M:debug_test()
     return
   end
 
-  -- Determine package from file path  
+  -- Determine package from file path
   local package = vim.fn.expand("%:p:h"):gsub("[/\\]", "."):gsub("^.*src[./\\]test[./\\]java[./\\]", "")
   local test_fqcn = package ~= "" and (package .. "." .. class_name) or class_name
 
@@ -211,13 +211,13 @@ function M.setup_dap()
   if not jdtls or not jdtls.setup_dap then
     return false
   end
-  
+
   -- Skip if already done
   if dap_setup_done then
     print("✅ DAP already set up, skipping...")
     return true
   end
-  
+
   -- Step 1: Wait for JDTLS to gain full capabilities
   print("⏳ Step 1: Waiting for JDTLS to gain full capabilities...")
   local jdtls_ready = vim.wait(30000, function()
@@ -236,18 +236,18 @@ function M.setup_dap()
     end
     return false
   end, 1000)
-  
+
   if not jdtls_ready then
     print("⚠️ JDTLS didn't gain full capabilities within 30s, proceeding anyway")
   else
     print("✅ Step 1 complete: JDTLS has rich capabilities")
   end
-  
+
   -- Step 2: Call DAP setup
   print("🔧 Step 2: Setting up JDTLS DAP...")
   jdtls.setup_dap({ hotcodereplace = "auto" })
   print("✅ Step 2 complete: DAP setup finished")
-  
+
   dap_setup_done = true
   return true
 end
@@ -266,11 +266,11 @@ function M.is_in_test_function(filename, line_no)
   if not M.is_test_file(filename) then
     return false, nil
   end
-  
+
   -- Search upward from current line to find test method
   for i = line_no, math.max(1, line_no - 50), -1 do
     local line = vim.api.nvim_buf_get_lines(0, i - 1, i, false)[1] or ""
-    
+
     -- Java test methods: @Test annotation or method names starting with "test"
     if line:match("@Test") then
       -- Look for method definition in next few lines
@@ -283,14 +283,14 @@ function M.is_in_test_function(filename, line_no)
       end
       return true, nil
     end
-    
+
     -- Direct test method pattern
     local method_name = line:match("void%s+(test%w*)%s*%(") or line:match("public%s+void%s+(test%w*)%s*%(")
     if method_name then
       return true, method_name
     end
   end
-  
+
   return false, nil
 end
 
