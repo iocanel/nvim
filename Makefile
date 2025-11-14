@@ -2,7 +2,7 @@ CONTAINER_IMAGE = iocanel/nvim
 UID := $(shell id -u)
 GID := $(shell id -g)
 HOME_DIR := $(HOME)
-DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) --tmpfs /tmp/nvim-state -e XDG_STATE_HOME=/tmp/nvim-state $(CONTAINER_IMAGE)
+DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) --tmpfs /tmp/nvim-state -e XDG_STATE_HOME=/tmp/nvim-state --cpus=1 --memory=1024m $(CONTAINER_IMAGE)
 
 all: test
 
@@ -160,6 +160,9 @@ typescript-container-test:
 container-build:
 	docker build -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE) .
 
+container-build-no-cache:
+	docker build --no-cache -f Dockerfile.ubuntu -t $(CONTAINER_IMAGE) .
+
 container-test: container-build c-container-test go-container-test java-container-test javascript-container-test python-container-test rust-container-test typescript-container-test
 
 container-dev: container-build
@@ -196,4 +199,4 @@ help:
 	@echo "  make container-test                 # Test in Ubuntu container (default)"
 	@echo "  make container-dev                  # Interactive development"
 
-.PHONY: help clean container-build container-test container-dev container-shell container-clean
+.PHONY: help clean container-build container-build-no-cache container-test container-dev container-shell container-clean
