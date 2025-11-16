@@ -2,7 +2,8 @@ CONTAINER_IMAGE = iocanel/nvim
 UID := $(shell id -u)
 GID := $(shell id -g)
 HOME_DIR := $(HOME)
-DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) --tmpfs /tmp/nvim-state:rw,noexec,nosuid,size=100m,uid=$(UID),gid=$(GID) -e XDG_STATE_HOME=/tmp/nvim-state --cpus=1 --memory=1024m $(CONTAINER_IMAGE)
+#DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) --tmpfs /tmp/nvim-state-$$:rw,noexec,nosuid,size=100m,uid=$(UID),gid=$(GID) -e XDG_STATE_HOME=/tmp/nvim-state-$$ --cpus=1 --memory=512m $(CONTAINER_IMAGE)
+DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) --tmpfs /tmp/nvim-state-$$:rw,noexec,nosuid,size=100m,uid=$(UID),gid=$(GID) -e XDG_STATE_HOME=/tmp/nvim-state-$$ $(CONTAINER_IMAGE)
 
 all: test
 
