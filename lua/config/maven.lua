@@ -23,6 +23,14 @@ function M.quote(expr)
 end
 
 --
+-- check if a file exists and is executable
+--
+function M.is_executable(file_path)
+  local stat = vim.loop.fs_stat(file_path)
+  return stat and stat.mode and bit.band(stat.mode, 0x49) ~= 0
+end
+
+--
 -- join pats (borrowed from jdtls)
 --
 function M.join(...)
@@ -148,10 +156,10 @@ function M.build(goals, module, resume, also_make, dir)
   end
 
   local toggleterm = require("toggleterm")
-  -- check if mvnw exists in the dir and use that
-  if project_root and vim.loop.fs_stat(M.join(dir, M.mvnw)) then
+  -- check if mvnw exists in the dir and is executable
+  if project_root and M.is_executable(M.join(dir, M.mvnw)) then
     toggleterm.exec(M.mvnw .. ' ' .. goals, 0, 10, dir)
-  elseif project_root and vim.loop.fs_stat(M.join(project_root, 'mvnw')) then
+  elseif project_root and M.is_executable(M.join(project_root, 'mvnw')) then
     toggleterm.exec(M.join(project_root, M.mvnw .. ' ' .. goals), 0, 10, dir)
   else
     toggleterm.exec("mvn " .. goals, 0, 10, dir)
@@ -248,14 +256,26 @@ function M.get_profiles()
   local root = M.find_module_root()
   local pom = M.join(root, 'pom.xml')
   local f = io.open(pom, 'r')
+  if f == nil then
+    return {}
+  end
   local content = f:read('*a')
   f:close()
 
   local profiles = {}
-  for profile in content:gmatch('<profile>(.-)</profile>') do
-    local id = profile:match('<id>(.-)</id>')
-    if id then
-      table.insert(profiles, id)
+  -- Extract profiles section first, then find individual profiles
+  local profiles_section = content:match('<profiles>(.-)</profiles>')
+  if profiles_section then
+    -- Find all profile blocks within the profiles section
+    for profile in profiles_section:gmatch('<profile[^>]*>(.-)</profile>') do
+      local id = profile:match('<id[^>]*>(.-)</id>')
+      if id then
+        -- Trim whitespace
+        id = id:match("^%s*(.-)%s*$")
+        if id ~= "" then
+          table.insert(profiles, id)
+        end
+      end
     end
   end
 
@@ -264,16 +284,29 @@ end
 
 function M.select_profile()
   local profiles = M.get_profiles()
+  
+  -- Add error handling for empty profiles
+  if not profiles or #profiles == 0 then
+    vim.notify("No profiles found in pom.xml", vim.log.levels.WARN)
+    return
+  end
+
+  -- Add 'none' option to clear profile
+  local profile_options = {"<none>"}
+  for _, profile in ipairs(profiles) do
+    table.insert(profile_options, profile)
+  end
 
   local pickers = require('telescope.pickers')
   local finders = require('telescope.finders')
   local sorters = require('telescope.sorters')
   local actions_state = require('telescope.actions.state')
+  local actions = require('telescope.actions')
 
   pickers.new({}, {
     prompt_title = 'Select a profile',
     finder = finders.new_table({
-      results = profiles,
+      results = profile_options,
       entry_maker = function(entry)
         return {
           value = entry,
@@ -286,12 +319,18 @@ function M.select_profile()
     attach_mappings = function(prompt_bufnr, map)
       map('i', '<CR>', function()
         local selection = actions_state.get_selected_entry()
-        -- Do something with the selected profile
-        local m = M.settings
-        m.profile = selection.value
-        M.settings = m
-        project.save_project_settings(M.settings, 'maven')
-        vim.api.nvim_buf_delete(prompt_bufnr, {force = true})
+        if selection then
+          local m = M.settings
+          if selection.value == "<none>" then
+            m.profile = nil
+          else
+            m.profile = selection.value
+          end
+          M.settings = m
+          project.save_project_settings(M.settings, 'maven')
+          vim.notify("Maven profile set to: " .. (m.profile or "default"), vim.log.levels.INFO)
+        end
+        actions.close(prompt_bufnr)
       end)
 
       return true
