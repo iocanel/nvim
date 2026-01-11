@@ -107,6 +107,8 @@ return {
           { "<leader>w", group = "window" },
           { "<leader>ws", group = "window split" },
           { "<leader>wj", group = "window jump" },
+          { "<leader>a", group = "ai" },
+          { "<leader>ac", group = "claude code" },
           { "<leader>cp", group = "copilot" },
           { "<leader>c", group = "code/ai" },
           { "<leader>t", group = "tool/toggle/template" },
