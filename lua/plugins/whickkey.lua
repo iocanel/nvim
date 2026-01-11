@@ -87,6 +87,13 @@ return {
           { "<leader>goi", group = "issues" },
           { "<leader>gor", group = "reactions" },
           { "<leader>gh", group = "hunk" },
+          { "<leader>ghr", desc = "reset hunk" },
+          { "<leader>ghs", desc = "stage hunk" },
+          { "gh", group = "hunk" },
+          { "ghn", desc = "next hunk" },
+          { "ghp", desc = "previous hunk" },
+          { "ghr", desc = "reset hunk" },
+          { "ghs", desc = "stage hunk" },
           { "<leader>h", group = "help" },
           { "<leader>l", group = "lsp" },
           { "<leader>lc", group = "code" },
@@ -100,6 +107,13 @@ return {
           { "<leader>w", group = "window" },
           { "<leader>ws", group = "window split" },
           { "<leader>wj", group = "window jump" },
+          { "<leader>cp", group = "copilot" },
+          { "<leader>c", group = "code/ai" },
+          { "<leader>t", group = "tool/toggle/template" },
+          { "<leader>tm", group = "maven" },
+          { "<leader>du", group = "debug ui" },
+          { "<leader>lg", group = "goto" },
+          { "<leader>jt", group = "java tests" },
         })
       end
     end

@@ -57,7 +57,7 @@ vim.keymap.set('n', '<leader>ts', "<cmd>TemplateSelect<cr>", { desc = 'template 
 --
 vim.keymap.set('n', '<leader>sf', "<cmd>Telescope find_files<cr>", { desc = 'search files' })
 vim.keymap.set('n', '<leader>sh', "<cmd>Telescope help_tags<cr>", { desc = 'search help' })
-vim.keymap.set('n', '<leader>sw', "<cmd>Telescope grep_string<cr>", { desc = 'search current word' })
+vim.keymap.set({'n', 'v'}, '<leader>sw', "<cmd>Telescope grep_string<cr>", { desc = 'search current word' })
 vim.keymap.set('n', '<leader>sg', "<cmd>Telescope live_grep<cr>", { desc = 'search grep' })
 vim.keymap.set('n', '<leader>sd', "<cmd>Telescope diagnostics<cr>", { desc = 'search diagnostics' })
 vim.keymap.set('n', '<leader>sb', function()
@@ -99,11 +99,15 @@ end
 vim.keymap.set('n', '<leader>gc', "<cmd>Git commit<cr>", { desc = 'git commit' })
 -- Gitsigns
 vim.keymap.set('n', '<leader>gs', "<cmd>Gitsigns stage_buffer<cr>", { desc = 'git stage buffer' })
-vim.keymap.set('n', '<leader>ghn', "<cmd>Gitsigns next_hunk<cr>", { desc = 'git hunk pext' })
+vim.keymap.set('n', '<leader>ghn', "<cmd>Gitsigns next_hunk<cr>", { desc = 'git hunk next' })
+vim.keymap.set('n', 'ghn', "<cmd>Gitsigns next_hunk<cr>", { desc = 'git hunk next' })
 vim.keymap.set('n', '<leader>ghp', "<cmd>Gitsigns prev_hunk<cr>", { desc = 'git hunk previous' })
-vim.keymap.set('n', '<leader>ghs', "<cmd>Gitsigns stage_hunk<cr>", { desc = 'git hunk stage' })
-vim.keymap.set('n', '<leader>ghu', "<cmd>Gitsigns undo_stage_hunk<cr>", { desc = 'git hunk uundo stage' })
-vim.keymap.set('n', '<leader>ghr', "<cmd>Gitsigns reset_hunk<cr>", { desc = 'git hunk reset' })
+vim.keymap.set('n', 'ghp', "<cmd>Gitsigns prev_hunk<cr>", { desc = 'git hunk previous' })
+vim.keymap.set({'n', 'v'}, '<leader>ghs', "<cmd>Gitsigns stage_hunk<cr>", { desc = 'git hunk stage' })
+vim.keymap.set({'n', 'v'}, 'ghs', "<cmd>Gitsigns stage_hunk<cr>", { desc = 'git hunk stage' })
+vim.keymap.set('n', '<leader>ghu', "<cmd>Gitsigns undo_stage_hunk<cr>", { desc = 'git hunk undo stage' })
+vim.keymap.set({'n', 'v'}, '<leader>ghr', "<cmd>Gitsigns reset_hunk<cr>", { desc = 'git hunk reset' })
+vim.keymap.set({'n', 'v'}, 'ghr', "<cmd>Gitsigns reset_hunk<cr>", { desc = 'git hunk reset' })
 vim.keymap.set('n', '<leader>ghv', "<cmd>Gitsigns preview_hunk<cr>", { desc = 'git hunk preview' })
 -- Neogit
 vim.keymap.set('n', '<leader>gn', "<cmd>Neogit<cr>", { desc = 'neogit' })
@@ -222,8 +226,8 @@ end
 -- [[ Copilot ]]
 --
 vim.keymap.set('n', '<leader>cpc', '<cmd>CopilotChat<cr>', {desc = "copilot chat"})
-vim.keymap.set('n', '<leader>cpf', '<cmd>CopilotChatFix<cr>', {desc = "copilot fix"})
-vim.keymap.set('n', '<leader>cpe', '<cmd>CopilotChatFix<cr>', {desc = "copilot explain"})
+vim.keymap.set({'n', 'v'}, '<leader>cpf', '<cmd>CopilotChatFix<cr>', {desc = "copilot fix"})
+vim.keymap.set({'n', 'v'}, '<leader>cpe', '<cmd>CopilotChatExplain<cr>', {desc = "copilot explain"})
 
 
 --
@@ -251,7 +255,7 @@ end, { desc = 'mvn clean install' })
 --
 function setup_lsp_bindings()
   vim.keymap.set('n', '<leader>lrn', vim.lsp.buf.rename, { desc = 'rename'})
-  vim.keymap.set('n', '<leader>lca', vim.lsp.buf.code_action, { desc = 'code action'})
+  vim.keymap.set({'n', 'v'}, '<leader>lca', vim.lsp.buf.code_action, { desc = 'code action'})
 
   vim.keymap.set('n', '<leader>lgd', vim.lsp.buf.definition, { desc = 'goto definition'})
   vim.keymap.set('n', '<leader>lgr', function()
@@ -265,7 +269,7 @@ function setup_lsp_bindings()
   vim.keymap.set('n', '<leader>lsw', function() require('telescope.builtin').lsp_dynamic_workspace_symbols() end, { desc = 'workspace symbols'})
   vim.keymap.set('n', '<leader>lgb', require('config.navigation').go_back, { desc = 'goto back'})
   vim.keymap.set('n', '<leader>lgf', require('config.navigation').go_forward, { desc = 'goto forward'})
-  vim.keymap.set('n', '<leader>lf', vim.lsp.buf.format, { desc = 'format buffer'})
+  vim.keymap.set({'n', 'v'}, '<leader>lf', vim.lsp.buf.format, { desc = 'format buffer'})
 end
 
 function setup_coc_bindings()
