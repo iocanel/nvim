@@ -1,5 +1,10 @@
 return {
   'David-Kunz/jester',
+  enabled = false, -- Disabled: plugin uses deprecated nvim-treesitter.ts_utils API
+  ft = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+  dependencies = {
+    'nvim-treesitter/nvim-treesitter',
+  },
   config = function ()
     require("jester").setup({
       {
