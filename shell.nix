@@ -2,17 +2,17 @@
 
 pkgs.mkShell {
   name = "neovim-development-environment";
-  
+
   buildInputs = with pkgs; [
     # Core utilities
     git
     curl
     wget
     unzip
-    
+
     # Neovim editor
     neovim
-    
+
     # Search and file utilities (from your home-manager config)
     fzf
     ripgrep
@@ -23,24 +23,23 @@ pkgs.mkShell {
     bat
     eza
     tree
-    
-    # C/C++ Development (from your home-manager config)  
+
+    # C/C++ Development (from your home-manager config)
     cmake
     gdb
     lldb
     libtool
-    
+
     # Java (exactly from your config)
     gradle
     temurin-bin-21
-    
+
     # JavaScript/TypeScript (from your config)
     nodejs
     yarn-berry
     nodePackages.gulp
-    nodePackages.ts-node
     typescript-language-server
-    
+
     # Python (matching your config)
     (python312.withPackages (ps: with ps; [
       numpy
@@ -48,18 +47,18 @@ pkgs.mkShell {
       requests
       debugpy
     ]))
-    
+
     # Rust (from your config)
     rustc
     rustfmt
     cargo
     rust-analyzer
-    
+
     # Go (from your config)
     go
     gopls
     delve
-    
+
     # Your exact codelldb setup
     vscode-extensions.vadimcn.vscode-lldb
     (pkgs.writeShellScriptBin "codelldb" ''
@@ -67,7 +66,7 @@ pkgs.mkShell {
       export LD_LIBRARY_PATH="$EXT/lldb/lib"
       exec "$EXT/adapter/codelldb" --liblldb "$EXT/lldb/lib/liblldb.so" "$@"
     '')
-    
+
     # Additional tools from your config
     gh
     pandoc
@@ -76,17 +75,17 @@ pkgs.mkShell {
     rsync
     zip
     util-linux
-    
+
     # Build tools
     gnumake
     pkg-config
     autoconf
     automake
-    
+
     # Additional development utilities
     stylua
   ];
-  
+
   shellHook = ''
     echo "🚀 Neovim Development Environment"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -111,23 +110,23 @@ pkgs.mkShell {
     echo ""
     echo "💡 Your DWIM debugging system supports all these languages!"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
+
     # Environment setup
     export EDITOR=nvim
     export NVIM_CONFIG_DIR="$PWD"
-    
+
     # Java environment (matching your home-manager setup)
     export JAVA_HOME="${pkgs.temurin-bin-21}"
-    
-    # Node.js environment  
+
+    # Node.js environment
     export NODE_PATH="${pkgs.nodejs}/lib/node_modules"
-    
+
     # Python environment
     export PYTHONPATH="${pkgs.python312.withPackages (ps: with ps; [ debugpy ])}/lib/python3.12/site-packages:$PYTHONPATH"
-    
+
     # Rust environment
     export RUST_SRC_PATH="${pkgs.rustc}/lib/rustlib/src/rust/library"
-    
+
     echo "🎯 Environment configured! You can now:"
     echo "  - Run 'nvim' to start Neovim with full language support"
     echo "  - Run 'make test' to test all language configurations"
@@ -138,7 +137,7 @@ pkgs.mkShell {
     echo "  - pyright: nix-shell -p nodePackages.pyright"
     echo ""
   '';
-  
+
   # Environment variables
   NIX_SHELL_PRESERVE_PROMPT = 1;
   NVIM_DEV_ENV = "true";
