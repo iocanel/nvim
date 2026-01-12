@@ -239,7 +239,7 @@ vim.keymap.set('n', '<leader>acC', '<cmd>ClaudeCode --continue<cr>', {desc = "co
 vim.keymap.set('n', '<leader>acm', '<cmd>ClaudeCodeSelectModel<cr>', {desc = "select claude model"})
 vim.keymap.set('n', '<leader>acb', '<cmd>ClaudeCodeAdd %<cr>', {desc = "add current buffer"})
 vim.keymap.set('v', '<leader>acs', '<cmd>ClaudeCodeSend<cr>', {desc = "send to claude"})
-vim.keymap.set('n', '<leader>acs', '<cmd>ClaudeCodeTreeAdd<cr>', {desc = "add file", ft = {"NvimTree", "neo-tree", "oil", "minifiles", "netrw"}})
+vim.keymap.set('n', '<leader>acs', '<cmd>ClaudeCodeTreeAdd<cr>', {desc = "add file"})
 vim.keymap.set('n', '<leader>aca', '<cmd>ClaudeCodeDiffAccept<cr>', {desc = "accept diff"})
 vim.keymap.set('n', '<leader>acd', '<cmd>ClaudeCodeDiffDeny<cr>', {desc = "deny diff"})
 
