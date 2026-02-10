@@ -53,11 +53,11 @@ ENV XDG_STATE_HOME="/nvim/.local/state"
 ENV XDG_CACHE_HOME="/nvim/.cache"
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 
-# Install Go 1.23.4
-RUN curl -LO https://go.dev/dl/go1.23.4.linux-amd64.tar.gz && \
-    tar -C /nvim -xzf go1.23.4.linux-amd64.tar.gz && \
+# Install Go 1.24.0 (required by Delve debugger)
+RUN curl -LO https://go.dev/dl/go1.24.0.linux-amd64.tar.gz && \
+    tar -C /nvim -xzf go1.24.0.linux-amd64.tar.gz && \
     mv /nvim/go /nvim/.go && \
-    rm go1.23.4.linux-amd64.tar.gz
+    rm go1.24.0.linux-amd64.tar.gz
 ENV PATH="/nvim/.go/bin:${PATH}"
 
 # Install Neovim 0.11.3
@@ -73,6 +73,7 @@ ENV NVIM_APPNAME=nvim \
 COPY --chmod=0775 lua /nvim/.config/nvim/lua/
 COPY --chmod=0775 ftplugin /nvim/.config/nvim/ftplugin/
 COPY --chmod=0775 templates /nvim/.config/nvim/templates/
+COPY --chmod=0775 scripts /nvim/.config/nvim/scripts/
 COPY --chmod=0775 init.lua /nvim/.config/nvim/
 COPY --chmod=0775 lazy-lock.json /nvim/.config/nvim/
 COPY --chmod=0775 entrypoint.sh /nvim/entrypoint.sh
@@ -81,7 +82,11 @@ COPY --chmod=0775 entrypoint.sh /nvim/entrypoint.sh
 RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb" "+qa" && \
-    /opt/nvim-linux-x86_64/bin/nvim --headless "+TSUpdateSync java javascript typescript python go rust c" "+qa"
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+TSUpdateSync java javascript typescript python go rust c" "+qa" && \
+    # Create wrapper for js-debug-adapter backward compatibility (new Mason package has different output format)
+    mkdir -p /nvim/.local/share/nvim/mason/packages/js-debug-adapter/out/src && \
+    ln -sf /nvim/.config/nvim/scripts/js-debug-wrapper.js \
+           /nvim/.local/share/nvim/mason/packages/js-debug-adapter/out/src/vsDebugServer.js
 
 #RUN chmod -R 775 /nvim/.local
 
