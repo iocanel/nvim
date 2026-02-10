@@ -106,24 +106,35 @@ function M:debug_test()
       end
       
       -- Look for test executables that match the package name pattern
+      -- Pick the largest one since test binaries include the test harness
       local deps_dir = cargo_root .. "/target/debug/deps"
       local handle = vim.uv.fs_scandir(deps_dir)
+      local best_path = nil
+      local best_size = 0
       if handle then
         while true do
           local name, type = vim.uv.fs_scandir_next(handle)
           if not name then break end
-          
+
           -- Look for executable files that start with the package name
           if type == "file" and name:match("^" .. package_name:gsub("-", "_")) then
             local full_path = deps_dir .. "/" .. name
-            -- Check if it's executable (simple check - file exists)
+            -- Check if it's executable
             if vim.fn.executable(full_path) == 1 then
-              return full_path
+              local stat = vim.uv.fs_stat(full_path)
+              if stat and stat.size > best_size then
+                best_size = stat.size
+                best_path = full_path
+              end
             end
           end
         end
       end
-      
+
+      if best_path then
+        return best_path
+      end
+
       -- Fallback: construct expected path
       return cargo_root .. "/target/debug/deps/" .. package_name:gsub("-", "_")
     end,
@@ -131,7 +142,7 @@ function M:debug_test()
     stopOnEntry = false,
     args = {},
   }
-  
+
   dap.run(launch_config)
 end
 
@@ -388,24 +399,35 @@ local function setup_dap_configurations()
           end
           
           -- Look for test executables that match the package name pattern
+          -- Pick the largest one since test binaries include the test harness
           local deps_dir = cargo_root .. "/target/debug/deps"
           local handle = vim.uv.fs_scandir(deps_dir)
+          local best_path = nil
+          local best_size = 0
           if handle then
             while true do
               local name, type = vim.uv.fs_scandir_next(handle)
               if not name then break end
-              
+
               -- Look for executable files that start with the package name
               if type == "file" and name:match("^" .. package_name:gsub("-", "_")) then
                 local full_path = deps_dir .. "/" .. name
-                -- Check if it's executable (simple check - file exists)
+                -- Check if it's executable
                 if vim.fn.executable(full_path) == 1 then
-                  return full_path
+                  local stat = vim.uv.fs_stat(full_path)
+                  if stat and stat.size > best_size then
+                    best_size = stat.size
+                    best_path = full_path
+                  end
                 end
               end
             end
           end
-          
+
+          if best_path then
+            return best_path
+          end
+
           -- Fallback: construct expected path
           return cargo_root .. "/target/debug/deps/" .. package_name:gsub("-", "_")
         end,
@@ -456,24 +478,35 @@ local function setup_dap_configurations()
           end
           
           -- Look for test executables that match the package name pattern
+          -- Pick the largest one since test binaries include the test harness
           local deps_dir = cargo_root .. "/target/debug/deps"
           local handle = vim.uv.fs_scandir(deps_dir)
+          local best_path = nil
+          local best_size = 0
           if handle then
             while true do
               local name, type = vim.uv.fs_scandir_next(handle)
               if not name then break end
-              
+
               -- Look for executable files that start with the package name
               if type == "file" and name:match("^" .. package_name:gsub("-", "_")) then
                 local full_path = deps_dir .. "/" .. name
-                -- Check if it's executable (simple check - file exists)
+                -- Check if it's executable
                 if vim.fn.executable(full_path) == 1 then
-                  return full_path
+                  local stat = vim.uv.fs_stat(full_path)
+                  if stat and stat.size > best_size then
+                    best_size = stat.size
+                    best_path = full_path
+                  end
                 end
               end
             end
           end
-          
+
+          if best_path then
+            return best_path
+          end
+
           -- Fallback: construct expected path
           return cargo_root .. "/target/debug/deps/" .. package_name:gsub("-", "_")
         end,
