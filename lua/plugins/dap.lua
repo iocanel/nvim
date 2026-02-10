@@ -173,27 +173,30 @@ return {
     end
   },
 
-  -- Credits to: https://github.com/nikolovlazar/dotfiles/blob/92c91ed035348c74e387ccd85ca19a376ea2f35e/.config/nvim/lua/plugins/dap.lua
-  -- nvim-dap-vscode-js
+  -- JavaScript/TypeScript debugging with Mason's js-debug-adapter
   {
-    "mxsdev/nvim-dap-vscode-js",
+    "mfussenegger/nvim-dap",
     ft = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" },
-    dependencies = { "mfussenegger/nvim-dap" },
     config = function()
       local dap = require("dap")
 
-      -- let the plugin register all pwa-* adapters for you
-      require("dap-vscode-js").setup({
-        debugger_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter",
-        adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "pwa-extensionHost", "node-terminal" },
-        log_file_level = false, -- disable debug logging in containers
-        log_console_level = vim.log.levels.ERROR, -- only show errors
-      })
+      -- Configure pwa-node adapter directly for Mason's js-debug-adapter
+      dap.adapters["pwa-node"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
+          command = "node",
+          args = {
+            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+            "${port}",
+          },
+        },
+      }
 
       -- Keep only the Attach configuration - file launch handled by dedicated config files
       for _, lang in ipairs({ "javascript", "typescript" }) do
         dap.configurations[lang] = {
-          -- Attach
           {
             type = "pwa-node",
             request = "attach",
