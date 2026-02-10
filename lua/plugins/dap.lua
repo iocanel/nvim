@@ -5,6 +5,7 @@ return {
     commit = "6ae8a14828b0f3bff1721a35a1dfd604b6a933bb",
     dependencies = {
       "leoluz/nvim-dap-go",
+      "mxsdev/nvim-dap-vscode-js",
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
     },
@@ -172,26 +173,21 @@ return {
     end
   },
 
-  -- JavaScript/TypeScript debugging with Mason's js-debug-adapter
+  -- nvim-dap-vscode-js
   {
-    "mfussenegger/nvim-dap",
+    "mxsdev/nvim-dap-vscode-js",
     ft = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" },
+    dependencies = { "mfussenegger/nvim-dap" },
     config = function()
       local dap = require("dap")
 
-      -- Configure pwa-node adapter directly for Mason's js-debug-adapter
-      dap.adapters["pwa-node"] = {
-        type = "server",
-        host = "localhost",
-        port = "${port}",
-        executable = {
-          command = "node",
-          args = {
-            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
-            "${port}",
-          },
-        },
-      }
+      -- let the plugin register all pwa-* adapters for you
+      require("dap-vscode-js").setup({
+        debugger_path = vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter",
+        adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "pwa-extensionHost", "node-terminal" },
+        log_file_level = false, -- disable debug logging in containers
+        log_console_level = vim.log.levels.ERROR, -- only show errors
+      })
 
       -- Keep only the Attach configuration - file launch handled by dedicated config files
       for _, lang in ipairs({ "javascript", "typescript" }) do
