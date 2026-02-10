@@ -81,7 +81,7 @@ COPY --chmod=0775 entrypoint.sh /nvim/entrypoint.sh
 RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb" "+qa" && \
-    /opt/nvim-linux-x86_64/bin/nvim --headless "+TSUpdateSync java javascript typescript python go rust c" "+qa"
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+TSInstallSync java javascript typescript python go rust c lua html css" "+qa"
 
 #RUN chmod -R 775 /nvim/.local
 
