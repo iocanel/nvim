@@ -5,7 +5,6 @@ return {
     commit = "6ae8a14828b0f3bff1721a35a1dfd604b6a933bb",
     dependencies = {
       "leoluz/nvim-dap-go",
-      "mxsdev/nvim-dap-vscode-js",
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
     },
