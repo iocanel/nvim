@@ -37,8 +37,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install tree-sitter-cli via npm
-RUN npm install -g tree-sitter-cli
+# Install tree-sitter-cli via npm (v0.24.7 is last version compatible with glibc 2.35)
+RUN npm install -g tree-sitter-cli@0.24.7
 
 # Create a directory for Neovim configuration and tools
 RUN mkdir /nvim
@@ -80,8 +80,13 @@ COPY --chmod=0775 entrypoint.sh /nvim/entrypoint.sh
 # Install plugins and LSP servers in build stage
 RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
-    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb" "+qa" && \
-    /opt/nvim-linux-x86_64/bin/nvim --headless "+TSInstallSync java javascript typescript python go rust c lua html css" "+qa"
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb" "+qa"
+
+# Install treesitter parsers - separate step for better debugging
+RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy load nvim-treesitter" \
+    "+lua local langs = {'java','javascript','typescript','python','go','rust','c','lua','html','css'}; for _,l in ipairs(langs) do print('Installing parser: '..l); require('nvim-treesitter').install({l}):wait(60000); end; print('Done installing parsers')" \
+    "+qa" && \
+    ls -la /nvim/.local/share/nvim/nvim-treesitter/parsers/ || echo "Parsers directory not found"
 
 #RUN chmod -R 775 /nvim/.local
 
