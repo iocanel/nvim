@@ -1,5 +1,45 @@
 #!/bin/bash
 
+# iNeoVim - Containerized Neovim wrapper
+# Uses Docker named volume for persistent data, initialized from container on first use
+
+set -euo pipefail
+
+# Configuration
+CONTAINER_IMAGE="iocanel/nvim"
+VOLUME_NAME="nvim-data"
+
+# Show help
+show_help() {
+    cat << EOF
+Usage: invim [OPTIONS] [FILES...]
+
+Run Neovim in a container with full development environment.
+
+Options:
+  --refresh    Recreate the data volume with fresh content from the latest image
+               (Warning: this will remove any user-installed plugins)
+  --help       Show this help message
+  [FILES...]   Files or directories to edit (passed to nvim)
+
+Examples:
+  invim .                    # Open current directory
+  invim file.txt             # Edit a file
+  invim --refresh            # Reset to fresh image content
+  invim --refresh .          # Reset and open current directory
+
+Volume Management:
+  Data is stored in Docker volume '$VOLUME_NAME'.
+  Use --refresh after 'docker pull $CONTAINER_IMAGE' to get new baked-in plugins.
+EOF
+}
+
+# Handle --help
+if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
+    show_help
+    exit 0
+fi
+
 # Check if current directory is under user's home
 CURRENT_DIR=$(pwd)
 if [[ "$CURRENT_DIR" != "$HOME"* ]]; then
@@ -7,9 +47,24 @@ if [[ "$CURRENT_DIR" != "$HOME"* ]]; then
     exit 1
 fi
 
-# Container configuration
-CONTAINER_IMAGE="iocanel/nvim"
-STATE_DIR=$(mktemp -d --suffix=nvim-state)
+# Handle --refresh flag to recreate volume
+if [[ "${1:-}" == "--refresh" ]]; then
+    echo "Refreshing $VOLUME_NAME volume with latest image content..."
+    docker volume rm "$VOLUME_NAME" 2>/dev/null || true
+    echo "Volume removed. It will be recreated with fresh content on next run."
+    shift
+fi
 
-# Run container with persistent state and current directory as workdir
-docker run --rm -it -v "$HOME:$HOME" --user "$(id -u):$(id -g)" -e HOME="$HOME" -w "$CURRENT_DIR" --tmpfs $STATE_DIR -e XDG_STATE_HOME=$STATE_DIR "$CONTAINER_IMAGE" $*
+# Run container with:
+# - Home directory mounted for file access
+# - Named volume for persistent data (initialized from container on first use)
+# - tmpfs for ephemeral state and cache (under /nvim/ for consistency)
+docker run --rm -it \
+    -v "$HOME:$HOME" \
+    -v "$VOLUME_NAME:/nvim/.local/share/nvim" \
+    --tmpfs "/nvim/.local/state:uid=$(id -u),gid=$(id -g)" \
+    --tmpfs "/nvim/.cache:uid=$(id -u),gid=$(id -g)" \
+    --user "$(id -u):$(id -g)" \
+    -e HOME="$HOME" \
+    -w "$CURRENT_DIR" \
+    "$CONTAINER_IMAGE" "$@"
