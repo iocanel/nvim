@@ -148,6 +148,8 @@ show_usage() {
     echo -e "  ${BLUE}$BINARY_NAME [nvim-options]${NC}    # Run Neovim in container"
     echo -e "  ${BLUE}$BINARY_NAME .${NC}                # Open current directory"
     echo -e "  ${BLUE}$BINARY_NAME file.txt${NC}         # Edit a specific file"
+    echo -e "  ${BLUE}$BINARY_NAME --refresh${NC}        # Reset to fresh image content"
+    echo -e "  ${BLUE}$BINARY_NAME --help${NC}           # Show help"
     echo
     log_info "Features included:"
     echo "  • Full LSP support (Java, Go, Rust, Python, TypeScript, etc.)"
@@ -159,9 +161,13 @@ show_usage() {
     echo
     log_info "The container includes:"
     echo "  • Neovim 0.11.3"
-    echo "  • Java 21, Go 1.23, Rust, Node.js 22, Python 3"
+    echo "  • Java 21, Go 1.24, Rust, Node.js 22, Python 3"
     echo "  • All necessary LSP servers and debug adapters"
     echo "  • Build tools and compilers"
+    echo
+    log_info "Data persistence:"
+    echo "  • Your plugins and settings are stored in Docker volume 'nvim-data'"
+    echo "  • To upgrade after pulling new image: $BINARY_NAME --refresh"
     echo
 
     if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
