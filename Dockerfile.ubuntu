@@ -53,11 +53,11 @@ ENV XDG_STATE_HOME="/nvim/.local/state"
 ENV XDG_CACHE_HOME="/nvim/.cache"
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 
-# Install Go 1.24.0 (required by Delve debugger)
-RUN curl -LO https://go.dev/dl/go1.24.0.linux-amd64.tar.gz && \
-    tar -C /nvim -xzf go1.24.0.linux-amd64.tar.gz && \
+# Install Go 1.25.1 (required by gitlab.nvim and Delve debugger)
+RUN curl -LO https://go.dev/dl/go1.25.1.linux-amd64.tar.gz && \
+    tar -C /nvim -xzf go1.25.1.linux-amd64.tar.gz && \
     mv /nvim/go /nvim/.go && \
-    rm go1.24.0.linux-amd64.tar.gz
+    rm go1.25.1.linux-amd64.tar.gz
 ENV PATH="/nvim/.go/bin:${PATH}"
 
 # Install Neovim 0.11.3
