@@ -150,6 +150,13 @@ COPY --chmod=0775 --from=builder /nvim/.config/nvim /nvim/.config/nvim
 COPY --chmod=0777 --from=builder /nvim/.local/share/nvim /nvim/.local/share/nvim
 COPY --chmod=0775 --from=builder /nvim/entrypoint.sh /nvim/entrypoint.sh
 
+# Ensure data directory is fully writable (for telescope history, etc.)
+RUN chmod -R 777 /nvim/.local/share/nvim
+
+# Create writable state and cache directories for any user
+RUN mkdir -p /nvim/.local/state /nvim/.cache && \
+    chmod 777 /nvim/.local/state /nvim/.cache
+
 # Install minimal Python debugging support only
 RUN python3 -m pip install --no-cache-dir --no-deps debugpy
 
