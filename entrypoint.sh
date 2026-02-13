@@ -2,25 +2,19 @@
 
 # Neovim container entrypoint script
 # Uses container's baked-in config directly with volume-mounted data for persistence
+# Environment variables can be overridden via docker run -e
 
 set -euo pipefail
 
-# All paths under /nvim/ for consistency
-# Config from container (read-only, always up-to-date with image)
-export XDG_CONFIG_HOME="/nvim/.config"
-
-# Data from volume (writable, initialized from container on first use)
-export XDG_DATA_HOME="/nvim/.local/share"
-
-# State and cache are ephemeral (tmpfs mounted by ivvim, or writable dirs in container)
-export XDG_STATE_HOME="/nvim/.local/state"
-export XDG_CACHE_HOME="/nvim/.cache"
-
-# Use standard nvim app name since we're using container paths
-export NVIM_APPNAME="nvim"
+# All paths under /nvim/ by default (can be overridden via docker run -e)
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-/nvim/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-/nvim/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-/nvim/.local/state}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-/nvim/.cache}"
+export NVIM_APPNAME="${NVIM_APPNAME:-nvim}"
 
 # Ensure ephemeral directories exist
-mkdir -p "$XDG_STATE_HOME" "$XDG_CACHE_HOME"
+mkdir -p "$XDG_STATE_HOME" "$XDG_CACHE_HOME" 2>/dev/null || true
 
 # Pass through all arguments to nvim
 exec nvim "$@"
