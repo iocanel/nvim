@@ -2,7 +2,12 @@ CONTAINER_IMAGE = iocanel/nvim
 UID := $(shell id -u)
 GID := $(shell id -g)
 HOME_DIR := $(HOME)
-DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) --tmpfs /tmp/nvim-state:uid=$(UID),gid=$(GID) -e XDG_STATE_HOME=/tmp/nvim-state $(CONTAINER_IMAGE)
+# Use container paths for config/data, but HOME-relative cache for JDTLS workspace
+DOCKER_RUN = docker run --rm -i -v $(HOME_DIR):$(HOME_DIR) --user $(UID):$(GID) -e HOME=$(HOME_DIR) \
+	--tmpfs /tmp/nvim-state:uid=$(UID),gid=$(GID) \
+	-e XDG_STATE_HOME=/tmp/nvim-state \
+	-e XDG_CACHE_HOME=$(HOME_DIR)/.cache \
+	$(CONTAINER_IMAGE)
 
 all: test
 
