@@ -15,13 +15,8 @@ return {
       'folke/neodev.nvim',
      },
     config = function()
-      -- Disable highlight from Lsp as we use treesitter for highlighting
-      vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(args)
-        local client = vim.lsp.get_client_by_id(args.data.client_id)
-        client.server_capabilities.semanticTokensProvider = nil
-      end,
-    });
+      -- LSP semantic tokens enabled - especially important for Java
+      -- where treesitter highlighting is minimal
     -- Fix LspInfo related errors
     local util = require("lspconfig.util")
     -- if util._trim is missing, alias it to the old name
