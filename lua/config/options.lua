@@ -54,6 +54,11 @@ vim.o.shiftwidth = 2
 vim.o.tabstop = 2
 vim.o.softtabstop = 2
 
+-- Spell checking options
+-- 'camel' breaks CamelCase words into separate words for spell checking
+-- 'noplainbuffer' only spell-checks regions marked with @spell (comments, not strings)
+vim.opt.spelloptions = { 'camel', 'noplainbuffer' }
+
 -- Centralized logic to enable/disable spell checking based on file buffer type
 vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
   callback = function()
