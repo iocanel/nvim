@@ -257,7 +257,9 @@ local config = {
           ".metadata",
           "archetype-resources",
           "META-INF/maven"
-        }
+        },
+        -- Separate output directory to avoid conflicts with Maven builds
+        outputPath = workspace_dir .. '/target/classes',
       },
       server = {
         launchMode = "Hybrid"
