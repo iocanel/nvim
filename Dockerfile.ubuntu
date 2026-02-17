@@ -80,7 +80,7 @@ COPY --chmod=0775 entrypoint.sh /nvim/entrypoint.sh
 # Install plugins and LSP servers in build stage (all packages from bootstrap.lua)
 RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
-    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb html-lsp css-lsp json-lsp vue-language-server solidity intelephense ltex-ls debugpy" "+qa"
+    /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb html-lsp css-lsp json-lsp vue-language-server solidity intelephense ltex-ls debugpy vscode-spring-boot-tools" "+qa"
 
 # Install treesitter parsers - separate step for better debugging
 # Copy to both site/parser (where nvim looks) and lazy/nvim-treesitter/parser (where bootstrap.lua checks)
