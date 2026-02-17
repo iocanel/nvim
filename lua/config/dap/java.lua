@@ -119,14 +119,76 @@ function M:debug_test_method()
   jdtls.test_nearest_method()
 end
 
+-- JBang debugging support
+function M:debug_jbang(port)
+  port = port or 4004
+  local bufname = vim.api.nvim_buf_get_name(0)
+  local original_win = vim.api.nvim_get_current_win()
+
+  if not bufname:match("%.java$") then
+    vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
+    return
+  end
+
+  -- Check if file has JBang shebang or directives
+  local first_lines = vim.api.nvim_buf_get_lines(0, 0, 5, false)
+  local is_jbang = false
+  for _, line in ipairs(first_lines) do
+    if line:match("^///usr/bin/env jbang") or line:match("^//DEPS") or line:match("^//SOURCES") then
+      is_jbang = true
+      break
+    end
+  end
+
+  if not is_jbang then
+    vim.notify("Current file doesn't appear to be a JBang script", vim.log.levels.WARN)
+  end
+
+  -- Start JBang with debug in a minimal bottom terminal
+  local cmd = string.format("jbang --debug=%d '%s'", port, bufname)
+  vim.cmd("botright 3split | terminal " .. cmd)
+  local term_win = vim.api.nvim_get_current_win()
+  local term_buf = vim.api.nvim_get_current_buf()
+
+  -- Return to original window
+  vim.api.nvim_set_current_win(original_win)
+
+  vim.notify(string.format("JBang started with debug on port %d. Attaching debugger...", port), vim.log.levels.INFO)
+
+  -- Wait a moment for JBang to start, then attach
+  vim.defer_fn(function()
+    -- Close the terminal window before DAP UI appears
+    if vim.api.nvim_win_is_valid(term_win) then
+      vim.api.nvim_win_close(term_win, true)
+    end
+
+    local dap = require('dap')
+    dap.run({
+      type = 'java',
+      request = 'attach',
+      name = "Attach to JBang",
+      hostName = 'localhost',
+      port = port,
+    })
+  end, 2000)
+end
+
 vim.cmd("command! JavaDebug lua require('config.dap.java'):debug()")
 vim.cmd("command! JavaDebugTest lua require('config.dap.java'):debug_test()")
 vim.cmd("command! JavaDebugTestMethod lua require('config.dap.java'):debug_test_method()")
 vim.cmd('command! JavaDebugAttachRemote lua require("config.dap.java").attach_to_remote()')
+vim.cmd("command! -nargs=? JBangDebug lua require('config.dap.java'):debug_jbang(<args>)")
 
 local dap_ok, dap = pcall(require, "dap")
 if dap_ok then
   dap.configurations.java = {
+    {
+      type = 'java',
+      request = 'attach',
+      name = "Attach to JBang (port 4004)",
+      hostName = 'localhost',
+      port = 4004,
+    },
     {
       type = 'java',
       request = 'attach',
@@ -169,6 +231,27 @@ if dap_ok then
     }
   }
 end
+-- Check if file is a JBang script
+local function is_jbang_script(filename)
+  if not filename or not filename:match("%.java$") then
+    return false
+  end
+  local file = io.open(filename, "r")
+  if not file then
+    return false
+  end
+  for i = 1, 10 do
+    local line = file:read("*l")
+    if not line then break end
+    if line:match("^///usr/bin/env jbang") or line:match("^//DEPS") or line:match("^//SOURCES") or line:match("^//FILES") then
+      file:close()
+      return true
+    end
+  end
+  file:close()
+  return false
+end
+
 -- DAP Interface Implementation
 function M.is_filetype_supported(filetype, filename)
   return filetype == "java" or (filename and filename:match("%.java$"))
@@ -213,6 +296,10 @@ function M.is_in_test_function(filename, line_no)
 end
 
 function M.get_debug_command()
+  local filename = vim.api.nvim_buf_get_name(0)
+  if is_jbang_script(filename) then
+    return "JBangDebug"
+  end
   return "JavaDebug"
 end
 
