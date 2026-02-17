@@ -82,6 +82,31 @@ local lombok_glob = m2_repo .. "/org/projectlombok/lombok/*/lombok-*.jar"
 local lombok_url = "https://repo1.maven.org/maven2/org/projectlombok/lombok/" .. lombok_version .. "/lombok-" .. lombok_version .. ".jar"
 local lombok_jar = ensure_maven_artifact("org.projectlombok", "lombok", lombok_version, lombok_glob, lombok_url)
 
+-- Find or download JBang Eclipse extensions (for JBang script support in JDTLS)
+local jbang_ext_dir = data_dir .. "/jdtls-extensions/jbang"
+local jbang_version = "0.0.3.20241002-1800"
+local jbang_jars = (function()
+  local jars = {}
+  local jar_names = { "dev.jbang.eclipse.core", "dev.jbang.eclipse.ls" }
+  vim.fn.mkdir(jbang_ext_dir, "p")
+
+  for _, name in ipairs(jar_names) do
+    local jar_file = string.format("%s/%s_%s.jar", jbang_ext_dir, name, jbang_version)
+    if vim.fn.filereadable(jar_file) == 1 then
+      table.insert(jars, jar_file)
+    else
+      local url = string.format("https://github.com/jbangdev/jbang-eclipse/releases/download/latest/%s_%s.jar", name, jbang_version)
+      local success = download_file_http(url, jar_file)
+      if success then
+        table.insert(jars, jar_file)
+      else
+        vim.notify("Failed to download " .. name, vim.log.levels.WARN)
+      end
+    end
+  end
+  return jars
+end)()
+
 local launcher_jar = vim.fn.glob(mason_data .. "/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar", 1)
 if launcher_jar == "" then
   vim.notify("JDTLS launcher JAR not found in Mason packages", vim.log.levels.ERROR)
@@ -216,6 +241,9 @@ local config = {
         gradle = {
           enabled = true
         },
+        jbang = {
+          projectPerScript = true
+        },
         exclusions = {
           "**/node_modules/**",
           "**/.metadata/**",
@@ -306,6 +334,15 @@ local config = {
   --
   -- If you don't plan on using the debugger or other eclipse.jdt.ls plugins you can remove this
   init_options = {
+    settings = {
+      java = {
+        import = {
+          jbang = {
+            projectPerScript = true
+          }
+        }
+      }
+    },
     bundles = (function()
       local bundles = {}
 
@@ -375,6 +412,12 @@ local config = {
         end
         -- vim.notify("Java test adapter found: " .. #test_jars .. " JAR files", vim.log.levels.INFO)
       end
+
+      -- JBang Eclipse extensions
+      for _, jar in ipairs(jbang_jars) do
+        table.insert(bundles, jar)
+      end
+
       return bundles
     end)();
   },
