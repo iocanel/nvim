@@ -48,6 +48,7 @@ vim.keymap.set('n', '<leader>.', "<cmd>Telescope resume<cr>", { desc = 'resume' 
 -- [[ Toggle ]]
 --
 vim.keymap.set('n', '<leader>tt', "<cmd>Neotree toggle<cr>", { desc = 'toggle tree' })
+-- <leader>td defined in lua/plugins/trouble.lua
 vim.keymap.set('n', '<leader>tu', "<cmd>Telescope undo<cr>", { desc = 'toggle undo tree' })
 -- [[ Template ]]
 vim.keymap.set('n', '<leader>ts', "<cmd>TemplateSelect<cr>", { desc = 'template select' })
@@ -203,8 +204,9 @@ vim.keymap.set('n', '<leader>dui', dapui.toggle, {desc = "dap ui toggle"})
 --
 vim.keymap.set('n', '<leader>Dp', vim.diagnostic.goto_prev, {desc = "go to previous"})
 vim.keymap.set('n', '<leader>Dn', vim.diagnostic.goto_next, {desc = "go to next"})
-vim.keymap.set('n', '<leader>Df', vim.diagnostic.open_float, {desc = "open float"})
+vim.keymap.set('n', '<leader>Df', _G.toggle_diagnostic_float, {desc = "toggle float"})
 vim.keymap.set('n', '<leader>Ds', vim.diagnostic.setloclist, {desc = "add to location list"})
+-- <leader>Dt defined in lua/plugins/trouble.lua
 
 --
 -- [[Hop]]
