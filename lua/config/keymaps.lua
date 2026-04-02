@@ -49,6 +49,14 @@ vim.keymap.set('n', '<leader>.', "<cmd>Telescope resume<cr>", { desc = 'resume' 
 --
 vim.keymap.set('n', '<leader>tt', "<cmd>Neotree toggle<cr>", { desc = 'toggle tree' })
 -- <leader>td defined in lua/plugins/trouble.lua
+
+--
+-- [[ Tabs ]]
+--
+vim.keymap.set('n', '<leader><tab>n', "<cmd>tabnew<cr>", { desc = 'new tab' })
+vim.keymap.set('n', '<leader><tab>l', "<cmd>tabnext<cr>", { desc = 'next tab' })
+vim.keymap.set('n', '<leader><tab>h', "<cmd>tabprevious<cr>", { desc = 'previous tab' })
+vim.keymap.set('n', '<leader><tab>c', "<cmd>tabclose<cr>", { desc = 'close tab' })
 vim.keymap.set('n', '<leader>tu', "<cmd>Telescope undo<cr>", { desc = 'toggle undo tree' })
 -- [[ Template ]]
 vim.keymap.set('n', '<leader>ts', "<cmd>TemplateSelect<cr>", { desc = 'template select' })
