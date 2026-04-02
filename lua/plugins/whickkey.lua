@@ -112,6 +112,7 @@ return {
           { "<leader>cp", group = "copilot" },
           { "<leader>c", group = "code/ai" },
           { "<leader>t", group = "tool/toggle/template" },
+          { "<leader><tab>", group = "tabs" },
           { "<leader>tm", group = "maven" },
           { "<leader>du", group = "debug ui" },
           { "<leader>lg", group = "goto" },
