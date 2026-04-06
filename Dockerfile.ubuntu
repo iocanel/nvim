@@ -85,7 +85,7 @@ RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
 # Install treesitter parsers - separate step for better debugging
 # Copy to both site/parser (where nvim looks) and lazy/nvim-treesitter/parser (where bootstrap.lua checks)
 RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy load nvim-treesitter" \
-    "+lua local langs = {'java','javascript','typescript','python','go','rust','c','lua','html','css'}; for _,l in ipairs(langs) do print('Installing parser: '..l); require('nvim-treesitter').install({l}):wait(60000); end; print('Done installing parsers')" \
+    "+TSInstallSync java javascript typescript python go rust c lua html css" \
     "+qa" && \
     ls -la /nvim/.local/share/nvim/site/parser/ && \
     mkdir -p /nvim/.local/share/nvim/lazy/nvim-treesitter/parser && \
