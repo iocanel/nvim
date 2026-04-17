@@ -15,7 +15,9 @@ local function show_diagnostic_float()
   local lines = {}
   for _, d in ipairs(diagnostics) do
     local severity = vim.diagnostic.severity[d.severity]
-    table.insert(lines, string.format("[%s] %s", severity, d.message))
+    for _, line in ipairs(vim.split(string.format("[%s] %s", severity, d.message), "\n")) do
+      table.insert(lines, line)
+    end
   end
 
   local buf = vim.api.nvim_create_buf(false, true)
