@@ -78,14 +78,15 @@ COPY --chmod=0775 lazy-lock.json /nvim/.config/nvim/
 COPY --chmod=0775 entrypoint.sh /nvim/entrypoint.sh
 
 # Install plugins and LSP servers in build stage (all packages from bootstrap.lua)
-RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! sync" "+qa" && \
+# Use install + restore (not sync!) to ensure exact lockfile versions
+RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! install" "+Lazy! restore" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb html-lsp css-lsp json-lsp vue-language-server solidity intelephense ltex-ls debugpy vscode-spring-boot-tools" "+qa"
 
-# Install treesitter parsers - separate step for better debugging
-# Copy to both site/parser (where nvim looks) and lazy/nvim-treesitter/parser (where bootstrap.lua checks)
+# Install treesitter parsers synchronously
 RUN /opt/nvim-linux-x86_64/bin/nvim --headless \
-    "+lua require('lazy').load({plugins='nvim-treesitter'}); local install = require('nvim-treesitter.install'); local langs = {'java','javascript','typescript','python','go','rust','c','lua','html','css'}; install.install(langs):wait(300000)" \
+    "+Lazy load nvim-treesitter" \
+    "+lua local langs = {'java','javascript','typescript','python','go','rust','c','lua','html','css'}; for _,l in ipairs(langs) do print('Installing parser: '..l); require('nvim-treesitter.install').install({l}):wait(60000); end; print('Done installing parsers')" \
     "+qa" && \
     ls -la /nvim/.local/share/nvim/site/parser/ && \
     mkdir -p /nvim/.local/share/nvim/lazy/nvim-treesitter/parser && \
