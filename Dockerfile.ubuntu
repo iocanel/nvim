@@ -77,9 +77,11 @@ COPY --chmod=0775 init.lua /nvim/.config/nvim/
 COPY --chmod=0775 lazy-lock.json /nvim/.config/nvim/
 COPY --chmod=0775 entrypoint.sh /nvim/entrypoint.sh
 
-# Install plugins and LSP servers in build stage (all packages from bootstrap.lua)
-# Use install + restore (not sync!) to ensure exact lockfile versions
-RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! install" "+Lazy! restore" "+qa" && \
+# Install plugins (clones latest), then restore lockfile and run Lazy restore to pin commits
+RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! install" "+qa"
+COPY --chmod=0775 lazy-lock.json /nvim/.config/nvim/
+RUN /opt/nvim-linux-x86_64/bin/nvim --headless "+Lazy! restore" "+qa" && \
+    rm -rf /nvim/.cache/nvim/luac && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonUpdate" "+qa" && \
     /opt/nvim-linux-x86_64/bin/nvim --headless "+MasonInstall jdtls java-debug-adapter java-test js-debug-adapter typescript-language-server pyright gopls delve rust-analyzer cpptools clangd lua-language-server codelldb html-lsp css-lsp json-lsp vue-language-server solidity intelephense ltex-ls debugpy vscode-spring-boot-tools" "+qa"
 
@@ -90,7 +92,7 @@ RUN /opt/nvim-linux-x86_64/bin/nvim --headless \
     "+qa" && \
     ls -la /nvim/.local/share/nvim/site/parser/ && \
     mkdir -p /nvim/.local/share/nvim/lazy/nvim-treesitter/parser && \
-    cp /nvim/.local/share/nvim/site/parser/*.so /nvim/.local/share/nvim/lazy/nvim-treesitter/parser/ 2>/dev/null || true
+    cp /nvim/.local/share/nvim/site/parser/*.so /nvim/.local/share/nvim/lazy/nvim-treesitter/parser/
 
 #RUN chmod -R 775 /nvim/.local
 
