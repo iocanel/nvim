@@ -77,7 +77,30 @@ return {
       -- A list of functions, each representing a global custom command
       -- that will be available in all sources (if not overridden in `opts[source_name].commands`)
       -- see `:h neo-tree-custom-commands-global`
-      commands = {},
+      commands = {
+        shared_copy = function(state)
+          local node = state.tree:get_node()
+          local f = io.open("/tmp/neotree_clipboard", "w")
+          f:write(node.path)
+          f:close()
+          vim.notify("Path saved: " .. node.path)
+        end,
+        shared_paste = function(state)
+          local f = io.open("/tmp/neotree_clipboard", "r")
+          if not f then
+            vim.notify("No path in shared clipboard", vim.log.levels.WARN)
+            return
+          end
+          local src = f:read("*a")
+          f:close()
+          local node = state.tree:get_node()
+          local dst_dir = node.type == "directory" and node.path or vim.fn.fnamemodify(node.path, ":h")
+          local fname = vim.fn.fnamemodify(src, ":t")
+          vim.fn.system({ "cp", "-r", src, dst_dir .. "/" .. fname })
+          vim.notify("Copied " .. fname .. " to " .. dst_dir)
+          require("neo-tree.sources.manager").refresh("filesystem")
+        end,
+      },
       window = {
         position = "left",
         width = 40,
@@ -93,7 +116,7 @@ return {
           ["<2-LeftMouse>"] = "open",
           ["<cr>"] = "open",
           ["<esc>"] = "cancel", -- close preview or floating neo-tree window
-          ["P"] = { "toggle_preview", config = { use_float = true } },
+          ["V"] = { "toggle_preview", config = { use_float = true } },
           ["l"] = "focus_preview",
           ["S"] = "open_split",
           ["s"] = "open_vsplit",
@@ -122,6 +145,8 @@ return {
           ["y"] = "copy_to_clipboard",
           ["x"] = "cut_to_clipboard",
           ["p"] = "paste_from_clipboard",
+          ["Y"] = "shared_copy",
+          ["P"] = "shared_paste",
           ["c"] = "copy", -- takes text input for destination, also accepts the optional config.show_path option like "add":
           -- ["c"] = {
           --  "copy",
