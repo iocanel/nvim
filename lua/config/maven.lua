@@ -32,6 +32,31 @@ end
 
 
 --
+-- get the invoker test name if the current buffer is inside a src/it/<name>/ directory
+--
+function M.get_invoker_test_name()
+  local bufname = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
+  local match = bufname:match(M.sep .. "src" .. M.sep .. "it" .. M.sep .. "([^" .. M.sep .. "]+)")
+  return match
+end
+
+--
+-- get the invoker parent module root (the module that contains src/it/)
+--
+function M.find_invoker_parent_root()
+  local bufname = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
+  local parent = bufname:match("(.*)" .. M.sep .. "src" .. M.sep .. "it" .. M.sep)
+  return parent
+end
+
+--
+-- check if the current buffer is inside an invoker test project
+--
+function M.is_invoker_context()
+  return M.get_invoker_test_name() ~= nil
+end
+
+--
 -- get the module root directory using pom.xml
 --
 function M.find_module_root()
@@ -106,6 +131,17 @@ function M.build(goals, module, resume, also_make, dir)
   -- if user explicitly requested the <current> module, then replace it with the actual module name
   if module == "<current>" then
     module = M.get_module_name()
+  end
+
+  -- handle invoker test context: run from project root, targeting the invoker parent module
+  local invoker_test = M.get_invoker_test_name()
+  if invoker_test then
+    local invoker_parent = M.find_invoker_parent_root()
+    if invoker_parent then
+      dir = project_root
+      module = M.get_module_name(invoker_parent)
+      goals = goals .. " -Dinvoker.test=" .. invoker_test
+    end
   end
 
   -- handle clean flag
@@ -514,7 +550,7 @@ if is_hydra_installed then
      aven
     ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
        ^Project^             ^Module^               ^File^                            ^Execute^                   ^Toggle^ 
-        %{project}           
+        %{project}  %{invoker}
     ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────    
     _pc_: clean            _mc_: clean              _fr_: run                          _h_: from history            _tc_:  [%{tc}] clean
     _pp_: package          _mp_: package          _fstc_: surefire test                _s_: from project settings   _tt_:  [%{tt}] skip tests
@@ -551,6 +587,10 @@ if is_hydra_installed then
         },
         funcs = {
           project = function() return M.get_project_name() or 'not found' end,
+          invoker = function()
+            local test = M.get_invoker_test_name()
+            if test then return '[invoker: ' .. test .. ']' else return '' end
+          end,
           tc = function() if M.settings.clean then return '  ' else return '   ' end end,
           tt = function() if M.settings.skip_tests then return '  ' else return '   ' end end,
           te = function() if M.settings.errors then return '  ' else return '   ' end end,
