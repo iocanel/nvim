@@ -83,7 +83,9 @@ return {
           local f = io.open("/tmp/neotree_clipboard", "w")
           f:write(node.path)
           f:close()
-          vim.notify("Path saved: " .. node.path)
+          vim.fn.setreg("+", node.path)
+          vim.fn.setreg("*", node.path)
+          vim.notify("Path copied: " .. node.path)
         end,
         shared_paste = function(state)
           local f = io.open("/tmp/neotree_clipboard", "r")
