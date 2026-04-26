@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     python3-venv \
     openjdk-21-jdk \
+    plantuml \
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
@@ -113,6 +114,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-21-jre-headless \
     # Build tools for Rust compilation
     build-essential \
+    # PlantUML for diagram compilation
+    plantuml \
     # Only essential debugging
     gdb \
     && apt-get clean \
