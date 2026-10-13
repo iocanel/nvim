@@ -251,6 +251,51 @@ function M.get_class_name_at_point()
   return nil -- return nil if no class declaration is found
 end
 
+--
+-- return the binary name of the class at point relative to its package (e.g. OuterTest$InnerTest for nested classes)
+--
+function M.get_binary_class_name_at_point()
+  local parser = vim.treesitter.get_parser(0, "java")
+  local tree = parser:parse()[1]
+
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local row = cursor[1] - 1
+  local col = cursor[2]
+
+  local names = {}
+  local node = tree:root():named_descendant_for_range(row, col, row, col)
+  while node do
+    if node:type() == "class_declaration" then
+      local class_name_node = node:field("name")[1]
+      if class_name_node then
+        table.insert(names, 1, vim.treesitter.get_node_text(class_name_node, 0))
+      end
+    end
+    node = node:parent()
+  end
+
+  if #names == 0 then
+    return M.get_class_name_at_point()
+  end
+  return table.concat(names, '$')
+end
+
+--
+-- return the quoted surefire/failsafe test selector for the class (and optionally the method) at point
+--
+function M.get_test_selector_at_point(include_method)
+  local selector = M.get_binary_class_name_at_point()
+  if include_method then
+    local method_name = M.get_method_name_at_point()
+    if method_name then
+      selector = selector .. '#' .. method_name
+    else
+      vim.notify('No method at point, testing ' .. selector, vim.log.levels.WARN)
+    end
+  end
+  return "'-Dtest=" .. selector .. "'"
+end
+
 function M.get_method_name_at_point()
   local parser = vim.treesitter.get_parser(0, "java")
   local tree = parser:parse()[1] -- get the first syntax tree
@@ -405,15 +450,15 @@ end
 
 function M.surefire_test_class()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
-  M.build("test -Dtest=" .. class_name, module)
+  local test = M.get_test_selector_at_point()
+  M.build("test " .. test, module)
 end
 
 function M.surefire_debug_class()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
+  local test = M.get_test_selector_at_point()
   project.set_build_system(M)
-  M.build("test -Dtest=" .. class_name .. " -Dmaven.surefire.debug", module)
+  M.build("test " .. test .. " -Dmaven.surefire.debug", module)
 
   -- Attach debugger using DAP with the correct module context
   vim.defer_fn(function()
@@ -431,17 +476,15 @@ end
 
 function M.surefire_test_method()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
-  local method_name = M.get_method_name_at_point()
-  M.build("test -Dtest=" .. class_name .. '#' .. method_name, module)
+  local test = M.get_test_selector_at_point(true)
+  M.build("test " .. test, module)
 end
 
 function M.surefire_debug_method()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
-  local method_name = M.get_method_name_at_point()
+  local test = M.get_test_selector_at_point(true)
   project.set_build_system(M)
-  M.build("test -Dtest=" .. class_name .. '#' .. method_name .. " -Dmaven.surefire.debug", module)
+  M.build("test " .. test .. " -Dmaven.surefire.debug", module)
 
   -- Attach debugger using DAP with the correct module context
   vim.defer_fn(function()
@@ -459,15 +502,15 @@ end
 
 function M.failsafe_test_class()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
-  M.build("test -Dtest=" .. class_name, module)
+  local test = M.get_test_selector_at_point()
+  M.build("test " .. test, module)
 end
 
 function M.failsafe_debug_class()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
+  local test = M.get_test_selector_at_point()
   project.set_build_system(M)
-  M.build("test -Dtest=" .. class_name .. " -Dmaven.failsafe.debug", module)
+  M.build("test " .. test .. " -Dmaven.failsafe.debug", module)
   
   -- Attach debugger using DAP with the correct module context
   vim.defer_fn(function()
@@ -485,18 +528,16 @@ end
 
 function M.failsafe_test_method()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
-  local method_name = M.get_method_name_at_point()
-  M.build("test -Dtest=" .. class_name .. '#' .. method_name, module)
+  local test = M.get_test_selector_at_point(true)
+  M.build("test " .. test, module)
 end
 
 function M.failsafe_debug_method()
   local module = M.get_module_name()
-  local class_name = M.get_class_name_at_point()
-  local method_name = M.get_method_name_at_point()
+  local test = M.get_test_selector_at_point(true)
 
   project.set_build_system(M)
-  M.build("test -Dtest=" .. class_name .. '#' .. method_name .. " -Dmaven.failsafe.debug", module)
+  M.build("test " .. test .. " -Dmaven.failsafe.debug", module)
   
   -- Attach debugger using DAP with the correct module context
   vim.defer_fn(function()
