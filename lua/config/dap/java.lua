@@ -25,6 +25,28 @@ function M:attach_to_remote(port)
   dap.continue()
 end
 
+-- Build the workspace (autobuild is disabled) and run the callback once the classes are up to date
+local function build_then(callback)
+  local client = vim.lsp.get_clients({ bufnr = 0, name = 'jdtls' })[1]
+  if not client then
+    vim.notify("jdtls is not attached to this buffer", vim.log.levels.ERROR)
+    return
+  end
+
+  local SUCCEED, WITHERROR = 1, 2
+  vim.notify("Building workspace...")
+  client:request('java/buildWorkspace', false, function(err, result)
+    if err or (result ~= SUCCEED and result ~= WITHERROR) then
+      vim.notify("Build failed, not launching. Run :JdtCompile for details.", vim.log.levels.ERROR)
+      return
+    end
+    if result == WITHERROR then
+      vim.notify("Workspace has compile errors, launching anyway", vim.log.levels.WARN)
+    end
+    callback()
+  end, 0)
+end
+
 -- Function to search for .classpath file in the current directory or parent directories
 local function find_classpath_file(start_dir)
   local dir = start_dir or vim.fn.getcwd()
@@ -84,7 +106,7 @@ function M:debug()
     projectName = module_name,
   }
 
-  dap.run(launch_config)
+  build_then(function() dap.run(launch_config) end)
 end
 
 function M:debug_test()
@@ -100,7 +122,7 @@ function M:debug_test()
     vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
     return
   end
-  jdtls.test_class()
+  build_then(jdtls.test_class)
 end
 
 function M:debug_test_method()
@@ -116,7 +138,7 @@ function M:debug_test_method()
     vim.notify("Current buffer is not a Java file", vim.log.levels.ERROR)
     return
   end
-  jdtls.test_nearest_method()
+  build_then(jdtls.test_nearest_method)
 end
 
 -- JBang debugging support
