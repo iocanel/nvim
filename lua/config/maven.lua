@@ -278,28 +278,65 @@ function M.get_method_name_at_point()
 end
 
 --
--- return the profiles defined in the pom.xml
+-- return the profiles found in the pom.xml files of the project and the current module
 --
-function M.get_profiles()
-  local root = M.find_module_root()
-  local pom = M.join(root, 'pom.xml')
-  local f = io.open(pom, 'r')
-  local content = f:read('*a')
-  f:close()
-
+function M.get_pom_profiles()
   local profiles = {}
-  for profile in content:gmatch('<profile>(.-)</profile>') do
-    local id = profile:match('<id>(.-)</id>')
-    if id then
-      table.insert(profiles, id)
+  local seen = {}
+  for _, root in ipairs({ M.find_project_root(), M.find_module_root() }) do
+    local f = root and io.open(M.join(root, 'pom.xml'), 'r')
+    if f then
+      local content = f:read('*a')
+      f:close()
+      for profile in content:gmatch('<profile>(.-)</profile>') do
+        local id = profile:match('<id>%s*(.-)%s*</id>')
+        if id and not seen[id] then
+          seen[id] = true
+          table.insert(profiles, id)
+        end
+      end
     end
   end
 
   return profiles
 end
 
+--
+-- asynchronously collect the profiles maven sees for the current module (including inherited and settings.xml ones)
+--
+function M.get_profiles(callback)
+  local cmd = { 'mvn', '-B', '-N', 'help:all-profiles' }
+  if M.settings.offline then
+    table.insert(cmd, '-o')
+  end
+
+  vim.system(cmd, { cwd = M.find_module_root(), text = true }, function(result)
+    local profiles = {}
+    local seen = {}
+    for id in (result.stdout or ''):gmatch('Profile Id: ([^%s]+)') do
+      if not seen[id] then
+        seen[id] = true
+        table.insert(profiles, id)
+      end
+    end
+
+    vim.schedule(function()
+      if #profiles == 0 then
+        vim.notify('Could not list profiles via maven, falling back to pom.xml scan', vim.log.levels.WARN)
+        profiles = M.get_pom_profiles()
+      end
+      callback(profiles)
+    end)
+  end)
+end
+
 function M.select_profile()
-  local profiles = M.get_profiles()
+  vim.notify('Loading maven profiles...')
+  M.get_profiles(M.show_profile_picker)
+end
+
+function M.show_profile_picker(profiles)
+  table.insert(profiles, 1, 'default')
 
   local pickers = require('telescope.pickers')
   local finders = require('telescope.finders')
@@ -322,12 +359,10 @@ function M.select_profile()
     attach_mappings = function(prompt_bufnr, map)
       map('i', '<CR>', function()
         local selection = actions_state.get_selected_entry()
-        -- Do something with the selected profile
-        local m = M.settings
-        m.profile = selection.value
-        M.settings = m
+        require('telescope.actions').close(prompt_bufnr)
+        M.settings = project.load_project_settings('maven', M.default_settings)
+        M.settings.profile = selection.value ~= 'default' and selection.value or nil
         project.save_project_settings(M.settings, 'maven')
-        vim.api.nvim_buf_delete(prompt_bufnr, {force = true})
       end)
 
       return true
