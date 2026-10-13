@@ -305,12 +305,15 @@ end
 -- asynchronously collect the profiles maven sees for the current module (including inherited and settings.xml ones)
 --
 function M.get_profiles(callback)
-  local cmd = { 'mvn', '-B', '-N', 'help:all-profiles' }
+  -- run from the directory holding .mvn, so relative paths in .mvn/maven.config resolve
+  local root = project.find_root({'.mvn'}) or M.find_project_root() or M.find_module_root()
+  local mvn = vim.loop.fs_stat(M.join(root, 'mvnw')) and M.mvnw or 'mvn'
+  local cmd = { mvn, '-B', '-N', '-f', M.join(M.find_module_root(), 'pom.xml'), 'help:all-profiles' }
   if M.settings.offline then
     table.insert(cmd, '-o')
   end
 
-  vim.system(cmd, { cwd = M.find_module_root(), text = true }, function(result)
+  vim.system(cmd, { cwd = root, text = true }, function(result)
     local profiles = {}
     local seen = {}
     for id in (result.stdout or ''):gmatch('Profile Id: ([^%s]+)') do
