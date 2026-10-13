@@ -34,7 +34,7 @@ end
 function M.load_project_settings(name, default_settings)
   local project_dir = M.find_root()
   if project_dir == nil then
-    return default_settings
+    return vim.deepcopy(default_settings)
   end
   local settings_dir = Path:new(project_dir .. '/.nvim')
   if settings_dir:exists() then
@@ -44,12 +44,12 @@ function M.load_project_settings(name, default_settings)
       return settings
     end
   end
-  return default_settings
+  return vim.deepcopy(default_settings)
 end
 
 -- Saves project settings to a file in the .nvim directory
 function M.save_project_settings(settings, name)
-  local project_dir = Path:new(vim.fn.getcwd() .. '/.nvim')
+  local project_dir = Path:new((M.find_root() or vim.fn.getcwd()) .. '/.nvim')
 
   -- Ensure the .nvim directory exists
   if not project_dir:exists() then
